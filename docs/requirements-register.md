@@ -92,16 +92,23 @@ Cross-cutting domains retained from the approved architecture: calendar/tasks; a
 - REQ-OPS-001: Provide encrypted independent backups, integrity verification and tested restore procedures.
 - REQ-OPS-002: Provide deployment, monitoring, incident response and disaster recovery runbooks.
 
-## 5. Provider examples, not commitments
+## 5. Provider choices and integration status
 
-The following are examples named during product planning, not verified integrations or purchased services:
+The initial family archive storage provider set is approved:
+- Microsoft OneDrive (`microsoft_onedrive`);
+- Google Drive (`google_drive`);
+- Yandex Disk (`yandex_disk`);
+- private local storage adapter (`local_private`) for development and controlled staging.
 
+These are approved provider targets, not claims of live account connections. OAuth app registrations, credentials, provider adapters, transfer verification, and restore tests remain outstanding. Mail services (Microsoft mail, Gmail, Yandex Mail) are separate connectors and are not binary storage providers.
+
+Other provider examples named during product planning:
 - AI: GPT-4o, o3, Claude and successor models.
 - Photo: Topaz Photo AI, Luminar Neo, Remini.
 - Video: CapCut, Topaz Video AI, Runway.
-- Maps, social networks and storage: provider to be selected after API, privacy, export, availability and cost review.
+- Maps and social networks: select after API, privacy, export, availability and cost review.
 
-The architecture must allow a provider to be replaced without changing the authoritative registry or rewriting family data. Where no supported API exists, provide a documented manual import/export path rather than pretending full synchronization is available.
+Storage requirements and the provider lifecycle are specified in `docs/storage-provider-configuration.md`. The architecture must allow a provider to be replaced without changing the authoritative registry or rewriting family data. Where no supported API exists, provide a documented manual import/export path rather than pretending full synchronization is available.
 
 ## 6. Delivery gates and status vocabulary
 
