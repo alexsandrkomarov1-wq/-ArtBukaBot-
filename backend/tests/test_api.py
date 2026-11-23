@@ -478,3 +478,77 @@ def test_login_lockout_survives_application_restart(tmp_path):
     # A new app instance and connection use the same test database.
     with make_client(tmp_path) as restarted_client:
         assert login(restarted_client, "owner").status_code == 429
+
+
+def test_navigation_manifest_is_authenticated_and_role_aware(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        owner_headers = auth(owner["access_token"])
+        guest = create_account(client, owner["access_token"], "nav_guest", "guest").json()
+        guest_token = login(client, "nav_guest").json()["access_token"]
+
+        assert client.get("/api/v1/navigation").status_code == 401
+        owner_menu = client.get("/api/v1/navigation", headers=owner_headers)
+        guest_menu = client.get("/api/v1/navigation", headers=auth(guest_token))
+
+        assert owner_menu.status_code == guest_menu.status_code == 200
+        owner_keys = {
+            item["key"]
+            for section in owner_menu.json()["sections"]
+            for item in section["items"]
+        }
+        guest_keys = {
+            item["key"]
+            for section in guest_menu.json()["sections"]
+            for item in section["items"]
+        }
+        assert {"people", "search", "relationships", "profile", "sessions", "users"} <= owner_keys
+        assert {"people", "search", "relationships", "profile", "sessions"} <= guest_keys
+        assert "users" not in guest_keys
+        assert owner_menu.json()["role"] == "owner"
+        assert guest_menu.json()["role"] == "guest"
+
+
+def test_private_registry_search_handles_cyrillic_case_and_archived_people(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        headers = auth(owner["access_token"])
+        first = client.post(
+            "/api/v1/people", headers=headers,
+            json={"display_name": "Артём Булаков"},
+        ).json()
+        second = client.post(
+            "/api/v1/people", headers=headers,
+            json={"display_name": "Мария Иванова"},
+        ).json()
+        archived = client.post(
+            "/api/v1/people", headers=headers,
+            json={"display_name": "Артём из старой записи"},
+        ).json()
+        assert client.delete(
+            f"/api/v1/people/{archived['person_id']}", headers=headers
+        ).status_code == 200
+
+        found = client.get("/api/v1/search?q=АРТЁМ", headers=headers)
+        assert found.status_code == 200
+        payload = found.json()
+        assert payload["total"] == 1
+        assert payload["items"][0]["entity_id"] == first["person_id"]
+        assert payload["items"][0]["title"] == "Артём Булаков"
+        assert payload["items"][0]["api_endpoint"] == f"/api/v1/people/{first['person_id']}"
+
+        by_id = client.get(
+            f"/api/v1/search?q={second['person_id'].lower()}",
+            headers=headers,
+        )
+        assert by_id.status_code == 200
+        assert by_id.json()["items"][0]["entity_id"] == second["person_id"]
+
+
+def test_private_registry_search_validates_query_and_requires_authentication(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        headers = auth(owner["access_token"])
+        assert client.get("/api/v1/search?q=a", headers=headers).status_code == 422
+        assert client.get("/api/v1/search?q=   ", headers=headers).status_code == 422
+        assert client.get("/api/v1/search?q=Артём").status_code == 401
