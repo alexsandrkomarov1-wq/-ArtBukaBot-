@@ -48,3 +48,93 @@ def test_restore_rejects_non_archive_sqlite_file_without_creating_destination(tm
     with pytest.raises(RuntimeError, match="not a complete KOMAROVA_CORE database"):
         restore_database(invalid_backup, restored_path)
     assert not restored_path.exists()
+
+
+def test_sqlite_backup_restore_preserves_complete_identity_graph(tmp_path):
+    """A restorable archive must retain people, edges, accounts, sessions and audit."""
+    from sqlalchemy import text
+
+    source_path = tmp_path / "complete-source.sqlite3"
+    backup_path = tmp_path / "complete-backup" / "snapshot.sqlite3"
+    restored_path = tmp_path / "complete-restore" / "restored.sqlite3"
+    source_engine = build_engine(f"sqlite:///{source_path}")
+
+    person_a = "P-" + "A" * 32
+    person_b = "P-" + "B" * 32
+    relationship_id = "R-" + "C" * 32
+    user_id = "U-" + "D" * 32
+    session_id = "S-" + "E" * 32
+    event_id = "A-" + "F" * 32
+    token_jti = "J" * 36
+
+    try:
+        run_migrations(source_engine)
+        with source_engine.begin() as connection:
+            connection.execute(text(
+                "INSERT INTO people (person_id, display_name, status, created_at, updated_at) "
+                "VALUES (:a, 'Archive person A', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP), "
+                "(:b, 'Archive person B', 'archived', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+            ), {"a": person_a, "b": person_b})
+            connection.execute(text(
+                "INSERT INTO relationships "
+                "(relationship_id, from_person_id, to_person_id, relationship_type, created_at) "
+                "VALUES (:rid, :a, :b, 'parent', CURRENT_TIMESTAMP)"
+            ), {"rid": relationship_id, "a": person_a, "b": person_b})
+            connection.execute(text(
+                "INSERT INTO users "
+                "(user_id, username, password_hash, role, status, created_at, updated_at) "
+                "VALUES (:uid, 'archive-owner', 'argon2-test-hash', 'owner', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+            ), {"uid": user_id})
+            connection.execute(text(
+                "INSERT INTO auth_sessions "
+                "(session_id, user_id, token_jti, created_at, expires_at, revoked_at) "
+                "VALUES (:sid, :uid, :jti, CURRENT_TIMESTAMP, '2099-01-01 00:00:00', NULL)"
+            ), {"sid": session_id, "uid": user_id, "jti": token_jti})
+            connection.execute(text(
+                "INSERT INTO audit_events "
+                "(event_id, event_type, entity_type, entity_id, actor_id, details, occurred_at) "
+                "VALUES (:eid, 'archive.test', 'person', :pid, :uid, '{\"source\":\"test\"}', CURRENT_TIMESTAMP)"
+            ), {"eid": event_id, "pid": person_a, "uid": user_id})
+            connection.execute(text(
+                "INSERT INTO login_attempts "
+                "(attempt_key, failed_attempts, window_started_at, locked_until) "
+                "VALUES ('archive-test-key', 2, CURRENT_TIMESTAMP, NULL)"
+            ))
+
+        backup_database(source_engine, backup_path)
+    finally:
+        source_engine.dispose()
+
+    restore_database(backup_path, restored_path)
+    restored_engine = build_engine(f"sqlite:///{restored_path}")
+    try:
+        with restored_engine.connect() as connection:
+            assert connection.exec_driver_sql("PRAGMA integrity_check").scalar_one() == "ok"
+            assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
+            assert connection.execute(text(
+                "SELECT display_name, status FROM people WHERE person_id=:id"
+            ), {"id": person_a}).one() == ("Archive person A", "active")
+            assert connection.execute(text(
+                "SELECT display_name, status FROM people WHERE person_id=:id"
+            ), {"id": person_b}).one() == ("Archive person B", "archived")
+            assert connection.execute(text(
+                "SELECT from_person_id, to_person_id, relationship_type "
+                "FROM relationships WHERE relationship_id=:id"
+            ), {"id": relationship_id}).one() == (person_a, person_b, "parent")
+            assert connection.execute(text(
+                "SELECT username, role FROM users WHERE user_id=:id"
+            ), {"id": user_id}).one() == ("archive-owner", "owner")
+            assert connection.execute(text(
+                "SELECT user_id, token_jti FROM auth_sessions WHERE session_id=:id"
+            ), {"id": session_id}).one() == (user_id, token_jti)
+            assert connection.execute(text(
+                "SELECT entity_id, actor_id, details FROM audit_events WHERE event_id=:id"
+            ), {"id": event_id}).one() == (person_a, user_id, '{"source":"test"}')
+            assert connection.execute(text(
+                "SELECT failed_attempts FROM login_attempts WHERE attempt_key='archive-test-key'"
+            )).scalar_one() == 2
+            assert connection.execute(text(
+                "SELECT version_num FROM alembic_version"
+            )).scalar_one() == "0004_wide_identifiers"
+    finally:
+        restored_engine.dispose()
