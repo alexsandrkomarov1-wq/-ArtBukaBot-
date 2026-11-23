@@ -57,7 +57,7 @@ def test_private_upload_registers_original_hash_and_quarantine_state(tmp_path):
         assert response.status_code == 201, response.text
         item = response.json()
         assert item["archive_item_id"].startswith("AR-")
-        assert len(item["archive_item_id"]) == 34
+        assert len(item["archive_item_id"]) == 35
         assert item["item_type"] == "photo"
         assert item["record_status"] == "quarantined"
         assert item["storage_state"] == "quarantined"

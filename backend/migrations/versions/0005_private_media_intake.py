@@ -15,7 +15,7 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "stored_blobs",
-        sa.Column("blob_id", sa.String(length=34), primary_key=True),
+        sa.Column("blob_id", sa.String(length=35), primary_key=True),
         sa.Column("sha256", sa.String(length=64), nullable=False),
         sa.Column("size_bytes", sa.BigInteger(), nullable=False),
         sa.Column("detected_mime_type", sa.String(length=120), nullable=False),
@@ -31,11 +31,11 @@ def upgrade() -> None:
     op.create_index("ix_stored_blobs_sha256", "stored_blobs", ["sha256"], unique=False)
     op.create_table(
         "archive_items",
-        sa.Column("archive_item_id", sa.String(length=34), primary_key=True),
+        sa.Column("archive_item_id", sa.String(length=35), primary_key=True),
         sa.Column("item_type", sa.String(length=16), nullable=False),
         sa.Column("title", sa.String(length=300), nullable=True),
         sa.Column("record_status", sa.String(length=24), nullable=False, server_default="quarantined"),
-        sa.Column("original_blob_id", sa.String(length=34), sa.ForeignKey("stored_blobs.blob_id"), nullable=False),
+        sa.Column("original_blob_id", sa.String(length=35), sa.ForeignKey("stored_blobs.blob_id"), nullable=False),
         sa.Column("created_by_user_id", sa.String(length=34), sa.ForeignKey("users.user_id"), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.UniqueConstraint("original_blob_id", name="uq_archive_items_original_blob"),
@@ -43,8 +43,8 @@ def upgrade() -> None:
     op.create_index("ix_archive_items_created_by_user_id", "archive_items", ["created_by_user_id"], unique=False)
     op.create_table(
         "archive_entity_links",
-        sa.Column("link_id", sa.String(length=34), primary_key=True),
-        sa.Column("archive_item_id", sa.String(length=34), sa.ForeignKey("archive_items.archive_item_id"), nullable=False),
+        sa.Column("link_id", sa.String(length=35), primary_key=True),
+        sa.Column("archive_item_id", sa.String(length=35), sa.ForeignKey("archive_items.archive_item_id"), nullable=False),
         sa.Column("target_entity_type", sa.String(length=24), nullable=False),
         sa.Column("target_entity_id", sa.String(length=40), nullable=False),
         sa.Column("link_role", sa.String(length=32), nullable=False),

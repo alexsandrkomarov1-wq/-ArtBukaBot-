@@ -70,7 +70,7 @@ class LoginAttempt(Base):
 
 class StoredBlob(Base):
     __tablename__ = "stored_blobs"
-    blob_id: Mapped[str] = mapped_column(String(34), primary_key=True, default=lambda: new_id("BL"))
+    blob_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("BL"))
     sha256: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
     size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
     detected_mime_type: Mapped[str] = mapped_column(String(120), nullable=False)
@@ -83,7 +83,7 @@ class StoredBlob(Base):
 
 class ArchiveItem(Base):
     __tablename__ = "archive_items"
-    archive_item_id: Mapped[str] = mapped_column(String(34), primary_key=True, default=lambda: new_id("AR"))
+    archive_item_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("AR"))
     item_type: Mapped[str] = mapped_column(String(16), nullable=False)
     title: Mapped[str | None] = mapped_column(String(300), nullable=True)
     record_status: Mapped[str] = mapped_column(String(24), nullable=False, default="quarantined")
@@ -97,7 +97,7 @@ class ArchiveEntityLink(Base):
         UniqueConstraint("archive_item_id", "target_entity_type", "target_entity_id", "link_role",
                          name="uq_archive_entity_link"),
     )
-    link_id: Mapped[str] = mapped_column(String(34), primary_key=True, default=lambda: new_id("LK"))
+    link_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("LK"))
     archive_item_id: Mapped[str] = mapped_column(ForeignKey("archive_items.archive_item_id"), nullable=False, index=True)
     target_entity_type: Mapped[str] = mapped_column(String(24), nullable=False)
     target_entity_id: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
