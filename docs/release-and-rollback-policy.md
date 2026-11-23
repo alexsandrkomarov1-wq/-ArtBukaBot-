@@ -56,6 +56,7 @@ A green build alone is not a release. A design mockup is not a working feature. 
 |---|---|---|---|
 | 2026-11-23 | `88001c897af387d69a2477f500a097666b32f0b7` | Stable pre-homepage-gallery checkpoint | Pages build, backend tests and deployment passed; account map manual search was browser-tested |
 | 2026-11-23 | `abcb245d9e93a3d0e037947aaf3cd52f8f6b30c9` | Homepage portrait gallery and NASA Mars feature | Pages build 45247644371: success; backend tests 45247644556: success (43 passed); Pages deployment 45247643872: success; live homepage HTTP 200 with four portrait slots, Internet Archive and NASA Mars links verified |
+| 2026-11-23 | `729e4766575a60ef06beabe7fa6678099293cc0e` | Browser-local photo/video viewer v1 | Pages build 45251825426: success; backend tests 45251825400: success; Pages deployment 45251824465: success; live `/media/` and JS asset HTTP 200, homepage navigation and CSS verified; JS syntax/interface contract passed. Manual selection/playback on a physical device was not tested; persistent upload/archive is not implemented |
 
 ## 7. Privacy and data integrity
 
