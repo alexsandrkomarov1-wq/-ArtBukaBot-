@@ -329,12 +329,12 @@ def test_complete_role_matrix_for_registry_and_account_api_methods(tmp_path):
 
             if role == "owner":
                 user_update = client.patch(
-                    f"/api/v1/users/{target_family['user']['user_id']}", headers=headers,
+                    f"/api/v1/users/{target_family['user_id']}", headers=headers,
                     json={"role": "moderator"},
                 )
             else:
                 user_update = client.patch(
-                    f"/api/v1/users/{target_guest['user']['user_id']}", headers=headers,
+                    f"/api/v1/users/{target_guest['user_id']}", headers=headers,
                     json={"status": "disabled"},
                 )
             assert user_update.status_code == expected[role]["users_update"]
