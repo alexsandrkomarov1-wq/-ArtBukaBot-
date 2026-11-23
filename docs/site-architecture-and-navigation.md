@@ -271,7 +271,7 @@ This document defines the target architecture and delivery contract. Implementat
 
 ## 14. Family mail and feedback architecture
 
-The family mail module is specified in [docs/family-mail-architecture.md](family-mail-architecture.md). It is a provider-neutral private subsystem, not a public list of family email addresses. The current family providers remain mixed by choice: Yandex Mail for the mother's mailbox and Gmail for the father's and son's mailboxes. No mailbox migration, forwarding, or provider change is implied.
+The family mail module is specified in [docs/family-mail-architecture.md](family-mail-architecture.md). It is a provider-neutral private subsystem, not a public list of family email addresses. The family uses more than one provider by choice. Individual owner-to-address and owner-to-provider mappings are private configuration and must not be published in this repository. No mailbox migration, forwarding, or provider change is implied.
 
 The first delivery step is a local compose action (mailto/deep link) from the private application, clearly labelled as opening the user's configured mail client rather than sending through KOMAROVA_CORE. Public feedback must use a separate project contact address and protected server-side intake; it must never reveal or route directly to private family mailboxes. Reading, searching, drafting and server-side sending require a later, separately authorized provider connection for each mailbox owner.
 
@@ -280,3 +280,16 @@ Mailbox content, addresses, provider identifiers, OAuth scopes, tokens and messa
 Mail records may link to existing PERSON-ID, EVENT-ID, PLACE-ID, JOURNEY-ID, STORY-ID and archive records through typed relationships with provenance and access checks. Email addresses are contact attributes, never identity keys. Duplicate contacts must resolve to the existing person record rather than creating a second person.
 
 Mail connector outages must not affect the public site or core family registry. Imported message bodies and attachments enter a controlled intake/quarantine process; attachments pass through File Engine, checksum and duplicate review before archive registration. No automatic ingestion, mailbox-wide indexing or cross-mailbox sharing is enabled by this architecture alone.
+
+
+## 15. External public collections: Internet Archive
+
+The optional Internet Archive publication model is specified in [docs/internet-archive-publication-model.md](internet-archive-publication-model.md). Internet Archive is an external distribution and discovery destination for selected rights-cleared materials; it is not the authoritative registry, private family archive, or sole preservation copy.
+
+KOMAROVA_CORE retains permanent IDs, original files, checksums, provenance, consent records, publication approvals and external identifiers. Every external publication must be linked to a permanent internal PUBLICATION-ID and to the exact approved derivative checksum and metadata version.
+
+Treat every Internet Archive upload as potentially public, searchable, downloadable and shareable. No private correspondence, personal data, medical/financial/identity documents, private account identifiers, unapproved living-person material, or private originals may be uploaded. Preservation consent is not publication consent. Copyright and license statements must be verified rather than guessed.
+
+The first release is a manual, human-reviewed workflow: select an existing archive item, prepare a safe derivative, inspect metadata and rights, obtain explicit approval, upload through the official interface, verify the item page and files, and record the external identifier and URL. No automated connector, account, collection, or upload is configured by this specification. A dedicated Internet Archive collection is not assumed to exist; collection creation is subject to Internet Archive's own eligibility rules and approval.
+
+The authoritative original and independent backups remain under KOMAROVA_CORE control. External availability or removal must never change or destroy the internal archive. Any later automated uploader must be server-side, audited, secret-managed and gated by explicit human approval. GitHub Pages must never hold upload credentials or perform uploads.
