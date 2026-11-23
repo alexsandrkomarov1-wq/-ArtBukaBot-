@@ -16,3 +16,12 @@ Thumbs.db
 _private/
 _private_reference/
 secrets/
+
+# Python backend and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.venv/
+venv/
+*.sqlite
