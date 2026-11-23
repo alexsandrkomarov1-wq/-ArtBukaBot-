@@ -7,7 +7,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = "0003_security_controls"
-down_revision = "0002_users_and_sessions"
+down_revision = "0002_users_sessions"
 branch_labels = None
 depends_on = None
 
