@@ -1,6 +1,6 @@
 """SQLite online backup and verified restore helpers.
 
-These helpers are deliberately explicit and never overwrite the source database.
+These helpers are deliberately explicit and never overwrite the source or destination.
 """
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import os
 import sqlite3
 import tempfile
 from pathlib import Path
+
 from sqlalchemy.engine import Engine
 
 
@@ -68,6 +69,8 @@ def restore_database(backup_path: str | Path, destination: str | Path) -> Path:
         raise ValueError("Restore destination must differ from backup source")
     if not source_path.is_file():
         raise FileNotFoundError(source_path)
+    if target.exists():
+        raise FileExistsError(f"Restore destination already exists: {target}")
     target.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary_name = tempfile.mkstemp(prefix=f".{target.name}.", suffix=".restore", dir=target.parent)
     os.close(fd)
@@ -79,6 +82,8 @@ def restore_database(backup_path: str | Path, destination: str | Path) -> Path:
             source.backup(restored)
             _check_integrity(restored)
             _check_archive_schema(restored)
+        if target.exists():
+            raise FileExistsError(f"Restore destination already exists: {target}")
         os.replace(temporary, target)
     except Exception:
         temporary.unlink(missing_ok=True)
