@@ -8,7 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .database import Base, build_engine, build_session_factory, session_dependency
+from .database import build_engine, build_session_factory, run_migrations, session_dependency
 from .models import AuditEvent, Person, RelationshipRecord
 from .schemas import PersonCreate, PersonRead, PersonUpdate, RelationshipCreate, RelationshipRead
 from .security import require_api_token
@@ -21,7 +21,7 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        Base.metadata.create_all(bind=engine)
+        run_migrations(engine)
         yield
         engine.dispose()
 
