@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Generator
+from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
@@ -27,7 +28,9 @@ def build_session_factory(engine: Engine):
 
 
 def run_migrations(engine: Engine) -> None:
-    config = Config("alembic.ini")
+    # Resolve configuration from this source file, not the process working directory.
+    project_root = Path(__file__).resolve().parents[2]
+    config = Config(str(project_root / "alembic.ini"))
     with engine.begin() as connection:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
