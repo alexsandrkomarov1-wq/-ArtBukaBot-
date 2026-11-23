@@ -4,6 +4,7 @@
   const button=root.querySelector("[data-guide-toggle]"), panel=root.querySelector("[data-guide-panel]");
   const title=root.querySelector("[data-guide-title]"), body=root.querySelector("[data-guide-body]");
   const links=root.querySelector("[data-guide-links]"), close=root.querySelector("[data-guide-close]");
+  const tooltip=root.querySelector("[data-guide-tooltip]");
   const path=window.location.pathname, base=document.documentElement.dataset.baseurl||"";
   const routes={
     media:{title:"Медиатека",body:"Здесь можно открыть фото и видео с текущего устройства. Сейчас просмотр локальный: файлы не попадают в закрытый архив. Для HEIC, HEVC и видео с поворотом может потребоваться обработанная совместимая копия.",links:[["Открыть медиатеку","/media/"],["Состояние проекта","/status/"]]},
@@ -17,7 +18,7 @@
   const data=routes[key];title.textContent=data.title;body.textContent=data.body;
   data.links.forEach(([label,route])=>{const a=document.createElement("a");a.href=base+route;a.textContent=label;links.append(a);});
   const setOpen=(open)=>{panel.hidden=!open;button.setAttribute("aria-expanded",open?"true":"false");if(open)close.focus();else button.focus();};
-  button.addEventListener("click",()=>setOpen(panel.hidden));close.addEventListener("click",()=>setOpen(false));
+  button.addEventListener("click",()=>{if(tooltip)tooltip.hidden=true;setOpen(panel.hidden);});close.addEventListener("click",()=>setOpen(false));
   document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!panel.hidden)setOpen(false);});
   try {
     if(!window.sessionStorage.getItem("komarova-guide-seen")) {

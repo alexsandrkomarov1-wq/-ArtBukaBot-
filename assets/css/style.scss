@@ -368,3 +368,6 @@ a { color:var(--green); }
 .site-guide-panel nav a:hover { border-color:var(--accent); background:var(--paper); }
 .site-guide-panel .site-guide-footnote { margin-bottom:0; padding-top:12px; border-top:1px solid var(--line); font-size:10px; }
 @media(max-width:600px) { .site-guide { right:14px; bottom:14px; } .site-guide-panel { right:-2px; } }
+
+.site-guide-tooltip { position:absolute; right:66px; bottom:11px; width:max-content; max-width:min(260px,calc(100vw - 110px)); padding:9px 12px; border:1px solid var(--line); background:var(--card); color:var(--ink-soft); box-shadow:0 5px 20px rgba(25,38,31,.12); font-size:11px; line-height:1.45; }
+.site-guide-tooltip[hidden] { display:none; }
