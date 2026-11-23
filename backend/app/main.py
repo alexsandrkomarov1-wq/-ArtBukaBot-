@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
 from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
+from .navigation import build_navigation
 from .schemas import (
     BootstrapCreate, LoginRequest, PasswordChange, PersonCreate, PersonRead, PersonUpdate,
     RelationshipCreate, RelationshipRead, SessionRead, TokenRead,
@@ -311,6 +312,52 @@ def create_app(
         db.commit()
         db.refresh(target)
         return target
+
+    @app.get("/api/v1/navigation")
+    def get_navigation(user: User = Depends(require_current_user)):
+        """Return the role-aware menu manifest for the private application."""
+        return build_navigation(user.role)
+
+    @app.get("/api/v1/search")
+    def search_registry(
+        q: str = Query(min_length=2, max_length=100),
+        limit: int = Query(default=20, ge=1, le=50),
+        db: Session = Depends(get_db),
+        _: User = Depends(require_current_user),
+    ):
+        """Search the implemented private registry without exposing it publicly.
+
+        Python casefold is used so Cyrillic names are searchable regardless of
+        letter case on SQLite, whose built-in case-insensitive LIKE is ASCII-only.
+        """
+        needle = " ".join(q.split()).casefold()
+        if len(needle) < 2:
+            raise HTTPException(status_code=422, detail="Search query must contain at least two non-space characters")
+
+        people = db.scalars(
+            select(Person)
+            .where(Person.status == "active")
+            .order_by(Person.display_name, Person.person_id)
+        ).all()
+        matches = [
+            person for person in people
+            if needle in person.display_name.casefold()
+            or needle in person.person_id.casefold()
+        ]
+        return {
+            "query": " ".join(q.split()),
+            "total": len(matches),
+            "items": [
+                {
+                    "kind": "person",
+                    "entity_id": person.person_id,
+                    "title": person.display_name,
+                    "description": f"PERSON-ID: {person.person_id}",
+                    "api_endpoint": f"/api/v1/people/{person.person_id}",
+                }
+                for person in matches[:limit]
+            ],
+        }
 
     @app.post("/api/v1/people", response_model=PersonRead, status_code=201)
     def create_person(
