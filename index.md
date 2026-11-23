@@ -61,6 +61,18 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   <article class="archive-card"><span class="card-kicker">03 / ГЕОГРАФИЯ</span><div class="card-symbol symbol-place" aria-hidden="true"><span></span><i></i></div><h3>Места и путешествия</h3><p>Города, маршруты, дома и места, связанные с семейной историей.</p><span class="card-state">РАЗДЕЛ В РАЗРАБОТКЕ</span></article>
   <article class="archive-card"><span class="card-kicker">04 / МЕДИАТЕКА</span><div class="card-symbol symbol-media" aria-hidden="true"><span></span><span></span><i></i></div><h3>Фотографии и документы</h3><p>Оригиналы, описания, источники и проверенные цифровые копии.</p><span class="card-state">РАЗДЕЛ В РАЗРАБОТКЕ</span></article>
 </section>
+<section class="places-gallery" aria-labelledby="places-gallery-title" data-places-gallery>
+  <div class="places-gallery-heading">
+    <div><p class="eyebrow">МИР ВОКРУГ НАС · МЕСТА И КУЛЬТУРА</p><h2 id="places-gallery-title">Места, которые <em>стоит увидеть.</em></h2><p>Музеи, архитектура, природные памятники и города. Фотографии загружаются из открытой медиатеки Wikimedia Commons с указанием источника и лицензии.</p></div>
+    <button type="button" class="gallery-refresh" data-gallery-refresh>Обновить фотографии <span aria-hidden="true">↻</span></button>
+  </div>
+  <div class="places-gallery-grid">
+    <article class="place-photo-card"><a data-place-link="0" href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"><img data-place-image="0" alt="Эрмитаж и архитектура Санкт-Петербурга" loading="lazy"><span class="place-photo-overlay"></span></a><div class="place-photo-caption"><span>01 / МУЗЕИ И АРХИТЕКТУРА</span><h3 data-place-title="0">Эрмитаж · Санкт-Петербург</h3><small data-place-credit="0">Загрузка фотографии…</small></div></article>
+    <article class="place-photo-card"><a data-place-link="1" href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"><img data-place-image="1" alt="Дворцы и парки Петергофа" loading="lazy"><span class="place-photo-overlay"></span></a><div class="place-photo-caption"><span>02 / ИСТОРИЧЕСКИЕ МЕСТА</span><h3 data-place-title="1">Петергоф · дворцы и парки</h3><small data-place-credit="1">Загрузка фотографии…</small></div></article>
+    <article class="place-photo-card"><a data-place-link="2" href="https://commons.wikimedia.org/" target="_blank" rel="noopener noreferrer"><img data-place-image="2" alt="Природные ландшафты Байкала" loading="lazy"><span class="place-photo-overlay"></span></a><div class="place-photo-caption"><span>03 / ПРИРОДА И ПУТЕШЕСТВИЯ</span><h3 data-place-title="2">Байкал · природное наследие</h3><small data-place-credit="2">Загрузка фотографии…</small></div></article>
+  </div>
+  <p class="places-gallery-note">Изображения сменяются автоматически. Каждая фотография ведёт на страницу оригинала с условиями использования. Доступность внешнего источника зависит от соединения с интернетом.</p>
+</section>
 <section class="sharing-panel">
   <div class="sharing-copy">
     <p class="eyebrow">ОТКРЫТЫЕ КОЛЛЕКЦИИ</p><h2>Семейная память<br><em>может быть доступна миру.</em></h2>
