@@ -3,7 +3,8 @@ import importlib.util
 import sqlite3
 from pathlib import Path
 
-MODULE_PATH = Path(__file__).with_name("komarova_file_engine.py")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "komarova_file_engine.py"
 spec = importlib.util.spec_from_file_location("komarova_file_engine", MODULE_PATH)
 engine = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(engine)
@@ -130,3 +131,19 @@ def test_export_refuses_overwrite_and_verifies_copy(tmp_path, monkeypatch):
         pass
     else:
         raise AssertionError("export must not overwrite existing destination")
+
+
+def test_log_failure_does_not_remove_committed_file_or_registry_row(tmp_path, monkeypatch):
+    db_path = configure(tmp_path, monkeypatch)
+    source = tmp_path / "log-failure.jpg"
+    source.write_bytes(b"keep-registered-file")
+    def fail_log(_message):
+        raise OSError("simulated log disk failure")
+    monkeypatch.setattr(engine, "log", fail_log)
+    material_id = engine.import_file(source)
+    with sqlite3.connect(db_path) as db:
+        stored_path = db.execute(
+            "SELECT stored_path FROM materials WHERE material_id=?", (material_id,)
+        ).fetchone()[0]
+    assert Path(stored_path).is_file()
+    assert Path(stored_path).read_bytes() == source.read_bytes()
