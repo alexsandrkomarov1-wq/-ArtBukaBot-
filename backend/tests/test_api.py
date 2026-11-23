@@ -375,7 +375,7 @@ def test_complete_role_matrix_for_registry_and_account_api_methods(tmp_path):
             # Password change is available to all roles and invalidates the old token.
             changed = client.post(
                 "/api/v1/auth/change-password", headers=headers,
-                json={"current_password": "a-long-test-password-123",
+                json={"current_password": ("correct-horse-battery-123" if role == "owner" else "a-long-test-password-123"),
                       "new_password": "a-new-long-test-password-987"},
             )
             assert changed.status_code == 200
