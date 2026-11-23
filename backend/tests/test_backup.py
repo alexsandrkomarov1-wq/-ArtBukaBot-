@@ -32,7 +32,10 @@ def test_sqlite_backup_restore_round_trip_on_separate_database(tmp_path):
             assert connection.execute(text(
                 "SELECT display_name FROM people WHERE person_id='P-ABCDEF123456'"
             )).scalar_one() == "Backup fixture"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0003_security_controls"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0004_wide_identifiers"
+            people_columns = connection.execute(text("PRAGMA table_info(people)")).all()
+            person_id_column = next(column for column in people_columns if column[1] == "person_id")
+            assert person_id_column[2] == "VARCHAR(34)"
     finally:
         restored_engine.dispose()
 
