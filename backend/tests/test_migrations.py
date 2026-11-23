@@ -1,7 +1,7 @@
 from sqlalchemy import inspect, select, text
 
 from backend.app.database import Base, build_engine, run_migrations
-from backend.app.models import Person
+from backend.app.models import AuditEvent, Person, RelationshipRecord
 
 
 def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
@@ -18,11 +18,14 @@ def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
             "people",
             "relationships",
             "audit_events",
+            "users",
+            "auth_sessions",
         }
         assert {column["name"] for column in inspector.get_columns("people")} == {
             "person_id", "display_name", "status", "created_at", "updated_at"
         }
         assert len(inspector.get_foreign_keys("relationships")) == 2
+        assert len(inspector.get_foreign_keys("auth_sessions")) == 1
         assert {index["name"] for index in inspector.get_indexes("relationships")} == {
             "ix_relationships_from_person_id", "ix_relationships_to_person_id"
         }
@@ -33,8 +36,10 @@ def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
 def test_existing_create_all_database_is_adopted_without_data_loss(tmp_path):
     database = tmp_path / "legacy.sqlite3"
     engine = build_engine(f"sqlite:///{database}")
+    legacy_tables = [Person.__table__, RelationshipRecord.__table__, AuditEvent.__table__]
     try:
-        Base.metadata.create_all(engine)
+        # Recreate the previous release's schema, before users and sessions existed.
+        Base.metadata.create_all(engine, tables=legacy_tables)
         with engine.begin() as connection:
             connection.execute(
                 Person.__table__.insert().values(
@@ -52,9 +57,11 @@ def test_existing_create_all_database_is_adopted_without_data_loss(tmp_path):
                     Person.person_id == "P-1234567890AB"
                 )
             ).one()
+            version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert row.person_id == "P-1234567890AB"
         assert row.display_name == "Existing record"
-        assert inspect(engine).has_table("alembic_version")
+        assert version == "0002_users_sessions"
+        assert inspect(engine).has_table("auth_sessions")
     finally:
         engine.dispose()
 

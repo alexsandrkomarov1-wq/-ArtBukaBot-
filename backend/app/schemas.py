@@ -1,7 +1,11 @@
 from datetime import datetime
 from typing import Literal
+import re
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+Role = Literal["owner", "moderator", "family_member", "guest"]
 
 
 class PersonCreate(BaseModel):
@@ -60,3 +64,68 @@ class RelationshipRead(BaseModel):
     to_person_id: str
     relationship_type: str
     created_at: datetime
+
+
+class BootstrapCreate(BaseModel):
+    username: str = Field(min_length=3, max_length=80)
+    password: str = Field(min_length=12, max_length=128)
+
+    @field_validator("username")
+    @classmethod
+    def clean_username(cls, value: str) -> str:
+        value = value.strip().lower()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9_.-]{2,79}", value):
+            raise ValueError("username must use 3-80 lowercase letters, numbers, dots, underscores or hyphens")
+        return value
+
+
+class UserCreate(BootstrapCreate):
+    role: Role
+
+
+class UserUpdate(BaseModel):
+    role: Role | None = None
+    status: Literal["active", "disabled"] | None = None
+
+    @model_validator(mode="after")
+    def require_change(self):
+        if self.role is None and self.status is None:
+            raise ValueError("At least one of role or status must be supplied")
+        return self
+
+
+class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: str
+    username: str
+    role: Role
+    status: Literal["active", "disabled"]
+    created_at: datetime
+    updated_at: datetime
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=80)
+    password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("username")
+    @classmethod
+    def clean_username(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+class TokenRead(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    expires_in: int
+    user: UserRead
+
+
+class SessionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    session_id: str
+    created_at: datetime
+    expires_at: datetime
+    revoked_at: datetime | None
