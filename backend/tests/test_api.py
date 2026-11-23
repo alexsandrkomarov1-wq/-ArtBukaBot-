@@ -280,3 +280,120 @@ def test_login_throttling_is_persistent_and_resets_after_success(tmp_path):
             response = login(client, "owner", "definitely-wrong-password")
             assert response.status_code == 401
         assert login(client, "owner").status_code == 429
+
+
+
+def test_complete_role_matrix_for_registry_and_account_api_methods(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        owner_token = owner["access_token"]
+        moderator = create_account(client, owner_token, "matrix_mod", "moderator").json()
+        family = create_account(client, owner_token, "matrix_family", "family_member").json()
+        guest = create_account(client, owner_token, "matrix_guest", "guest").json()
+
+        actors = {
+            "owner": owner_token,
+            "moderator": login(client, "matrix_mod").json()["access_token"],
+            "family_member": login(client, "matrix_family").json()["access_token"],
+            "guest": login(client, "matrix_guest").json()["access_token"],
+        }
+        expected = {
+            "owner": {"users_read": 200, "users_create": 201, "person_create": 201,
+                      "person_read": 200, "person_update": 200, "person_archive": 200,
+                      "relationship_create": 201, "relationship_read": 200},
+            "moderator": {"users_read": 200, "users_create": 201, "person_create": 201,
+                          "person_read": 200, "person_update": 200, "person_archive": 200,
+                          "relationship_create": 201, "relationship_read": 200},
+            "family_member": {"users_read": 403, "users_create": 403, "person_create": 201,
+                              "person_read": 200, "person_update": 403, "person_archive": 403,
+                              "relationship_create": 201, "relationship_read": 200},
+            "guest": {"users_read": 403, "users_create": 403, "person_create": 403,
+                      "person_read": 200, "person_update": 403, "person_archive": 403,
+                      "relationship_create": 403, "relationship_read": 200},
+        }
+
+        for role, token in actors.items():
+            headers = auth(token)
+            assert client.get("/api/v1/auth/me", headers=headers).status_code == 200
+            assert client.get("/api/v1/auth/sessions", headers=headers).status_code == 200
+            assert client.get("/api/v1/users", headers=headers).status_code == expected[role]["users_read"]
+
+            create_user_response = client.post(
+                "/api/v1/users", headers=headers,
+                json={"username": f"matrix_new_{role}", "password": "a-long-test-password-987", "role": "guest"},
+            )
+            assert create_user_response.status_code == expected[role]["users_create"]
+
+            person = client.post(
+                "/api/v1/people", headers=headers,
+                json={"display_name": f"Matrix person {role}"},
+            )
+            assert person.status_code == expected[role]["person_create"]
+
+            # Read routes are available to every authenticated role.
+            existing_person = client.post(
+                "/api/v1/people", headers=auth(owner_token),
+                json={"display_name": f"Read fixture {role}"},
+            ).json()
+            person_id = existing_person["person_id"]
+            assert client.get("/api/v1/people", headers=headers).status_code == 200
+            assert client.get(f"/api/v1/people/{person_id}", headers=headers).status_code == expected[role]["person_read"]
+
+            update = client.patch(
+                f"/api/v1/people/{person_id}", headers=headers,
+                json={"display_name": f"Updated {role}"},
+            )
+            assert update.status_code == expected[role]["person_update"]
+
+            archive_fixture = client.post(
+                "/api/v1/people", headers=auth(owner_token),
+                json={"display_name": f"Archive fixture {role}"},
+            ).json()
+            archive = client.delete(
+                f"/api/v1/people/{archive_fixture['person_id']}", headers=headers,
+            )
+            assert archive.status_code == expected[role]["person_archive"]
+
+            first = client.post(
+                "/api/v1/people", headers=auth(owner_token),
+                json={"display_name": f"Relation A {role}"},
+            ).json()
+            second = client.post(
+                "/api/v1/people", headers=auth(owner_token),
+                json={"display_name": f"Relation B {role}"},
+            ).json()
+            relation = client.post(
+                "/api/v1/relationships", headers=headers,
+                json={"from_person_id": first["person_id"], "to_person_id": second["person_id"],
+                      "relationship_type": "test"},
+            )
+            assert relation.status_code == expected[role]["relationship_create"]
+            assert client.get(
+                f"/api/v1/people/{first['person_id']}/relationships", headers=headers,
+            ).status_code == expected[role]["relationship_read"]
+
+            # Password change is available to all roles and invalidates the old token.
+            changed = client.post(
+                "/api/v1/auth/change-password", headers=headers,
+                json={"current_password": "a-long-test-password-123",
+                      "new_password": "a-new-long-test-password-987"},
+            )
+            assert changed.status_code == 200
+            assert client.get("/api/v1/auth/me", headers=headers).status_code == 401
+            fresh_login = login(client, f"matrix_{role}" if role != "owner" else "owner",
+                                "a-new-long-test-password-987" if role != "owner" else "a-new-long-test-password-987")
+            # Owner's initial password differs from the account fixture password.
+            if role == "owner":
+                fresh_login = login(client, "owner", "a-new-long-test-password-987")
+            assert fresh_login.status_code == 200
+            fresh_headers = auth(fresh_login.json()["access_token"])
+            assert client.post("/api/v1/auth/logout", headers=fresh_headers).status_code == 200
+
+        assert client.get("/health").status_code == 200
+        # Bootstrap remains public but is permanently closed after the first account.
+        bootstrap_again = client.post(
+            "/api/v1/auth/bootstrap",
+            headers={"X-Core-Bootstrap-Token": "test-bootstrap-secret"},
+            json={"username": "late_owner", "password": "a-long-test-password-456"},
+        )
+        assert bootstrap_again.status_code == 409

@@ -4,7 +4,6 @@ import json
 import os
 import secrets
 import hashlib
-from datetime import timezone
 from contextlib import asynccontextmanager
 
 import jwt
@@ -150,10 +149,10 @@ def create_app(
         attempt_key = hashlib.sha256(f"{payload.username}:{source_ip}".encode("utf-8")).hexdigest()
         attempt = db.get(LoginAttempt, attempt_key)
         now = utc_now()
-        if attempt and attempt.locked_until and (attempt.locked_until.replace(tzinfo=timezone.utc) if attempt.locked_until.tzinfo is None else attempt.locked_until) > now:
+        if attempt and attempt.locked_until and attempt.locked_until > now:
             db.rollback()
             raise HTTPException(status_code=429, detail="Too many login attempts; try again later")
-        if attempt and (now - (attempt.window_started_at.replace(tzinfo=timezone.utc) if attempt.window_started_at.tzinfo is None else attempt.window_started_at)).total_seconds() > 900:
+        if attempt and (now - attempt.window_started_at).total_seconds() > 900:
             attempt.failed_attempts = 0
             attempt.window_started_at = now
             attempt.locked_until = None
