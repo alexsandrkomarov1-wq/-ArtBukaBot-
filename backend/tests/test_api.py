@@ -380,11 +380,13 @@ def test_complete_role_matrix_for_registry_and_account_api_methods(tmp_path):
             )
             assert changed.status_code == 200
             assert client.get("/api/v1/auth/me", headers=headers).status_code == 401
-            fresh_login = login(client, f"matrix_{role}" if role != "owner" else "owner",
-                                "a-new-long-test-password-987" if role != "owner" else "a-new-long-test-password-987")
-            # Owner's initial password differs from the account fixture password.
-            if role == "owner":
-                fresh_login = login(client, "owner", "a-new-long-test-password-987")
+            account_username = {
+                "owner": "owner",
+                "moderator": "matrix_mod",
+                "family_member": "matrix_family",
+                "guest": "matrix_guest",
+            }[role]
+            fresh_login = login(client, account_username, "a-new-long-test-password-987")
             assert fresh_login.status_code == 200
             fresh_headers = auth(fresh_login.json()["access_token"])
             assert client.post("/api/v1/auth/logout", headers=fresh_headers).status_code == 200
