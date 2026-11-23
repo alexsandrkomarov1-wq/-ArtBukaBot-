@@ -48,6 +48,10 @@ Cross-cutting domains retained from the approved architecture: calendar/tasks; a
 - REQ-CORE-004: Preserve old IDs and references through every migration and merge.
 
 ### Archive and preservation
+- REQ-ARC-006: Provide a browser-based photo viewer and native video playback interface for supported local or archived media.
+- REQ-ARC-007: Support album sequence playback, slideshow, fullscreen viewing, keyboard navigation and download of an authorized original/derivative.
+- REQ-ARC-008: Clearly distinguish browser-local preview from persistent server upload; never imply a selected local file has entered the family archive without a verified upload transaction.
+- REQ-ARC-009: Detect and report unsupported media codecs/formats; do not promise MKV, HEVC or 4K playback solely from a filename.
 - REQ-ARC-001: Ingest documents and media without altering original bytes.
 - REQ-ARC-002: Store metadata, checksum, detected format, source, ingest time and object ID.
 - REQ-ARC-003: Link archive objects to people, events, places, organizations and other sources.
@@ -138,3 +142,10 @@ Each requirement must have:
 - known limitations and recovery behavior.
 
 This register is the product baseline. New requests are added as new requirements or explicit amendments; existing requirements are not silently removed.
+
+
+## 9. Media viewer first delivery slice (23 November 2026)
+
+The first browser-facing media viewer is intentionally local-only. It allows a visitor to select photo/video files from the current device, preview images, play browser-supported video, move between selected files, run a photo slideshow, enter fullscreen and download the selected local file. Object URLs are released when the page is closed or the selection is replaced.
+
+This slice is not a persistent family archive. It does not upload files, store shared albums, synchronize devices, generate AI descriptions, attach PERSON-ID/EVENT-ID/PLACE-ID, create ZIP exports, or provide private access control. Those capabilities remain gated on authenticated private hosting, object storage, immutable originals, metadata registry and audit trail.
