@@ -83,7 +83,7 @@ This branch is not deployed. Before production use it still needs HTTPS hosting,
 - Disabling an account revokes every active session in the same transaction. Re-enabling the account does not revive old tokens.
 - A database-backed lock row serializes first-owner bootstrap and owner role/status changes across processes and supported SQL databases.
 - Login throttling is persisted in the database: five failed attempts for a username and direct client IP trigger a 15-minute lockout. Forwarded IP headers are intentionally not trusted.
-- SQLite backup uses the online backup API. Restore writes to a temporary file, checks integrity, and atomically replaces only the destination. The automated test restores into a separate database and checks both registry data and migration version.
+- SQLite backup uses the online backup API. Restore validates the source and creates a new destination atomically; it refuses to overwrite an existing file. The portable database archive adds a SHA-256 manifest and verifies schema and foreign-key integrity.
 
 These controls are not a substitute for a production WAF, monitoring, incident response, off-site encrypted backups, or a formal security review. The current lock row serializes login validation and owner administration; this is safe but may become a throughput bottleneck and should be replaced with finer-grained database locking when moving to PostgreSQL.
 

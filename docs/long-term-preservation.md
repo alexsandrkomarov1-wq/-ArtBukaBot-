@@ -50,11 +50,11 @@ No module should be marked "implemented" merely because its name appears in the 
 
 | Area | Current state | Required before real family data |
 |---|---|---|
-| Person identity | PERSON-ID is currently `P-` plus 12 hexadecimal characters (48 random bits) | Move new identifiers to at least 128-bit globally unique IDs. Preserve all existing IDs and provide an explicit compatibility migration. Never recycle IDs. |
+| Person identity | New PERSON-ID values use `P-` plus 32 hexadecimal characters (128 random bits); legacy IDs are retained | Keep identifiers immutable, preserve legacy values, and never recycle IDs. |
 | Database | SQLite is the development default; its file path can depend on the process working directory | Use an explicitly configured production database URL, managed migrations, documented restore, and a tested PostgreSQL deployment path. |
 | Attachments | No durable binary-object repository is implemented | Add a storage abstraction and content-addressed object store. Keep original bytes immutable; store previews and converted derivatives separately. |
-| Integrity | Database audit events exist, but there is no archive-wide checksum inventory | Create SHA-256 manifests at ingest, periodically verify every stored object, retain verification logs, and repair from a known-good independent copy. |
-| Backups | SQLite online backup and restore helper has a separate-database test | Add scheduled encrypted off-site copies, immutable/offline retention, backup manifests, restore drills, and recovery-point/recovery-time objectives. |
+| Integrity | Portable database archive v1 includes a SHA-256 checksum and SQLite integrity/schema/foreign-key verification; media objects have no checksum inventory yet | Add checksums at media ingest, periodically verify every stored object, retain verification logs, and repair from a known-good independent copy. |
+| Backups | SQLite online backup/restore and portable database archive v1 are implemented and CI-tested; full relational graph restore is tested. No scheduled or off-site copy exists. | Add scheduled encrypted off-site copies, immutable/offline retention, restore drills, and recovery-point/recovery-time objectives. |
 | Encryption | No verified encryption-at-rest or key recovery process | Encrypt devices, disks, backups, and object storage. Document key rotation, offline recovery material, and succession access. |
 | Audit | Audit rows are application-written but not tamper-evident against a database administrator | Add append-only controls and tamper-evident chained or signed audit exports, with independent copies. |
 | Concurrency | Database lock row serializes bootstrap and account administration | Keep concurrency tests on every supported database. The current single lock row is safe-oriented but can become a throughput bottleneck. |
@@ -144,14 +144,14 @@ The schedule must be automated where possible and documented so another person c
 
 ## 7. Current release boundary
 
-As of this document's date, the repository branch `core-backend-foundation` is a development backend foundation. It is not a deployed private family site. GitHub Pages is a static Jekyll shell and is not connected to the API or database. The current SQLite backup helper is a tested starting point, not an off-site disaster-recovery system. No real family archive should be placed in this public repository.
+As of this document's date, the repository branch `core-backend-foundation` is a development backend foundation. It is not a deployed private family site. GitHub Pages is a static Jekyll shell and is not connected to the API or database. The current SQLite backup helper and checksummed archive v1 preserve the relational database, not the full media library. They are not an off-site disaster-recovery system. No real family archive should be placed in this public repository.
 
 The next architectural gates, in order:
 
 1. Finish and verify account/session/rate-limit/bootstrap/role hardening.
 2. Test concurrency and migrations on SQLite and PostgreSQL.
 3. Upgrade new permanent identifiers to 128-bit while preserving legacy IDs.
-4. Define the object-store interface, preservation package, checksums, and full export/import.
+4. Extend archive format v1 to include the future object store, original media files, metadata, and per-object checksums.
 5. Build encrypted backup, independent restore, and key-recovery workflows.
 6. Add sync and connector boundaries with explicit provenance and conflict handling.
 7. Deploy privately only after security review, operations runbooks, and disaster-recovery tests.

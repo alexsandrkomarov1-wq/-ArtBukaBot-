@@ -138,3 +138,28 @@ def test_sqlite_backup_restore_preserves_complete_identity_graph(tmp_path):
             )).scalar_one() == "0004_wide_identifiers"
     finally:
         restored_engine.dispose()
+
+
+
+def test_backup_rejects_broken_foreign_key_references(tmp_path):
+    from sqlalchemy import text
+
+    source = tmp_path / "broken-source.sqlite3"
+    backup = tmp_path / "backups" / "must-not-be-created.sqlite3"
+    engine = build_engine(f"sqlite:///{source}")
+    try:
+        run_migrations(engine)
+        # SQLite FK enforcement is off by default unless a connection enables it;
+        # the integrity scan must still detect pre-existing orphan references.
+        with engine.begin() as connection:
+            connection.execute(text(
+                "INSERT INTO relationships "
+                "(relationship_id, from_person_id, to_person_id, relationship_type, created_at) "
+                "VALUES ('R-' || printf('%032d', 1), 'P-missing-from', 'P-missing-to', "
+                "'invalid-fixture', CURRENT_TIMESTAMP)"
+            ))
+        with pytest.raises(RuntimeError, match="foreign-key violations"):
+            backup_database(engine, backup)
+        assert not backup.exists()
+    finally:
+        engine.dispose()
