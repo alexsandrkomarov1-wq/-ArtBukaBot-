@@ -1,0 +1,6 @@
+{
+  "name":"komarova-core-desktop","version":"0.1.0","description":"Локальный каталогизатор семейного архива KOMAROVA_CORE","main":"main.cjs","private":true,
+  "scripts":{"start":"electron .","dist:win":"electron-builder --win nsis"},
+  "devDependencies":{"electron":"^35.0.0","electron-builder":"^26.0.12"},
+  "build":{"appId":"org.komarova.core.desktop","productName":"KOMAROVA_CORE","directories":{"output":"dist"},"files":["main.cjs","preload.cjs","renderer.js","index.html","styles.css","package.json"],"win":{"target":[{"target":"nsis","arch":["x64"]}],"artifactName":"KOMAROVA_CORE-Setup.${ext}"},"nsis":{"oneClick":false,"perMachine":false,"allowToChangeInstallationDirectory":true,"createDesktopShortcut":true,"createStartMenuShortcut":true}}
+}
