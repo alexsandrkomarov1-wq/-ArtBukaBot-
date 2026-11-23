@@ -19,7 +19,12 @@ def _sqlite_connection(engine: Engine):
 
 
 def _check_integrity(connection: sqlite3.Connection) -> None:
-    result = connection.execute("PRAGMA integrity_check").fetchone()
+    try:
+        result = connection.execute("PRAGMA integrity_check").fetchone()
+    except sqlite3.DatabaseError as exc:
+        raise RuntimeError(
+            "Backup is not a complete KOMAROVA_CORE database: invalid SQLite file"
+        ) from exc
     if not result or result[0] != "ok":
         raise RuntimeError(f"SQLite integrity_check failed: {result[0] if result else 'no result'}")
 
