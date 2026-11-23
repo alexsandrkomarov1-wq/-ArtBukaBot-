@@ -7,5 +7,5 @@ def test_site_guide_is_included_and_has_accessible_contextual_controls():
     assert 'data-guide-toggle' in layout and 'data-guide-panel' in layout
     assert 'aria-expanded="false"' in layout
     assert "site-guide-tooltip" in layout
-    assert "routes.media" in script and "routes.account" in script and "routes.status" in script
+    assert 'media:{title:' in script and 'account:{title:' in script and 'status:{title:' in script
     assert "window.sessionStorage" in script
