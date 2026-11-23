@@ -7,3 +7,12 @@ vendor/
 Gemfile.lock
 .DS_Store
 Thumbs.db
+
+# Protect private application data and credentials
+*.sqlite3
+*.db
+.env
+.env.*
+_private/
+_private_reference/
+secrets/
