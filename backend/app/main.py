@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .database import build_engine, build_session_factory, run_migrations, session_dependency
+from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
 from .models import AuditEvent, AuthSession, Person, RelationshipRecord, User, utc_now
 from .schemas import (
     BootstrapCreate, LoginRequest, PasswordChange, PersonCreate, PersonRead, PersonUpdate,
@@ -40,7 +40,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        run_migrations(engine)
+        verify_migrations_current(engine)
         yield
         engine.dispose()
 

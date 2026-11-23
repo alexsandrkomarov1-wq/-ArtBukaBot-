@@ -1,12 +1,17 @@
 from fastapi.testclient import TestClient
 
+from backend.app.database import build_engine, run_migrations
 from backend.app.main import create_app
 
 
 def make_client(tmp_path):
     database = tmp_path / "test.sqlite3"
+    database_url = f"sqlite:///{database}"
+    migration_engine = build_engine(database_url)
+    run_migrations(migration_engine)
+    migration_engine.dispose()
     app = create_app(
-        database_url=f"sqlite:///{database}",
+        database_url=database_url,
         jwt_secret="test-only-signing-secret-with-at-least-32-bytes",
         bootstrap_token="test-bootstrap-secret",
     )

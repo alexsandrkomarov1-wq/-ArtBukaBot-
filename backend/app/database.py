@@ -6,6 +6,8 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
+from alembic.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -36,6 +38,23 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as connection:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
+
+
+
+def verify_migrations_current(engine: Engine) -> None:
+    """Fail fast when the database is not at the code's migration head."""
+    project_root = Path(__file__).resolve().parents[2]
+    config = Config(str(project_root / "alembic.ini"))
+    config.set_main_option("script_location", str(project_root / "backend" / "migrations"))
+    config.set_main_option("prepend_sys_path", str(project_root))
+    expected_revision = ScriptDirectory.from_config(config).get_current_head()
+    with engine.connect() as connection:
+        current_revision = MigrationContext.configure(connection).get_current_revision()
+    if current_revision != expected_revision:
+        raise RuntimeError(
+            "Database schema is not at the current migration head. "
+            "Run 'python -m backend.app.migrate' once before starting API workers."
+        )
 
 
 def session_dependency(factory) -> Generator[Session, None, None]:

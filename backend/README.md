@@ -13,7 +13,11 @@ python -m venv .venv
 pip install -r requirements-dev.txt
 ~~~
 
-Configure secrets outside the repository. Do not commit real credentials or family data.
+Configure secrets outside the repository. Do not commit real credentials or family data. Apply migrations before launching the API:
+
+~~~bash
+python -m backend.app.migrate
+~~~
 
 PowerShell example:
 
@@ -24,7 +28,7 @@ $env:DATABASE_URL = "sqlite:///./komarova_core.db"
 python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8081
 ~~~
 
-The app applies Alembic migrations at startup. The initial migration can adopt the previous complete create_all schema without replacing existing records. Partial or structurally incompatible legacy schemas are rejected. The initial schema migration is intentionally forward-only because downgrading it would destroy registry and audit data.
+Apply Alembic migrations once before starting API workers. The API checks that the database is at the current migration head and refuses to start if it is not. This avoids multiple worker processes racing to apply migrations. Run the migration command shown below. The initial migration can adopt the previous complete create_all schema without replacing existing records. Partial or structurally incompatible legacy schemas are rejected. The initial schema migration is intentionally forward-only because downgrading it would destroy registry and audit data.
 
 ## First owner account
 
