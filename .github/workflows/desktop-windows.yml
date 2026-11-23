@@ -1,0 +1,38 @@
+name: KOMAROVA_CORE Desktop Windows
+on:
+  push:
+    branches: [core-backend-foundation]
+    paths:
+      - "desktop/**"
+      - ".github/workflows/desktop-windows.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: desktop/package.json
+      - name: Install dependencies
+        working-directory: desktop
+        run: npm install
+      - name: Check JavaScript syntax
+        working-directory: desktop
+        run: node --check main.cjs; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; node --check preload.cjs; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; node --check renderer.js
+      - name: Build Windows installer
+        working-directory: desktop
+        run: npm run dist:win
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: KOMAROVA_CORE-Windows-Installer
+          path: desktop/dist/*.exe
+          if-no-files-found: error
+          retention-days: 14
