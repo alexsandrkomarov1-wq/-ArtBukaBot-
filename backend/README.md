@@ -86,3 +86,28 @@ This branch is not deployed. Before production use it still needs HTTPS hosting,
 - SQLite backup uses the online backup API. Restore writes to a temporary file, checks integrity, and atomically replaces only the destination. The automated test restores into a separate database and checks both registry data and migration version.
 
 These controls are not a substitute for a production WAF, monitoring, incident response, off-site encrypted backups, or a formal security review. The current lock row serializes login validation and owner administration; this is safe but may become a throughput bottleneck and should be replaced with finer-grained database locking when moving to PostgreSQL.
+
+## Portable database archive (format v1)
+
+The code now supports a portable ZIP-based database archive with a JSON manifest and SHA-256 checksum. It verifies the archive structure, database checksum, SQLite integrity, required KOMAROVA_CORE tables, foreign-key consistency, and Alembic schema revision.
+
+Set `DATABASE_URL` to the SQLite database to export, then run:
+
+~~~bash
+python -m backend.app.archive_cli export /safe/location/family-core.kca
+python -m backend.app.archive_cli verify /safe/location/family-core.kca
+python -m backend.app.archive_cli restore /safe/location/family-core.kca /safe/location/restored-core.sqlite3
+~~~
+
+PowerShell example:
+
+~~~powershell
+$env:DATABASE_URL = "sqlite:///./komarova_core.db"
+python -m backend.app.archive_cli export "D:\FamilyBackups\family-core.kca"
+python -m backend.app.archive_cli verify "D:\FamilyBackups\family-core.kca"
+python -m backend.app.archive_cli restore "D:\FamilyBackups\family-core.kca" "D:\FamilyBackups\restored-core.sqlite3"
+~~~
+
+Exports and restores refuse to overwrite existing destination files. Restore always targets a new database file. Keep archives outside the public GitHub repository and protect them as sensitive family data.
+
+**Scope limitation:** archive format v1 contains the relational SQLite database only. The project's binary media/object-storage layer has not yet been implemented, so photographs, videos, audio and document file contents are not yet packaged. They must be added as separately checksummed archive members before this can be called a complete family-library export.

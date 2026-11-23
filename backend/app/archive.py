@@ -43,6 +43,11 @@ def _database_revision(path: Path) -> str:
         with sqlite3.connect(path) as connection:
             _check_integrity(connection)
             _check_archive_schema(connection)
+            violations = connection.execute("PRAGMA foreign_key_check").fetchall()
+            if violations:
+                raise ValueError(
+                    f"Archive database contains foreign-key violations: {violations[:10]}"
+                )
             rows = connection.execute("SELECT version_num FROM alembic_version").fetchall()
     except sqlite3.DatabaseError as exc:
         raise ValueError("Archive database is not a readable SQLite database") from exc

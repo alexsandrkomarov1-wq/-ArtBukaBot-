@@ -30,6 +30,14 @@ def _check_integrity(connection: sqlite3.Connection) -> None:
         raise RuntimeError(f"SQLite integrity_check failed: {result[0] if result else 'no result'}")
 
 
+def _check_foreign_keys(connection: sqlite3.Connection) -> None:
+    violations = connection.execute("PRAGMA foreign_key_check").fetchall()
+    if violations:
+        raise RuntimeError(
+            f"Database contains foreign-key violations: {violations[:10]}"
+        )
+
+
 def _check_archive_schema(connection: sqlite3.Connection) -> None:
     tables = {
         row[0] for row in connection.execute(
@@ -54,6 +62,7 @@ def backup_database(engine: Engine, destination: str | Path) -> Path:
             source.backup(backup)
             _check_integrity(backup)
             _check_archive_schema(backup)
+            _check_foreign_keys(backup)
     except Exception:
         target.unlink(missing_ok=True)
         raise
@@ -79,9 +88,11 @@ def restore_database(backup_path: str | Path, destination: str | Path) -> Path:
         with sqlite3.connect(source_path) as source, sqlite3.connect(temporary) as restored:
             _check_integrity(source)
             _check_archive_schema(source)
+            _check_foreign_keys(source)
             source.backup(restored)
             _check_integrity(restored)
             _check_archive_schema(restored)
+            _check_foreign_keys(restored)
         if target.exists():
             raise FileExistsError(f"Restore destination already exists: {target}")
         os.replace(temporary, target)
