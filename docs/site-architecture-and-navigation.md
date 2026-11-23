@@ -340,3 +340,29 @@ Acceptance tests:
 - The page makes clear that external-service shortcuts are not live KOMAROVA_CORE integrations.
 - The external hub and private `/app/` remain separate navigation and security surfaces.
 
+
+
+## 17. Homepage family portraits and NASA Mars feature
+
+The public homepage includes a dedicated family portrait gallery. It is a presentation of approved portrait derivatives linked to the canonical Person records, not a separate photo store and not a list of manually invented identities.
+
+- Each family member controls their own selected profile portrait in the authenticated private application, subject to the project's permission model and age-appropriate guardian safeguards where applicable.
+- A member may upload/select a replacement, preview the crop, choose the active portrait, and withdraw public display permission. The gallery must show only the exact derivative currently approved for public display.
+- Changing a private profile image does not automatically publish it. Public display requires a separate explicit publication approval from the person or authorized guardian, recorded against the derivative/version.
+- The homepage must never show private originals, upload paths, filenames containing personal data, private account identifiers or an unapproved photo. A missing or withdrawn portrait returns to a neutral empty state, never a fabricated portrait.
+- Public portrait cards should link to a public person page only if that page and its metadata have separately been approved. A hidden or private person must not be discoverable through card source, HTML comments, image URLs or API responses.
+- The present GitHub Pages gallery is a visual shell with neutral empty portrait frames. It is not connected to private profile editing, media upload, authorization or storage. Do not label the editing workflow as available until those backend capabilities are implemented and tested.
+
+The homepage also contains a clearly visible Mars research feature linking to NASA's official Mars science portal at https://science.nasa.gov/mars/. This is an external resource, not a claim that KOMAROVA_CORE operates a Mars project or has an active NASA integration. Internet Archive remains a separate external publishing/discovery destination.
+
+Acceptance tests:
+1. Homepage shows the family portrait area and the NASA Mars link at desktop and mobile widths.
+2. Empty portrait slots contain no invented people or photographs.
+3. Only records with active public approval can populate a portrait card.
+4. Revoking approval removes the public portrait without deleting the private original.
+5. Each portrait is resolved through a permanent PERSON-ID and approved derivative ID, never through display name or filename.
+6. The NASA link opens the official NASA Mars portal safely in a separate browsing context.
+
+## 18. Release checkpoints, change history and rollback
+
+The release and rollback procedure is defined in [docs/release-and-rollback-policy.md](release-and-rollback-policy.md). Every production change must have a recoverable checkpoint, an isolated implementation branch, passing checks on the exact commit and a recorded deployment result. A successful static-site build does not certify private application capabilities.
