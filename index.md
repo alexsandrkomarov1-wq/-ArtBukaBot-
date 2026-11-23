@@ -1,18 +1,44 @@
 ---
 layout: default
 title: Главная
-description: Публичная витрина семейного проекта KOMAROVA_CORE
+description: Цифровой семейный архив KOMAROVA_CORE. История, память и материалы для открытого доступа.
 ---
-<section class="hero">
-<p class="eyebrow">СЕМЕЙНЫЙ ИНФОРМАЦИОННЫЙ ПРОЕКТ</p>
-<h1>История семьи.<br><span>Связь поколений.</span></h1>
-<p class="hero-lead">KOMAROVA_CORE — пространство для сохранения семейной истории, значимых событий и материалов, которыми можно делиться публично.</p>
-<a class="primary-link" href="{{ '/about/' | relative_url }}">О проекте <span aria-hidden="true">→</span></a>
+<section class="hero hero-archive" aria-labelledby="home-title">
+  <div class="hero-copy">
+    <p class="eyebrow"><span class="eyebrow-line"></span> ЦИФРОВОЙ СЕМЕЙНЫЙ АРХИВ</p>
+    <h1 id="home-title">История,<br>которую <em>сохраняют.</em></h1>
+    <p class="hero-lead">KOMAROVA_CORE объединяет семейную память, людей, события, места и документы в единую систему. Чтобы важное не терялось между поколениями.</p>
+    <div class="hero-actions">
+      <a class="primary-link" href="{{ '/about/' | relative_url }}">О проекте <span aria-hidden="true">↗</span></a>
+      <a class="text-link" href="#archive-directions">Исследовать направления <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+  <div class="hero-art" aria-label="Графическая композиция семейного архива">
+    <div class="archive-stamp"><span>СЕМЕЙНЫЙ</span><strong>АРХИВ</strong><span>ИСТОРИЯ · ПАМЯТЬ · СВЯЗЬ</span></div>
+    <div class="archive-index"><span>КОЛЛЕКЦИЯ</span><strong>01</strong><span>KOMAROVA_CORE</span></div>
+    <div class="archive-orbit orbit-one"></div><div class="archive-orbit orbit-two"></div>
+    <span class="archive-year">MEMORIA<br>FAMILIAE</span>
+  </div>
+  <div class="hero-foot"><span>СОХРАНЯЯ ПРОШЛОЕ</span><span class="hero-foot-rule"></span><span>СОЗДАЁМ СВЯЗЬ С БУДУЩИМ</span></div>
 </section>
-<section class="intro-grid" aria-label="Направления проекта">
-<article class="info-card"><span class="card-number">01</span><h2>Семейная история</h2><p>Хронология, истории поколений и материалы, подготовленные для открытого доступа.</p></article>
-<article class="info-card"><span class="card-number">02</span><h2>События и память</h2><p>Значимые даты, семейные события и исторические заметки.</p></article>
-<article class="info-card"><span class="card-number">03</span><h2>Публикации</h2><p>Статьи, фотографии и другие материалы, разрешённые к публикации.</p></article>
+<section class="section-intro" id="archive-directions">
+  <div><p class="eyebrow">СОДЕРЖАНИЕ АРХИВА</p><h2>Не просто страницы.<br><em>Связанные истории.</em></h2></div>
+  <p>Каждый материал в будущем будет связан с людьми, датами, событиями, местами и источниками. Так отдельные документы складываются в общую картину.</p>
 </section>
-<section class="notice"><div class="notice-mark" aria-hidden="true">i</div><div><h2>Публичная часть проекта</h2><p>Этот сайт не содержит закрытого семейного архива. Личные данные, адреса, контакты, документы и переписки не публикуются.</p></div></section>
-<section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ РАЗРАБОТКИ</p><h2>Что уже работает, а что ещё предстоит сделать</h2><p>Статусы модулей, исходный код и результаты автоматических проверок.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">→</span></a></section>
+<section class="archive-grid" aria-label="Направления семейного архива">
+  <article class="archive-card archive-card-feature"><span class="card-kicker">01 / ПОКОЛЕНИЯ</span><div class="card-symbol symbol-tree" aria-hidden="true"><span></span><span></span><span></span><i></i></div><h3>История семьи</h3><p>Поколения, биографии, родственные связи и семейная хроника.</p><span class="card-state">РАЗДЕЛ В РАЗРАБОТКЕ</span></article>
+  <article class="archive-card"><span class="card-kicker">02 / ВРЕМЯ</span><div class="card-symbol symbol-time" aria-hidden="true"><span></span><span></span><i></i></div><h3>События и хронология</h3><p>Значимые даты, встречи, семейные события и исторический контекст.</p><span class="card-state">РАЗДЕЛ В РАЗРАБОТКЕ</span></article>
+  <article class="archive-card"><span class="card-kicker">03 / ГЕОГРАФИЯ</span><div class="card-symbol symbol-place" aria-hidden="true"><span></span><i></i></div><h3>Места и путешествия</h3><p>Города, маршруты, дома и места, связанные с семейной историей.</p><span class="card-state">РАЗДЕЛ В РАЗРАБОТКЕ</span></article>
+  <article class="archive-card"><span class="card-kicker">04 / МЕДИАТЕКА</span><div class="card-symbol symbol-media" aria-hidden="true"><span></span><span></span><i></i></div><h3>Фотографии и документы</h3><p>Оригиналы, описания, источники и проверенные цифровые копии.</p><span class="card-state">РАЗДЕЛ В РАЗРАБОТКЕ</span></article>
+</section>
+<section class="sharing-panel">
+  <div class="sharing-copy">
+    <p class="eyebrow">ОТКРЫТЫЕ КОЛЛЕКЦИИ</p><h2>Семейная память<br><em>может быть доступна миру.</em></h2>
+    <p>Материалы, которые разрешено публиковать, можно будет распространять через KOMAROVA_CORE и внешние цифровые библиотеки, включая Internet Archive. Для каждой публикации будут указаны авторство, источник и условия использования.</p>
+    <a class="outline-link" href="https://archive.org/" target="_blank" rel="noopener noreferrer">Перейти на Internet Archive <span aria-hidden="true">↗</span></a>
+    <p class="sharing-note">Внешняя площадка для будущих публикаций. Семейная коллекция KOMAROVA_CORE там пока не создана.</p>
+  </div>
+  <div class="sharing-seal" aria-hidden="true"><span>OPEN</span><strong>MEMORY</strong><span>SHARED WITH CARE</span></div>
+</section>
+<section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
+<section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
