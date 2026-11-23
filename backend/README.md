@@ -70,6 +70,8 @@ Only the owner can change account roles. The last active owner cannot be disable
 - DELETE /api/v1/people/{person_id} — soft archive.
 - POST /api/v1/relationships — link two existing people.
 - GET /api/v1/people/{person_id}/relationships — list links for a person.
+- GET /api/v1/navigation — authenticated, role-aware navigation manifest for capabilities that currently exist in the private API.
+- GET /api/v1/search?q=... — authenticated search of active people by display name or PERSON-ID; supports Cyrillic case-insensitive matching and returns entity IDs plus API detail endpoints.
 
 All authenticated endpoints use Authorization: Bearer <access_token>. The public GET /health endpoint contains no personal data. API documentation endpoints remain disabled.
 
@@ -111,3 +113,10 @@ python -m backend.app.archive_cli restore "D:\FamilyBackups\family-core.kca" "D:
 Exports and restores refuse to overwrite existing destination files. Restore always targets a new database file. Keep archives outside the public GitHub repository and protect them as sensitive family data.
 
 **Scope limitation:** archive format v1 contains the relational SQLite database only. The project's binary media/object-storage layer has not yet been implemented, so photographs, videos, audio and document file contents are not yet packaged. They must be added as separately checksummed archive members before this can be called a complete family-library export.
+
+
+## Integrated navigation and search API
+
+The private API now exposes a single role-aware navigation manifest and a search endpoint over the existing people registry. The manifest does not advertise unimplemented destinations: account administration is omitted for family-member and guest roles. Search is authenticated and returns only active people; it does not expose the private registry to the public GitHub Pages site.
+
+Search currently covers only the implemented `people` entity. Events, places, journeys, photographs, documents and family stories are not searchable until their data models and access rules exist. The API manifest is a backend contract for the private application, not a claim that a complete browser-based private UI has already been built. Search currently performs Unicode case-fold matching in application code to support Cyrillic names on SQLite; for very large registries this should be replaced with an indexed normalized search field in a reviewed database migration.
