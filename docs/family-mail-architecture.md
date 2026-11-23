@@ -8,12 +8,9 @@
 
 KOMAROVA_CORE will use a provider-neutral mail domain with separate adapters for Gmail and Yandex Mail. The family does not need to move to one provider to obtain a unified application.
 
-Current provider allocation, as supplied by the project owner:
-- Mother: Yandex Mail.
-- Father: Gmail.
-- Son: Gmail.
+The family currently uses more than one provider. The architecture must preserve each owner's chosen provider and must not force a common-provider migration. Individual owner-to-address and owner-to-provider mappings are private configuration and must not be published in this repository.
 
-This is a recorded design input, not a live connection. Do not change addresses, migrate mailboxes, enable forwarding or create aliases without the mailbox owner's explicit decision.
+This is a design constraint, not a live connection. Do not change addresses, migrate mailboxes, enable forwarding or create aliases without the mailbox owner's explicit decision.
 
 The module has two distinct workflows:
 1. **Compose a message:** prepare a message for the user's configured mail client. This is the initial, low-risk capability.
