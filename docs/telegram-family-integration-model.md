@@ -2,7 +2,7 @@
 
 **Document status:** architecture specification, 23 November 2026  
 **Target branch:** `core-backend-foundation`  
-**Implementation status:** four Telegram sources are registered in this architecture specification; no Telegram connector, browser automation, message sync or media import is implemented.
+**Implementation status:** six Telegram sources are registered in this architecture specification; no Telegram connector, browser automation, message sync or media import is implemented.
 
 ## 1. Purpose
 
