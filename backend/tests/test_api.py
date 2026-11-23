@@ -67,7 +67,7 @@ def test_bootstrap_is_one_time_and_owner_can_login(tmp_path):
         owner = bootstrap_owner(client)
         assert owner["user"]["role"] == "owner"
         assert owner["user"]["user_id"].startswith("U-")
-        assert len(owner["user"]["user_id"]) == 14
+        assert len(owner["user"]["user_id"]) == 34
         assert client.get("/api/v1/auth/me", headers=auth(owner["access_token"])).json()["username"] == "owner"
 
         repeated = client.post(
@@ -179,7 +179,7 @@ def test_person_registry_archive_and_audit_actor(tmp_path):
         assert created.status_code == 201
         person = created.json()
         person_id = person["person_id"]
-        assert person_id.startswith("P-") and len(person_id) == 14
+        assert person_id.startswith("P-") and len(person_id) == 34
         assert person["display_name"] == "Иван Иванов"
 
         fetched = client.get(f"/api/v1/people/{person_id}", headers=headers)
@@ -212,6 +212,7 @@ def test_relationships_require_two_existing_people(tmp_path):
             },
         )
         assert relation.status_code == 201
+        assert len(relation.json()["relationship_id"]) == 34
         assert relation.json()["from_person_id"] == first_id
         assert len(client.get(
             f"/api/v1/people/{first_id}/relationships", headers=headers

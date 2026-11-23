@@ -1,5 +1,9 @@
 from alembic.autogenerate import compare_metadata
+from alembic import command
+from alembic.config import Config
 from alembic.migration import MigrationContext
+from pathlib import Path
+
 from sqlalchemy import inspect, select, text
 
 from backend.app.database import Base, build_engine, run_migrations
@@ -75,7 +79,7 @@ def test_existing_create_all_database_is_adopted_without_data_loss(tmp_path):
             version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert row.person_id == "P-1234567890AB"
         assert row.display_name == "Existing record"
-        assert version == "0003_security_controls"
+        assert version == "0004_wide_identifiers"
         assert inspect(engine).has_table("auth_sessions")
     finally:
         engine.dispose()
@@ -102,5 +106,43 @@ def test_partial_legacy_schema_is_rejected_without_changing_core_tables(tmp_path
         with engine.connect() as connection:
             version_rows = connection.execute(text("SELECT version_num FROM alembic_version")).all()
         assert version_rows == []
+    finally:
+        engine.dispose()
+
+
+
+def test_legacy_48_bit_person_id_survives_identifier_width_migration(tmp_path):
+    database = tmp_path / "identifier-upgrade.sqlite3"
+    engine = build_engine(f"sqlite:///{database}")
+    project_root = Path(__file__).resolve().parents[2]
+    config = Config(str(project_root / "alembic.ini"))
+    config.set_main_option("script_location", str(project_root / "backend" / "migrations"))
+    config.set_main_option("prepend_sys_path", str(project_root))
+
+    try:
+        with engine.begin() as connection:
+            config.attributes["connection"] = connection
+            command.upgrade(config, "0003_security_controls")
+
+        with engine.begin() as connection:
+            connection.execute(text(
+                "INSERT INTO people (person_id, display_name, status, created_at, updated_at) "
+                "VALUES (:id, :name, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+            ), {"id": "P-1234567890AB", "name": "Legacy person"})
+
+        run_migrations(engine)
+
+        inspector = inspect(engine)
+        assert inspector.get_columns("people")[0]["type"].length == 34
+        with engine.connect() as connection:
+            row = connection.execute(
+                select(Person.person_id, Person.display_name).where(
+                    Person.person_id == "P-1234567890AB"
+                )
+            ).one()
+            version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+        assert row.person_id == "P-1234567890AB"
+        assert row.display_name == "Legacy person"
+        assert version == "0004_wide_identifiers"
     finally:
         engine.dispose()
