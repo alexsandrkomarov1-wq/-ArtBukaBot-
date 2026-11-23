@@ -2,7 +2,7 @@
 
 **Document status:** architecture specification, 23 November 2026  
 **Target branch:** `core-backend-foundation`  
-**Implementation status:** links and integration rules specified; no Telegram API connection or media import implemented.
+**Implementation status:** browser-based access and import workflow specified; no browser automation or media import implemented.
 
 ## 1. Purpose
 
@@ -81,29 +81,47 @@ Therefore:
 
 The first release should support manual upload through the private archive interface. Telegram API-based import is a later, optional capability and must not block that release.
 
-## 7. Future connector boundary
+## 7. Browser-based Telegram Web access and media intake
 
-If a Telegram connector is approved later, it must be an isolated adapter with narrowly scoped capabilities.
+The primary planned access method is the normal Telegram Web user interface in a browser, not a rewrite of the existing bots and not a mandatory Bot API integration.
 
-Potential future capabilities, each requiring separate implementation and authorization:
-- list or receive explicitly selected messages;
-- retrieve selected media only after a user action;
-- preserve source chat/message identifiers as provenance;
-- create a review item in private intake/quarantine;
-- report connector status and last successful synchronization.
+Canonical entry point: https://web.telegram.org/k/
 
-Out of scope unless separately approved:
-- reading the full group history;
-- bulk downloading old photographs or videos;
-- monitoring all messages continuously;
-- sending messages or media to the group;
-- changing bot commands or behavior;
-- automatically publishing to the website;
-- two-way synchronization or deletion propagation.
+Expected workflow:
+1. Open Telegram Web in a browser profile controlled by the owner.
+2. The owner completes Telegram authentication directly in that browser, including password and one-time confirmation code when Telegram requests them.
+3. KOMAROVA_CORE may use only the already authenticated browser session and the chats/files that this account is legitimately allowed to access.
+4. An authorized user selects the relevant message, attachment, or explicitly approved batch for intake.
+5. The browser workflow downloads the selected photo/video/document without altering the source in Telegram.
+6. The downloaded file is copied into the local intake area `KOMAROVA_CORE/intake/telegram/attachments` and handed to File Engine for validation, SHA-256 calculation, duplicate review, provenance capture and MATERIAL-ID registration.
+7. Successful intake creates an archive candidate. It does not automatically publish the file to the public website.
 
-Prefer an explicit user-initiated import over continuous monitoring. If Telegram API access is not configured or available, the interface must say so honestly and continue to provide ordinary external links.
+Security requirements:
+- The owner enters the Telegram password and confirmation code directly into Telegram Web. Never ask the owner to send credentials to ChatGPT or store them in source code, logs, project documentation or ordinary configuration.
+- Do not export, copy, print or commit Telegram session cookies, local storage, auth keys or browser profile data.
+- Keep the authenticated browser profile local and access-controlled. Do not share it with public hosting or expose it to frontend JavaScript.
+- Do not bypass Telegram access controls, CAPTCHA, rate limits, privacy restrictions or technical protections.
+- If the session expires or Telegram requests re-authentication, pause and let the owner complete the login interactively.
+- Respect Telegram's current terms, account security prompts and the user's actual group membership/permissions.
 
-## 8. Security and privacy
+Selection and volume rules:
+- The browser method makes downloading possible; it does not mean the entire group history should be downloaded.
+- No bulk history download or automatic monitoring is enabled at this stage.
+- Support a deliberate user-selected attachment or a user-approved bounded batch, rather than requiring one-at-a-time manual file handling forever.
+- Any future rule-based collection of new posts must be separately specified, previewed and approved before activation.
+- Preserve exact downloaded bytes; calculate SHA-256; retain chat/message/source references as provenance only.
+- Never treat Telegram IDs as PERSON-ID, PHOTO-ID, EVENT-ID or primary archive IDs.
+- Intake failures remain visible and retryable; never claim an item was archived before File Engine confirms it.
+
+This browser workflow is a planned capability. It is not yet implemented merely because Telegram Web is accessible in a normal browser.
+
+## 8. Optional API connector boundary
+
+A Telegram API connector may be considered later as a separate optional adapter, but it is not the primary assumption for the current design and is not required for browser-based intake.
+
+Any API capabilities require separate implementation and authorization. Out of scope unless separately approved: full-history scraping, continuous monitoring, sending messages/media, changing bot behavior, automatic public publishing, two-way synchronization, or deletion propagation.
+
+## 9. Security and privacy
 
 - Bot tokens and Telegram API credentials belong only in a server-side secret manager or protected environment configuration.
 - Never commit secrets to the repository or expose them in browser JavaScript.
@@ -114,7 +132,7 @@ Prefer an explicit user-initiated import over continuous monitoring. If Telegram
 - Do not assume that membership in a Telegram group grants permission to access the private KOMAROVA_CORE archive.
 - Do not expose group membership, message history, or personal metadata on the public site.
 
-## 9. Acceptance criteria
+## 10. Acceptance criteria
 
 The link-only website stage is complete when:
 1. Both bot links open the correct canonical Telegram usernames.
@@ -126,7 +144,7 @@ The link-only website stage is complete when:
 
 A future connector stage is complete only when explicit selection, authorization, provenance, quarantine, checksum validation, duplicate review, audit logging, and failure handling are tested.
 
-## 10. Current status and next steps
+## 11. Current status and next steps
 
 - Owner-provided bot usernames and links: recorded in this specification.
 - Owner-provided family group locator: recorded as an internal, unverified locator; not suitable for public invitation.
@@ -134,7 +152,7 @@ A future connector stage is complete only when explicit selection, authorization
 - Website link block: specified, not yet implemented.
 - Telegram API connector: not implemented.
 - Group media download/import: explicitly prohibited at this stage.
-- Next safe delivery step: implement and test the website link presentation, with group visibility withheld until a valid invitation URL and visibility decision are confirmed.
+- Next safe delivery step: implement and test the website link presentation, with group visibility withheld until a valid invitation URL and visibility decision are confirmed. Then implement the authenticated browser intake workflow and File Engine handoff.
 - Later step: design a manual, selected-item import adapter only if the owner approves it.
 
 This specification complements `docs/family-archive-media-model.md`. It does not claim that Telegram connectivity, media import, or website UI has been implemented.
