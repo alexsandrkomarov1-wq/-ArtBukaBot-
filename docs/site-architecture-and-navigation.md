@@ -169,13 +169,15 @@ Back navigation should preserve the previous list's filters and page position wh
 
 ## 8. Telegram Web browser workflow
 
-Telegram access is designed around the existing Telegram Web user interface in a browser, using the owner's own authenticated session. This is distinct from Telegram Bot API integration. Existing family bots remain unchanged.
+The Telegram perimeter contains four distinct sources with separate connector identities and authorization states: `TG-BOT-ARTBUKABOT` (`@ArtBukaBot`), `TG-BOT-BULAKOVARTYOM` (`@bulakovartyom_bot`), `TG-GROUP-FAMILY` (the private family group), and `TG-USER-IRINA` (`@irina_wecanship`, daughter's personal account). These are source references in the architecture, not live connections or database rows. The two bots remain unchanged. The daughter's account is a personal user account, not a Bot API bot; access requires her explicit permission and must never be inferred from the public username.
+
+Telegram Web access is designed around the normal browser interface and an account owner's own authenticated session. This is distinct from Bot API integration. A session may be used only for chats/files that account can legitimately access and that the content owner has authorized for the stated purpose.
 
 Target workflow:
 1. Open https://web.telegram.org/k/ in the owner's controlled browser profile.
 2. The owner enters their Telegram password and confirmation code directly in Telegram Web. KOMAROVA_CORE must never request or store these credentials.
-3. Use only the authenticated account's existing access and permissions.
-4. Let the owner select an attachment or approve a bounded batch of messages/files for intake.
+3. Use only the authenticated account's existing access and permissions. For the daughter's personal source, require her explicit, informed authorization of the specific chats, content and date range; she may perform the selection/export herself. Never request or transfer her password, OTP, cookies or session data.
+4. Let the authorized account owner select an attachment or approve a bounded batch of messages/files for intake.
 5. Download selected photos/videos/documents through the authorized browser session.
 6. Copy them to the local intake path `KOMAROVA_CORE/intake/telegram/attachments` and hand them to File Engine.
 7. File Engine validates content, calculates SHA-256, checks duplicates, records source provenance and registers MATERIAL-ID before reporting successful intake.
@@ -185,7 +187,9 @@ Security: never store or export Telegram passwords, one-time codes, session cook
 
 The ability to access Telegram Web does not authorize downloading the entire group history. At this stage there is no bulk download or continuous monitoring. Support deliberate item selection or a bounded batch approved by the owner. Any future automatic rule for new posts requires a separate specification and explicit activation.
 
-The supplied group Web Telegram locator is not a public invite URL. Do not expose the group publicly until a valid invitation URL and visibility approval exist. Telegram IDs remain provenance only, never PERSON-ID, PHOTO-ID, EVENT-ID or primary registry keys. Telegram API integration is optional and is not required for this browser-based workflow.
+The supplied group Web Telegram locator is not a public invite URL. Do not expose the group publicly until a valid invitation URL and visibility approval exist. The daughter's account link and all private chats remain private and must not appear on the public site. Telegram IDs remain provenance only, never PERSON-ID, PHOTO-ID, EVENT-ID or primary registry keys. Telegram API integration is optional and is not required for this browser-based workflow.
+
+The two bot sources may later use Bot API adapters after a read-only audit of the existing bot deployments, credentials custody and update delivery. Group ingestion through a bot depends on actual membership and privacy settings and must not trigger permission changes without approval. The personal user-account source cannot be treated as a Bot API bot; any MTProto/user-session connector is a separate, consent-gated design.
 
 ## 9. Authorization and publication
 
@@ -245,7 +249,9 @@ Run route/link checks, backend and frontend tests, accessibility checks, authori
 13. Search returns only records the current user may access.
 14. Public pages display only the exact approved derivative.
 15. Revoked publication is withdrawn and auditable.
-16. Telegram links work without API credentials.
+16. Approved public Telegram bot links work without API credentials.
+16a. The private family group and daughter's personal account are not exposed on public pages.
+16b. Any import from the daughter's personal account has a recorded consent scope and an auditable user-initiated selection.
 17. No group media is downloaded unless individually selected through an approved workflow.
 18. End-to-end test: create/find person, add event/place, upload photo, link entities, search, open authorized gallery.
 19. Route/link tests run in CI on every relevant change.
@@ -255,6 +261,6 @@ Run route/link checks, backend and frontend tests, accessibility checks, authori
 
 The repository currently contains a Jekyll public site with a small number of public pages, a backend foundation with people/accounts/sessions/audit and SQLite archive functionality, and architecture documents for media and Telegram boundaries.
 
-The complete route map, authenticated private frontend, all entity detail pages, event/place/journey services, media storage/upload, galleries, maps, unified search, Telegram API connector and end-to-end navigation are not implemented by the existence of this document.
+The complete route map, authenticated private frontend, all entity detail pages, event/place/journey services, media storage/upload, galleries, maps, cross-entity unified search, Telegram connectors for the four sources and end-to-end navigation are not implemented by the existence of this document.
 
 This document defines the target architecture and delivery contract. Implementation status changes only after code and tests exist.
