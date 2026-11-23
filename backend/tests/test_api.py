@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 from fastapi.testclient import TestClient
 
 from backend.app.database import build_engine, run_migrations
@@ -412,3 +414,51 @@ def test_complete_role_matrix_for_registry_and_account_api_methods(tmp_path):
             json={"username": "late_owner", "password": "a-long-test-password-456"},
         )
         assert bootstrap_again.status_code == 409
+
+
+
+def test_concurrent_owner_changes_cannot_remove_the_last_owner(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        owner_id = owner["user"]["user_id"]
+        second = create_account(client, owner["access_token"], "second_owner", "owner").json()
+        second_token = login(client, "second_owner").json()["access_token"]
+
+        def disable(target_id, token):
+            return client.patch(
+                f"/api/v1/users/{target_id}", headers=auth(token),
+                json={"status": "disabled"},
+            )
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(disable, second["user_id"], owner["access_token"])
+            second_request = pool.submit(disable, owner_id, second_token)
+            responses = [first.result(), second_request.result()]
+
+        assert sum(response.status_code == 200 for response in responses) == 1
+        assert all(response.status_code in {200, 401, 409} for response in responses)
+        owner_logins = [
+            login(client, "owner", "correct-horse-battery-123"),
+            login(client, "second_owner"),
+        ]
+        assert sum(response.status_code == 200 for response in owner_logins) == 1
+
+
+def test_concurrent_bootstrap_creates_exactly_one_initial_owner(tmp_path):
+    with make_client(tmp_path) as client:
+        def bootstrap(username):
+            return client.post(
+                "/api/v1/auth/bootstrap",
+                headers={"X-Core-Bootstrap-Token": "test-bootstrap-secret"},
+                json={"username": username, "password": "a-long-bootstrap-password-123"},
+            )
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            first = pool.submit(bootstrap, "first_owner")
+            second = pool.submit(bootstrap, "second_owner")
+            responses = [first.result(), second.result()]
+
+        assert sorted(response.status_code for response in responses) == [201, 409]
+        assert login(client, "first_owner", "a-long-bootstrap-password-123").status_code + login(
+            client, "second_owner", "a-long-bootstrap-password-123"
+        ).status_code in {602, 603}

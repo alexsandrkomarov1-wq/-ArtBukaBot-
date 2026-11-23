@@ -234,6 +234,12 @@ def create_app(
         actor: User = Depends(require_roles("owner", "moderator")),
         db: Session = Depends(get_db),
     ):
+        acquire_security_lock(db)
+        db.refresh(actor)
+        if actor.status != "active":
+            raise HTTPException(status_code=401, detail="Account is unavailable")
+        if actor.role not in {"owner", "moderator"}:
+            raise HTTPException(status_code=403, detail="Insufficient role permissions")
         if actor.role == "moderator" and payload.role not in {"family_member", "guest"}:
             raise HTTPException(status_code=403, detail="Moderators may create family_member or guest accounts only")
         try:
@@ -260,8 +266,12 @@ def create_app(
         actor: User = Depends(require_roles("owner", "moderator")),
         db: Session = Depends(get_db),
     ):
-        if actor.role == "owner":
-            acquire_security_lock(db)
+        acquire_security_lock(db)
+        db.refresh(actor)
+        if actor.status != "active":
+            raise HTTPException(status_code=401, detail="Account is unavailable")
+        if actor.role not in {"owner", "moderator"}:
+            raise HTTPException(status_code=403, detail="Insufficient role permissions")
         target = db.get(User, user_id)
         if target is None:
             raise HTTPException(status_code=404, detail="User not found")
