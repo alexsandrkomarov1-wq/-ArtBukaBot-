@@ -16,6 +16,8 @@ Thumbs.db
 _private/
 _private_reference/
 secrets/
+private_media/
+private_media_*/
 
 # Python backend and test artifacts
 __pycache__/

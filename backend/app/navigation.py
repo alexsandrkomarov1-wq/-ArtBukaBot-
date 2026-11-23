@@ -35,6 +35,13 @@ def build_navigation(role: str) -> dict:
                     "api_endpoint": "/api/v1/people/{person_id}/relationships",
                     "permission": "read",
                 },
+                {
+                    "key": "archive",
+                    "title": "Семейный архив",
+                    "kind": "archive",
+                    "api_endpoint": "/api/v1/archive/items",
+                    "permission": "read",
+                },
             ],
         },
         {
@@ -58,6 +65,21 @@ def build_navigation(role: str) -> dict:
             ],
         },
     ]
+
+    if role in {"owner", "moderator", "family_member"}:
+        sections.append({
+            "key": "archive_intake",
+            "title": "Приём материалов",
+            "items": [
+                {
+                    "key": "archive_upload",
+                    "title": "Загрузка материалов",
+                    "kind": "archive_upload",
+                    "api_endpoint": "/api/v1/archive/items",
+                    "permission": "write",
+                },
+            ],
+        })
 
     if role in {"owner", "moderator"}:
         sections.append({

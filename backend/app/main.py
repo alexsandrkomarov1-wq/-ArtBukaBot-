@@ -6,6 +6,7 @@ import secrets
 import hashlib
 from datetime import timezone
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
@@ -14,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
+from .archive_api import build_archive_router
 from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
 from .navigation import build_navigation
 from .schemas import (
@@ -31,6 +33,7 @@ def create_app(
     database_url: str | None = None,
     jwt_secret: str | None = None,
     bootstrap_token: str | None = None,
+    media_root: str | Path | None = None,
 ) -> FastAPI:
     engine = build_engine(database_url)
     session_factory = build_session_factory(engine)
@@ -88,6 +91,11 @@ def create_app(
                 raise HTTPException(status_code=403, detail="Insufficient role permissions")
             return user
         return dependency
+
+    configured_media_root = Path(
+        media_root if media_root is not None else os.getenv("CORE_MEDIA_ROOT", "./private_media")
+    )
+    app.include_router(build_archive_router(get_db, require_roles, configured_media_root))
 
     def acquire_security_lock(db: Session) -> None:
         # A single database row serializes bootstrap and owner-administration writes

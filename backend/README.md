@@ -120,3 +120,29 @@ Exports and restores refuse to overwrite existing destination files. Restore alw
 The private API now exposes a single role-aware navigation manifest and a search endpoint over the existing people registry. The manifest does not advertise unimplemented destinations: account administration is omitted for family-member and guest roles. Search is authenticated and returns only active people; it does not expose the private registry to the public GitHub Pages site.
 
 Search currently covers only the implemented `people` entity. Events, places, journeys, photographs, documents and family stories are not searchable until their data models and access rules exist. The API manifest is a backend contract for the private application, not a claim that a complete browser-based private UI has already been built. Search currently performs Unicode case-fold matching in application code to support Cyrillic names on SQLite; for very large registries this should be replaced with an indexed normalized search field in a reviewed database migration.
+
+
+## Private photo/video intake API (development only)
+
+The API now contains a first authenticated media-intake slice. Apply migration `0005_private_media_intake` using the existing migration command before starting the application.
+
+Set `CORE_MEDIA_ROOT` to a private, persistent directory outside the Git checkout and public web root. Example PowerShell configuration:
+
+~~~powershell
+$env:CORE_MEDIA_ROOT = "D:\\KOMAROVA_PRIVATE_MEDIA"
+python -m backend.app.migrate
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8081
+~~~
+
+Endpoints (all require a valid bearer session):
+- `POST /api/v1/archive/items` — authenticated multipart photo/video upload; owner, moderator and family_member roles only.
+- `GET /api/v1/archive/items` — list archive metadata.
+- `GET /api/v1/archive/items/{archive_item_id}` — read one archive metadata record.
+- `POST /api/v1/archive/items/{archive_item_id}/links` — link to an existing active PERSON-ID.
+- `GET /api/v1/archive/items/{archive_item_id}/links` — list confirmed person links.
+
+The upload endpoint streams in 1 MiB chunks, enforces a 100 MiB maximum, checks a supported file signature, calculates SHA-256 and rejects exact duplicate content. Original bytes are placed in a private quarantine directory. The response does not disclose storage paths or object keys.
+
+**Quarantine is intentional.** No antivirus scanner, isolated media decoder, derivative generation, preview/download/stream route, event/place registry, cloud storage adapter, browser private UI, or production deployment is configured. The service does not yet make quarantined files viewable. Do not upload real family media to this development repository or an unreviewed host. A persistent private volume and backup policy are mandatory; ephemeral container disk is not durable storage.
+
+The old root-level `komarova_file_engine.py` remains a separate legacy tool for a different SQLite schema. It is not used by the API and must not be pointed at the backend database.

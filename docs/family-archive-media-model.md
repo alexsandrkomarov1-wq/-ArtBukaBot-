@@ -2,7 +2,7 @@
 
 **Document status:** design specification, 23 November 2026  
 **Scope:** private intake and preservation of photographs and other family media  
-**Implementation status:** not implemented; this document defines the target model and acceptance contract  
+**Implementation status:** partial; authenticated photo/video quarantine intake and person links are implemented in the development backend, while the broader archive model remains unimplemented  
 **Target branch:** `core-backend-foundation`
 
 This document extends the approved product requirements and the approved private “Загрузка материалов” module. It does not replace the authoritative registry, existing PERSON-ID values, or the wider KOMAROVA_CORE architecture.
@@ -297,3 +297,25 @@ Do not implement social-network synchronization, AI face identification, bulk pu
 - Not implemented: archive/media tables, binary storage adapter, photo intake, validation pipeline, previews, photo/event links, private upload UI, media-inclusive export/restore, and publication approvals.
 
 A successful GitHub Pages workflow verifies the public-site build/deployment only. It does not verify any of the private archive capabilities above.
+
+
+## 14. Implemented development slice: private intake (23 November 2026)
+
+The current backend implements a deliberately narrow subset of this model:
+
+| Model element | Development implementation | Boundary |
+|---|---|---|
+| StoredBlob | `stored_blobs` | SHA-256, byte size, detected MIME, original filename, provider key, quarantine state |
+| ArchiveItem | `archive_items` | Permanent ARCHIVE-ID, photo/video type, title, uploader and quarantine state |
+| EntityLink | `archive_entity_links` | Confirmed links to existing PERSON-ID only |
+| UploadBatch / UploadItem | Not implemented | Multi-file transactional batch and per-file retry states remain future work |
+| MediaDerivative | Not implemented | No thumbnails, transcoding or AI-generated derivatives |
+| PublicationApproval | Not implemented | No public publishing or public media URL |
+
+The private API accepts photo/video uploads only. It streams the request into a private local quarantine area, validates a basic signature allowlist, computes SHA-256, rejects exact duplicate bytes, and commits the registry metadata with an audit event. The original is not transformed. The API returns metadata, never a filesystem path or storage object key.
+
+All received files remain quarantined because antivirus/malware scanning and isolated media processing are not yet configured. No preview, playback, download, public publication or automatic archive promotion is provided by this backend slice. A successful HTTP upload means only that the file was received into private quarantine and registered, not that it passed a security scan or became a preserved archive master.
+
+The current local filesystem adapter is a development adapter. Configure `CORE_MEDIA_ROOT` to a private persistent volume outside the repository. Do not use ephemeral container storage for family records. A future object-storage adapter must preserve the same blob IDs, checksums, immutable-original rules and authorization contract.
+
+The separate legacy `komarova_file_engine.py` uses an independent SQLite schema and is not an adapter for the backend database. It must not be pointed at the backend database or used as an alternative registry.

@@ -106,7 +106,35 @@ class SessionRead(BaseModel):
     expires_at: datetime
     revoked_at: datetime | None
 
-
 class PasswordChange(BaseModel):
     current_password: str = Field(min_length=1, max_length=128)
     new_password: str = Field(min_length=12, max_length=128)
+
+class ArchiveLinkCreate(BaseModel):
+    target_entity_type: Literal["person"] = "person"
+    target_entity_id: str = Field(min_length=3, max_length=40)
+    link_role: Literal["depicted", "photographer", "owner", "mentioned"] = "depicted"
+    source_note: str | None = Field(default=None, max_length=1000)
+
+class ArchiveLinkRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    link_id: str
+    archive_item_id: str
+    target_entity_type: str
+    target_entity_id: str
+    link_role: str
+    confirmation_status: str
+    source_note: str | None
+    created_at: datetime
+
+class ArchiveItemRead(BaseModel):
+    archive_item_id: str
+    item_type: Literal["photo", "video"]
+    title: str | None
+    record_status: Literal["quarantined"]
+    original_filename: str
+    detected_mime_type: str
+    size_bytes: int
+    sha256: str
+    storage_state: Literal["quarantined"]
+    created_at: datetime

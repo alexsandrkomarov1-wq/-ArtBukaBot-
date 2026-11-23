@@ -29,7 +29,7 @@ The system is not eight separate websites. It is one product with a shared ident
 | Domain | Scope | Initial acceptance outcome | Current status |
 |---|---|---|---|
 | CORE — identity and registry | People, permanent IDs, aliases, duplicate resolution, organizations, objects, entity links | One person can be found through known names/aliases and remains the same entity after edits/imports | Partial |
-| FAMILY_ARCHIVE | Documents, letters, correspondence, photographs, video, audio, publications, source files | Upload, classify, link to people/events, preview, download/export, checksum and preserve original | Not implemented |
+| FAMILY_ARCHIVE | Documents, letters, correspondence, photographs, video, audio, publications, source files | Upload, classify, link to people/events, preview, download/export, checksum and preserve original | Partial |
 | FAMILY_TIMELINE | Life stories, family events, dates, generations, biographies | Events can be entered, sourced, linked to people and displayed chronologically | Not implemented |
 | FAMILY_PLACES | Places, walks, trips, routes, maps, photo galleries and captions | Create a walk/journey without programming; display ordered map points, route, photos and narrative | Not implemented |
 | AI_ASSISTANT | Conversational assistant, logical step-by-step analysis, web research, archive search, image understanding, OCR and transcription | Answers distinguish archive facts, external sources, inference and uncertainty; citations/provenance are retained | Not implemented |
@@ -149,3 +149,26 @@ This register is the product baseline. New requests are added as new requirement
 The first browser-facing media viewer is intentionally local-only. It allows a visitor to select photo/video files from the current device, preview images, play browser-supported video, move between selected files, run a photo slideshow, enter fullscreen and download the selected local file. Object URLs are released when the page is closed or the selection is replaced.
 
 This slice is not a persistent family archive. It does not upload files, store shared albums, synchronize devices, generate AI descriptions, attach PERSON-ID/EVENT-ID/PLACE-ID, create ZIP exports, or provide private access control. Those capabilities remain gated on authenticated private hosting, object storage, immutable originals, metadata registry and audit trail.
+
+
+## 10. Private media intake backend slice (23 November 2026)
+
+The first private media API slice adds authenticated photo/video intake to a local private quarantine directory and registers metadata in the same SQLAlchemy database as people and accounts. It is not a production archive release.
+
+Implemented in code on the feature branch:
+- Alembic revision `0005_private_media_intake` adds `stored_blobs`, `archive_items` and `archive_entity_links` without rewriting existing PERSON-ID values.
+- `POST /api/v1/archive/items` streams uploads in 1 MiB chunks, enforces a 100 MiB limit, checks an allowlisted extension against basic file signatures, calculates SHA-256 and registers the exact original bytes.
+- Exact duplicate content is rejected with HTTP 409 and the existing archive item ID; a second item is not silently created.
+- Original bytes are stored under a private, non-public local quarantine root configured by `CORE_MEDIA_ROOT`. Storage paths and object keys are not returned by the API.
+- `GET /api/v1/archive/items` and `GET /api/v1/archive/items/{ARCHIVE-ID}` return private metadata only.
+- `POST /api/v1/archive/items/{ARCHIVE-ID}/links` and the matching GET route support confirmed links to existing active PERSON-ID records. Event and place links are not enabled because those registries do not yet exist in the backend.
+- Upload and person-link actions write audit events. Owner, moderator and family_member may upload/link; guest is read-only.
+
+Explicit limitations:
+- New uploads remain `quarantined`. Malware scanning, isolated media decoding, thumbnail generation, safe preview, download/stream endpoints, retention/reconciliation jobs, cloud object-storage adapters and production deployment are not implemented.
+- No upload is available from the public GitHub Pages site. No real family media should be sent to this development API.
+- Local filesystem persistence depends on a separately configured durable private volume. A container's ephemeral disk is not a family archive.
+- The separate legacy `komarova_file_engine.py` is not wired into this API; it targets a different SQLite schema and must not be pointed at the backend database.
+- Passing CI does not make this service operational. Production use still requires a private host, persistent storage, malware scanning, backup/restore of binary objects, security review and an end-to-end upload/restore drill.
+
+Requirement status remains partial until the above controls and operational gates are verified.
