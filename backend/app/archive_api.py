@@ -249,20 +249,20 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             source_note=payload.source_note,
             created_by_user_id=actor.user_id,
         )
-        db.add(link)
-        db.flush()
-        db.add(AuditEvent(
-            event_type="archive.person_linked",
-            entity_type="archive_item",
-            entity_id=item.archive_item_id,
-            actor_id=actor.user_id,
-            details=json.dumps({
-                "link_id": link.link_id,
-                "person_id": person.person_id,
-                "link_role": payload.link_role,
-            }, ensure_ascii=False),
-        ))
         try:
+            db.add(link)
+            db.flush()
+            db.add(AuditEvent(
+                event_type="archive.person_linked",
+                entity_type="archive_item",
+                entity_id=item.archive_item_id,
+                actor_id=actor.user_id,
+                details=json.dumps({
+                    "link_id": link.link_id,
+                    "person_id": person.person_id,
+                    "link_role": payload.link_role,
+                }, ensure_ascii=False),
+            ))
             db.commit()
         except IntegrityError:
             db.rollback()

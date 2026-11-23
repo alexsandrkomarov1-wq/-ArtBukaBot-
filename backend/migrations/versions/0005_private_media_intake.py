@@ -25,10 +25,9 @@ def upgrade() -> None:
         sa.Column("storage_state", sa.String(length=24), nullable=False, server_default="quarantined"),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("last_verified_at", sa.DateTime(timezone=True), nullable=True),
-        sa.UniqueConstraint("sha256", name="uq_stored_blobs_sha256"),
         sa.UniqueConstraint("storage_object_key", name="uq_stored_blobs_storage_key"),
     )
-    op.create_index("ix_stored_blobs_sha256", "stored_blobs", ["sha256"], unique=False)
+    op.create_index("ix_stored_blobs_sha256", "stored_blobs", ["sha256"], unique=True)
     op.create_table(
         "archive_items",
         sa.Column("archive_item_id", sa.String(length=35), primary_key=True),
