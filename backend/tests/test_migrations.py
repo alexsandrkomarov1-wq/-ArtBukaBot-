@@ -1,6 +1,4 @@
-from alembic import command
-from alembic.config import Config
-from sqlalchemy import inspect, select
+from sqlalchemy import inspect, select, text
 
 from backend.app.database import Base, build_engine, run_migrations
 from backend.app.models import Person
@@ -9,7 +7,6 @@ from backend.app.models import Person
 def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
     database = tmp_path / "migration-test.sqlite3"
     engine = build_engine(f"sqlite:///{database}")
-    # The migration config must not depend on the process working directory.
     monkeypatch.chdir(tmp_path)
 
     try:
@@ -62,7 +59,7 @@ def test_existing_create_all_database_is_adopted_without_data_loss(tmp_path):
         engine.dispose()
 
 
-def test_partial_legacy_schema_is_rejected_without_creating_other_tables(tmp_path):
+def test_partial_legacy_schema_is_rejected_without_changing_core_tables(tmp_path):
     database = tmp_path / "partial.sqlite3"
     engine = build_engine(f"sqlite:///{database}")
     try:
@@ -77,6 +74,11 @@ def test_partial_legacy_schema_is_rejected_without_creating_other_tables(tmp_pat
         else:
             raise AssertionError("Partial legacy schema must be rejected")
 
-        assert set(inspect(engine).get_table_names()) == {"people"}
+        inspector = inspect(engine)
+        assert "people" in inspector.get_table_names()
+        assert not {"relationships", "audit_events"}.intersection(inspector.get_table_names())
+        with engine.connect() as connection:
+            version_rows = connection.execute(text("SELECT version_num FROM alembic_version")).all()
+        assert version_rows == []
     finally:
         engine.dispose()

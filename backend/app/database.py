@@ -28,9 +28,11 @@ def build_session_factory(engine: Engine):
 
 
 def run_migrations(engine: Engine) -> None:
-    # Resolve configuration from this source file, not the process working directory.
     project_root = Path(__file__).resolve().parents[2]
     config = Config(str(project_root / "alembic.ini"))
+    # Both Alembic paths must be absolute: services may start outside the repo root.
+    config.set_main_option("script_location", str(project_root / "backend" / "migrations"))
+    config.set_main_option("prepend_sys_path", str(project_root))
     with engine.begin() as connection:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
