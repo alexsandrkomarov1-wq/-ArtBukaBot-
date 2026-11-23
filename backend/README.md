@@ -37,7 +37,7 @@ Apply Alembic migrations once before starting API workers. The API checks that t
 3. Sign in through POST /api/v1/auth/login.
 4. Remove CORE_BOOTSTRAP_TOKEN from the runtime environment after the owner account has been created. Bootstrap is also blocked automatically once any account exists.
 
-The JWT signing secret must contain at least 32 characters. Access tokens expire after 30 minutes. Sessions are stored in the database and checked on every authenticated request; logout and password changes revoke active sessions.
+The JWT signing secret must contain at least 32 characters. Access tokens expire after 30 minutes. Sessions are stored in the database and checked on every authenticated request; logout, password changes, and account disabling revoke active sessions. Login failures are tracked in the database: five failures for the same username and direct client IP trigger a 15-minute lockout. Bootstrap and owner-administration writes use a database lock row so concurrent workers serialize these security-sensitive changes.
 
 ## Accounts and roles
 
@@ -76,3 +76,13 @@ All authenticated endpoints use Authorization: Bearer <access_token>. The public
 ## Remaining production work
 
 This branch is not deployed. Before production use it still needs HTTPS hosting, secret management, rate limiting and abuse controls, verified backup/restore, encryption-at-rest decisions, operational monitoring, a reviewed account recovery process, and independent security review. The static GitHub Pages site is not connected to this backend. Do not use real family data in this public development repository.
+
+
+## Security controls added in revision 0003
+
+- Disabling an account revokes every active session in the same transaction. Re-enabling the account does not revive old tokens.
+- A database-backed lock row serializes first-owner bootstrap and owner role/status changes across processes and supported SQL databases.
+- Login throttling is persisted in the database: five failed attempts for a username and direct client IP trigger a 15-minute lockout. Forwarded IP headers are intentionally not trusted.
+- SQLite backup uses the online backup API. Restore writes to a temporary file, checks integrity, and atomically replaces only the destination. The automated test restores into a separate database and checks both registry data and migration version.
+
+These controls are not a substitute for a production WAF, monitoring, incident response, off-site encrypted backups, or a formal security review. The current lock row serializes login validation and owner administration; this is safe but may become a throughput bottleneck and should be replaced with finer-grained database locking when moving to PostgreSQL.

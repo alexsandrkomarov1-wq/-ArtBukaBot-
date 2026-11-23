@@ -3,16 +3,17 @@ from __future__ import annotations
 import json
 import os
 import secrets
+import hashlib
 from contextlib import asynccontextmanager
 
 import jwt
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, status
-from sqlalchemy import func, select
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
-from .models import AuditEvent, AuthSession, Person, RelationshipRecord, User, utc_now
+from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
 from .schemas import (
     BootstrapCreate, LoginRequest, PasswordChange, PersonCreate, PersonRead, PersonUpdate,
     RelationshipCreate, RelationshipRead, SessionRead, TokenRead,
@@ -86,6 +87,17 @@ def create_app(
             return user
         return dependency
 
+    def acquire_security_lock(db: Session) -> None:
+        # A single database row serializes bootstrap and owner-administration writes
+        # across processes. UPDATE obtains a row/write lock until transaction commit.
+        result = db.execute(
+            update(SystemState)
+            .where(SystemState.state_key == "security_admin")
+            .values(version=SystemState.version + 1)
+        )
+        if result.rowcount != 1:
+            raise RuntimeError("Required security_admin lock row is missing; apply migrations")
+
     def audit(db: Session, event_type: str, entity_type: str, entity_id: str, actor_id: str, details: dict):
         db.add(AuditEvent(
             event_type=event_type, entity_type=entity_type, entity_id=entity_id,
@@ -112,9 +124,11 @@ def create_app(
             raise HTTPException(status_code=503, detail="Owner bootstrap is disabled")
         if not x_core_bootstrap_token or not secrets.compare_digest(x_core_bootstrap_token, configured_bootstrap_token):
             raise HTTPException(status_code=401, detail="Valid bootstrap token required")
-        if db.scalar(select(func.count()).select_from(User)):
-            raise HTTPException(status_code=409, detail="Bootstrap is available only before the first account")
         try:
+            acquire_security_lock(db)
+            if db.scalar(select(func.count()).select_from(User)):
+                db.rollback()
+                raise HTTPException(status_code=409, detail="Bootstrap is available only before the first account")
             owner = create_user_record(db, payload.username, payload.password, "owner")
             audit(db, "user.bootstrap_created", "user", owner.user_id, owner.user_id, {"role": "owner"})
             db.commit()
@@ -125,14 +139,36 @@ def create_app(
             raise HTTPException(status_code=409, detail="Username is already in use")
 
     @app.post("/api/v1/auth/login", response_model=TokenRead)
-    def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)):
         if not configured_jwt_secret:
             raise HTTPException(status_code=503, detail="Authentication is not configured")
+        # Persisted throttling works across API workers and restarts. The client IP is
+        # taken from the direct connection; untrusted forwarding headers are ignored.
+        acquire_security_lock(db)
+        source_ip = request.client.host if request.client else "unknown"
+        attempt_key = hashlib.sha256(f"{payload.username}:{source_ip}".encode("utf-8")).hexdigest()
+        attempt = db.get(LoginAttempt, attempt_key)
+        now = utc_now()
+        if attempt and attempt.locked_until and attempt.locked_until > now:
+            db.rollback()
+            raise HTTPException(status_code=429, detail="Too many login attempts; try again later")
+        if attempt and (now - attempt.window_started_at).total_seconds() > 900:
+            attempt.failed_attempts = 0
+            attempt.window_started_at = now
+            attempt.locked_until = None
         user = db.scalar(select(User).where(User.username == payload.username))
-        if user is None or not verify_password(payload.password, user.password_hash):
+        valid = user is not None and verify_password(payload.password, user.password_hash)
+        if not valid or user.status != "active":
+            if attempt is None:
+                attempt = LoginAttempt(attempt_key=attempt_key, failed_attempts=0, window_started_at=now)
+                db.add(attempt)
+            attempt.failed_attempts += 1
+            if attempt.failed_attempts >= 5:
+                attempt.locked_until = now + __import__("datetime").timedelta(minutes=15)
+            db.commit()
             raise HTTPException(status_code=401, detail="Invalid username or password")
-        if user.status != "active":
-            raise HTTPException(status_code=403, detail="Account is disabled")
+        if attempt is not None:
+            db.delete(attempt)
         token, token_jti, expires_at = create_access_token(user.user_id, configured_jwt_secret)
         session = AuthSession(user_id=user.user_id, token_jti=token_jti, expires_at=expires_at)
         db.add(session)
@@ -223,6 +259,8 @@ def create_app(
         actor: User = Depends(require_roles("owner", "moderator")),
         db: Session = Depends(get_db),
     ):
+        if actor.role == "owner":
+            acquire_security_lock(db)
         target = db.get(User, user_id)
         if target is None:
             raise HTTPException(status_code=404, detail="User not found")
@@ -244,9 +282,20 @@ def create_app(
             target.role = payload.role
         if payload.status is not None:
             target.status = payload.status
+        revoked_sessions = 0
+        if old_status == "active" and target.status == "disabled":
+            now = utc_now()
+            active_sessions = db.scalars(select(AuthSession).where(
+                AuthSession.user_id == target.user_id,
+                AuthSession.revoked_at.is_(None),
+            )).all()
+            for active_session in active_sessions:
+                active_session.revoked_at = now
+            revoked_sessions = len(active_sessions)
         audit(db, "user.updated", "user", target.user_id, actor.user_id, {
             "old_role": old_role, "new_role": target.role,
             "old_status": old_status, "new_status": target.status,
+            "revoked_sessions": revoked_sessions,
         })
         db.commit()
         db.refresh(target)

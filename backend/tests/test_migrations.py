@@ -21,7 +21,7 @@ def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
             "relationships",
             "audit_events",
             "users",
-            "auth_sessions",
+            "auth_sessions", "system_state", "login_attempts",
         }
         assert {column["name"] for column in inspector.get_columns("people")} == {
             "person_id", "display_name", "status", "created_at", "updated_at"
@@ -75,7 +75,7 @@ def test_existing_create_all_database_is_adopted_without_data_loss(tmp_path):
             version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert row.person_id == "P-1234567890AB"
         assert row.display_name == "Existing record"
-        assert version == "0002_users_sessions"
+        assert version == "0003_security_controls"
         assert inspect(engine).has_table("auth_sessions")
     finally:
         engine.dispose()

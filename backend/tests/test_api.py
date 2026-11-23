@@ -249,3 +249,34 @@ def test_blank_person_name_and_short_password_are_rejected(tmp_path):
             json={"display_name": "   "},
         )
         assert response.status_code == 422
+
+
+
+def test_disabling_user_revokes_sessions_even_after_reenable(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        owner_headers = auth(owner["access_token"])
+        member = create_account(client, owner["access_token"], "member", "family_member").json()
+        member_login = login(client, "member").json()
+        member_headers = auth(member_login["access_token"])
+        disabled = client.patch(
+            f"/api/v1/users/{member['user_id']}", headers=owner_headers,
+            json={"status": "disabled"},
+        )
+        assert disabled.status_code == 200
+        assert client.get("/api/v1/auth/me", headers=member_headers).status_code == 401
+        enabled = client.patch(
+            f"/api/v1/users/{member['user_id']}", headers=owner_headers,
+            json={"status": "active"},
+        )
+        assert enabled.status_code == 200
+        assert client.get("/api/v1/auth/me", headers=member_headers).status_code == 401
+
+
+def test_login_throttling_is_persistent_and_resets_after_success(tmp_path):
+    with make_client(tmp_path) as client:
+        bootstrap_owner(client)
+        for _ in range(5):
+            response = login(client, "owner", "definitely-wrong-password")
+            assert response.status_code == 401
+        assert login(client, "owner").status_code == 429
