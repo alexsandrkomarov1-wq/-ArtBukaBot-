@@ -267,3 +267,16 @@ The repository currently contains a Jekyll public site with a small number of pu
 The complete route map, authenticated private frontend, all entity detail pages, event/place/journey services, media storage/upload, galleries, maps, cross-entity unified search, Telegram connectors for the four sources and end-to-end navigation are not implemented by the existence of this document.
 
 This document defines the target architecture and delivery contract. Implementation status changes only after code and tests exist.
+
+
+## 14. Family mail and feedback architecture
+
+The family mail module is specified in [docs/family-mail-architecture.md](family-mail-architecture.md). It is a provider-neutral private subsystem, not a public list of family email addresses. The current family providers remain mixed by choice: Yandex Mail for the mother's mailbox and Gmail for the father's and son's mailboxes. No mailbox migration, forwarding, or provider change is implied.
+
+The first delivery step is a local compose action (mailto/deep link) from the private application, clearly labelled as opening the user's configured mail client rather than sending through KOMAROVA_CORE. Public feedback must use a separate project contact address and protected server-side intake; it must never reveal or route directly to private family mailboxes. Reading, searching, drafting and server-side sending require a later, separately authorized provider connection for each mailbox owner.
+
+Mailbox content, addresses, provider identifiers, OAuth scopes, tokens and message metadata are private. They must not be embedded in GitHub Pages HTML, JavaScript bundles, public API responses, logs or public documentation. Each mailbox owner controls consent and scopes; access by one family member does not grant access to another mailbox. The son's account requires age-appropriate consent and guardian oversight. Credentials and tokens remain in a dedicated secrets vault or protected runtime secret store, never in Git.
+
+Mail records may link to existing PERSON-ID, EVENT-ID, PLACE-ID, JOURNEY-ID, STORY-ID and archive records through typed relationships with provenance and access checks. Email addresses are contact attributes, never identity keys. Duplicate contacts must resolve to the existing person record rather than creating a second person.
+
+Mail connector outages must not affect the public site or core family registry. Imported message bodies and attachments enter a controlled intake/quarantine process; attachments pass through File Engine, checksum and duplicate review before archive registration. No automatic ingestion, mailbox-wide indexing or cross-mailbox sharing is enabled by this architecture alone.
