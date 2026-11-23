@@ -15,3 +15,4 @@ description: Публичная витрина семейного проекта
 <article class="info-card"><span class="card-number">03</span><h2>Публикации</h2><p>Статьи, фотографии и другие материалы, разрешённые к публикации.</p></article>
 </section>
 <section class="notice"><div class="notice-mark" aria-hidden="true">i</div><div><h2>Публичная часть проекта</h2><p>Этот сайт не содержит закрытого семейного архива. Личные данные, адреса, контакты, документы и переписки не публикуются.</p></div></section>
+<section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ РАЗРАБОТКИ</p><h2>Что уже работает, а что ещё предстоит сделать</h2><p>Статусы модулей, исходный код и результаты автоматических проверок.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">→</span></a></section>

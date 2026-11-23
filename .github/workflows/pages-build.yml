@@ -1,0 +1,26 @@
+name: GitHub Pages build
+
+on:
+  push:
+    branches:
+      - core-backend-foundation
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Build Jekyll site
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Check generated pages and local links
+        run: python3 scripts/check_pages_links.py _site
