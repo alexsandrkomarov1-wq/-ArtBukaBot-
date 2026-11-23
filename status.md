@@ -39,16 +39,24 @@ description: Проверяемое состояние модулей KOMAROVA_C
   <p>Миграции и тесты существуют, но полный проверенный цикл миграции, резервирования и восстановления PostgreSQL не подтверждён. Результаты SQLite не засчитываются как проверка PostgreSQL.</p>
   <p class="status-evidence">Подтверждение: отдельный PostgreSQL CI job и тест восстановления пока отсутствуют.</p>
 </article>
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-red">КРАСНЫЙ</span><span class="status-index">05</span></div>
+  <h2>Семейная почта и обратная связь</h2>
+  <p>Провайдер-независимая архитектура Gmail/Yandex и границы приватности описаны. Подключение ящиков, чтение и поиск переписки, отправка через backend, форма обратной связи и почтовый интерфейс пока не реализованы.</p>
+  <p class="status-links"><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/family-mail-architecture.md">Архитектура семейной почты</a></p>
+</article>
 </section>
 <section class="status-summary">
-<h2>Последняя подтверждённая проверка backend</h2>
-<p><strong>31 тест пройден</strong> в CI. Это тесты существующей backend-основы и архива SQLite, а не доказательство готовности четырёх модулей выше.</p>
+<h2>Последняя подтверждённая проверка</h2>
+<p>На коммите <strong>66d4653e</strong> успешно завершились backend-тесты, сборка GitHub Pages, проверка локальных ссылок и публикация сайта. Эти проверки подтверждают работоспособность существующей основы и статической витрины, но не означают, что частные модули уже реализованы.</p>
 <ul>
 <li>Ветка: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/tree/core-backend-foundation">core-backend-foundation</a></li>
-<li>Коммит: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/commit/54bba598b649697ce5122b593fc034170d815680"><code>54bba598</code></a></li>
-<li>CI: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45112035406">запуск 45112035406 · success</a></li>
+<li>Коммит: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/commit/66d4653e9d3201d689d205d68fb1e24a25edc6ca"><code>66d4653e</code></a></li>
+<li>Backend tests: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45237932993">success</a></li>
+<li>GitHub Pages build: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45237932517">success</a></li>
+<li>Pages deployment: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45237930719">success</a></li>
 <li><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/requirements-register.md">Полный реестр требований</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/long-term-preservation.md">План долгосрочного хранения</a></li>
 </ul>
-<p class="status-note">Статусы на этой странице являются зафиксированным снимком. Они не обновляются автоматически при каждом коммите. После изменения кода страницу и доказательства необходимо обновить.</p>
+<p class="status-note">Статусы на этой странице являются зафиксированным снимком. Они не обновляются автоматически при каждом коммите. После изменения кода и проверок страницу и доказательства необходимо обновить.</p>
 </section>
 <p><a href="{{ '/' | relative_url }}">← На главную</a></p>
