@@ -15,7 +15,7 @@ KOMAROVA_CORE must remain recoverable while it evolves. A new feature is not all
 - `feature/*`: isolated work for a defined change; validate before promotion.
 - `backup/stable-YYYY-MM-DD`: immutable-by-convention checkpoint of the last verified working state. Never use it for feature development.
 
-The initial checkpoint branch `backup/stable-2026-11-23` points to commit `88001c897af387d69a2477f500a097666b32f0b7`, the verified state before the homepage family-gallery and Mars changes.
+The initial checkpoint branch `backup/stable-2026-11-23` points to commit `88001c897af387d69a2477f500a097666b32f0b7`, the verified state before the homepage family-gallery and Mars changes. The first promoted homepage release is `abcb245d9e93a3d0e037947aaf3cd52f8f6b30c9`.
 
 ## 3. Required change sequence
 
@@ -55,7 +55,7 @@ A green build alone is not a release. A design mockup is not a working feature. 
 | Date | Candidate | Scope | Verification |
 |---|---|---|---|
 | 2026-11-23 | `88001c897af387d69a2477f500a097666b32f0b7` | Stable pre-homepage-gallery checkpoint | Pages build, backend tests and deployment passed; account map manual search was browser-tested |
-| 2026-11-23 | Pending | Homepage portrait gallery and NASA Mars feature | Must be filled only after CI, deployment and live-page checks pass |
+| 2026-11-23 | `abcb245d9e93a3d0e037947aaf3cd52f8f6b30c9` | Homepage portrait gallery and NASA Mars feature | Pages build 45247644371: success; backend tests 45247644556: success (43 passed); Pages deployment 45247643872: success; live homepage HTTP 200 with four portrait slots, Internet Archive and NASA Mars links verified |
 
 ## 7. Privacy and data integrity
 
