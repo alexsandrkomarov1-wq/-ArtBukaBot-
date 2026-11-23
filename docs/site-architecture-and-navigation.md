@@ -264,7 +264,7 @@ Run route/link checks, backend and frontend tests, accessibility checks, authori
 
 The repository currently contains a Jekyll public site with a small number of public pages, a backend foundation with people/accounts/sessions/audit and SQLite archive functionality, and architecture documents for media and Telegram boundaries.
 
-The complete route map, authenticated private frontend, all entity detail pages, event/place/journey services, media storage/upload, galleries, maps, cross-entity unified search, Telegram connectors for the four sources and end-to-end navigation are not implemented by the existence of this document.
+The complete route map, authenticated private frontend, all entity detail pages, event/place/journey services, media storage/upload, galleries, maps, cross-entity unified search, Telegram connectors for all six registered sources and end-to-end navigation are not implemented by the existence of this document.
 
 This document defines the target architecture and delivery contract. Implementation status changes only after code and tests exist.
 
