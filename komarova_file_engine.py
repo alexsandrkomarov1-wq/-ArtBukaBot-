@@ -137,9 +137,24 @@ def import_file(source: str | Path) -> str | None:
 
         # Reuse the earliest registry ID if its archived bytes are missing.
         repair_row = next(((mid, stored) for mid, stored in rows), None)
+        recovered_existing = False
         if repair_row:
             material_id, old_path = repair_row
-            final_path = Path(old_path) if old_path else STORAGE / category.lower() / f"{material_id}{extension}"
+            if old_path:
+                previous_path = Path(old_path)
+                if previous_path.exists():
+                    # Never overwrite a damaged archive object. Keep it as evidence
+                    # and write the verified replacement to a new immutable path.
+                    recovered_existing = True
+                    final_path = (
+                        STORAGE / category.lower()
+                        / f"{material_id}.recovered-{uuid.uuid4().hex[:8]}{extension}"
+                    )
+                else:
+                    # A missing object can safely be restored at its registered path.
+                    final_path = previous_path
+            else:
+                final_path = STORAGE / category.lower() / f"{material_id}{extension}"
         else:
             material_id = f"KOM-{category}-{uuid.uuid4().hex[:12].upper()}"
             final_path = STORAGE / category.lower() / f"{material_id}{extension}"
@@ -192,7 +207,8 @@ def import_file(source: str | Path) -> str | None:
     # The registry transaction is already committed. A log outage must never
     # trigger deletion of a file that the database now references.
     try:
-        log(f"IMPORT | {material_id} | {source.name} | SHA256={digest}")
+        event = "RECOVERY" if recovered_existing else "IMPORT"
+        log(f"{event} | {material_id} | {source.name} | SHA256={digest}")
     except OSError as error:
         print(f"ПРЕДУПРЕЖДЕНИЕ: импорт завершён, но журнал не обновлён: {error}", file=sys.stderr)
 

@@ -147,3 +147,31 @@ def test_log_failure_does_not_remove_committed_file_or_registry_row(tmp_path, mo
         ).fetchone()[0]
     assert Path(stored_path).is_file()
     assert Path(stored_path).read_bytes() == source.read_bytes()
+
+
+def test_corrupted_archive_is_preserved_and_reimported_to_new_path(tmp_path, monkeypatch):
+    db_path = configure(tmp_path, monkeypatch)
+    source = tmp_path / "recovery.jpg"
+    source.write_bytes(b"original-photo-payload")
+    material_id = engine.import_file(source)
+
+    with sqlite3.connect(db_path) as db:
+        old_stored_path = Path(db.execute(
+            "SELECT stored_path FROM materials WHERE material_id=?", (material_id,)
+        ).fetchone()[0])
+
+    old_stored_path.write_bytes(b"corrupted-archive-evidence")
+    repaired_id = engine.import_file(source)
+
+    with sqlite3.connect(db_path) as db:
+        new_stored_path = Path(db.execute(
+            "SELECT stored_path FROM materials WHERE material_id=?", (material_id,)
+        ).fetchone()[0])
+
+    assert repaired_id == material_id
+    assert old_stored_path.read_bytes() == b"corrupted-archive-evidence"
+    assert new_stored_path != old_stored_path
+    assert new_stored_path.read_bytes() == source.read_bytes()
+    assert engine.verify_files() == (1, 0)
+    log_text = (tmp_path / "logs" / "file_engine.log").read_text(encoding="utf-8")
+    assert "RECOVERY" in log_text
