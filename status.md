@@ -46,17 +46,45 @@ description: Проверяемое состояние модулей KOMAROVA_C
   <p class="status-links"><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/family-mail-architecture.md">Архитектура семейной почты</a></p>
 </article>
 </section>
-<section class="status-summary">
-<h2>Последняя подтверждённая проверка</h2>
-<p>На коммите <strong>66d4653e</strong> успешно завершились backend-тесты, сборка GitHub Pages, проверка локальных ссылок и публикация сайта. Эти проверки подтверждают работоспособность существующей основы и статической витрины, но не означают, что частные модули уже реализованы.</p>
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-green">ЗЕЛЁНЫЙ</span><span class="status-index">06</span></div>
+  <h2>Публичная главная страница</h2>
+  <p>Публичная витрина KOMAROVA_CORE запущена. Главная содержит семейную портретную галерею с пустыми безопасными слотами, ссылки Internet Archive и NASA Mars. Внешние ссылки проверены на опубликованной странице.</p>
+  <p class="status-evidence">Подтверждение: HTTP 200, четыре карточки портретов, внешние ссылки archive.org и science.nasa.gov/mars присутствуют в live HTML.</p>
+</article>
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">07</span></div>
+  <h2>Персональное управление портретом</h2>
+  <p>На главной подготовлены места для портретов. Индивидуальная загрузка, выбор, замена и публикация фотографии из закрытого кабинета пока не реализованы: необходимы авторизация, защищённое хранилище, права доступа и отдельное согласие на публичный показ.</p>
+  <p class="status-links"><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/site-architecture-and-navigation.md">Требования к портретам и публикации</a></p>
+</article>
+
+<p><a href="{{ '/' | relative_url }}">← На главную</a></p><section class="status-summary">
+<h2>Последний подтверждённый запуск публичной витрины</h2>
+<p>Публичная главная страница запущена на коммите <strong>abcb245d</strong>. Ветка <code>core-backend-foundation</code> прошла сборку сайта, проверку локальных ссылок, backend-тесты и публикацию GitHub Pages. Live-проверка подтвердила наличие четырёх портретных карточек, Internet Archive и NASA Mars.</p>
 <ul>
 <li>Ветка: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/tree/core-backend-foundation">core-backend-foundation</a></li>
-<li>Коммит: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/commit/66d4653e9d3201d689d205d68fb1e24a25edc6ca"><code>66d4653e</code></a></li>
-<li>Backend tests: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45237932993">success</a></li>
-<li>GitHub Pages build: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45237932517">success</a></li>
-<li>Pages deployment: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45237930719">success</a></li>
-<li><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/requirements-register.md">Полный реестр требований</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/long-term-preservation.md">План долгосрочного хранения</a></li>
+<li>Коммит: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/commit/abcb245d9e93a3d0e037947aaf3cd52f8f6b30c9"><code>abcb245d</code></a></li>
+<li>GitHub Pages build: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45247644371">success</a></li>
+<li>Backend tests: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45247644556">success, 43 passed</a></li>
+<li>Pages deployment: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/actions/runs/45247643872">success</a></li>
+<li>Резервная контрольная точка: <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/tree/backup/stable-2026-11-23">backup/stable-2026-11-23</a></li>
+<li><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/release-and-rollback-policy.md">Правила выпусков и отката</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/requirements-register.md">Полный реестр требований</a></li>
 </ul>
-<p class="status-note">Статусы на этой странице являются зафиксированным снимком. Они не обновляются автоматически при каждом коммите. После изменения кода и проверок страницу и доказательства необходимо обновить.</p>
+<p class="status-note">Публичная витрина считается запущенной и может улучшаться последующими проверяемыми выпусками. Закрытый семейный архив, редактирование портретов и другие приватные функции не считаются реализованными до фактического подключения backend и прохождения соответствующих тестов.</p>
 </section>
+
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-green">ЗЕЛЁНЫЙ</span><span class="status-index">06</span></div>
+  <h2>Публичная главная страница</h2>
+  <p>Публичная витрина KOMAROVA_CORE запущена. Главная содержит семейную портретную галерею с пустыми безопасными слотами, ссылки Internet Archive и NASA Mars. Внешние ссылки проверены на опубликованной странице.</p>
+  <p class="status-evidence">Подтверждение: HTTP 200, четыре карточки портретов, внешние ссылки archive.org и science.nasa.gov/mars присутствуют в live HTML.</p>
+</article>
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">07</span></div>
+  <h2>Персональное управление портретом</h2>
+  <p>На главной подготовлены места для портретов. Индивидуальная загрузка, выбор, замена и публикация фотографии из закрытого кабинета пока не реализованы: необходимы авторизация, защищённое хранилище, права доступа и отдельное согласие на публичный показ.</p>
+  <p class="status-links"><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/site-architecture-and-navigation.md">Требования к портретам и публикации</a></p>
+</article>
+
 <p><a href="{{ '/' | relative_url }}">← На главную</a></p>
