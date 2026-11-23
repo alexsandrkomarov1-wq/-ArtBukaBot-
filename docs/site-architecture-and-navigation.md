@@ -311,7 +311,9 @@ The hub contains the following user-approved external destinations:
 | WhatsApp Web | https://web.whatsapp.com/login/ | Open WhatsApp Web sign-in for messaging and supported calling |
 | Telegram Web | https://web.telegram.org/#/im. | Open Telegram Web |
 | Outlook Mail | https://outlook.live.com/mail/0/inbox | Open Outlook inbox |
-| Google Earth | https://earth.google.com/static/multi-threaded/versions/20261105_1202_RC00/index.html?utm_source=earth7&utm_campaign=vine&hl=ru#search/32,+%D0%A5%D0%BE%D1%80%D1%83%D0%B3%D0%B2%D0%B8%D0%BD%D0%BE,+%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F+%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/@56.06970397,37.07571186,219.08665252a,33717.18137986d,35y,0.12901605h,0.14828729t,0r/data=CigiJgokCTbSOrmDEUxAEYG2WF1KDkxAGX9dlpiBnUJAIXJec_z7mEJA | Open Google Earth at the supplied Хоругвино map view |
+| Google Earth | https://earth.google.com/web/ | Open Google Earth at a visitor-selected place or coordinate pair |
+
+The homepage also exposes Internet Archive as a visible external destination for future public collections. The destination is https://archive.org/ and is not represented as a configured KOMAROVA_CORE collection.
 
 The hub also defines two explicit actions:
 
@@ -324,7 +326,7 @@ Implementation and security requirements:
 2. Do not embed third-party login pages or collect their passwords, one-time codes, cookies, tokens or session data in KOMAROVA_CORE.
 3. Do not claim that opening WhatsApp Web or Telegram Web creates a connector, imports messages, or guarantees that calling is available. They are external service launch links only.
 4. The Outlook link opens the inbox. The separate compose action opens the visitor's configured mail client; neither action means KOMAROVA_CORE has sent or received mail.
-5. Google Earth is an external map destination. The supplied deep link should preserve its Хоругвино search/view parameters. This does not constitute an internal KOMAROVA_CORE map, place record, or route service.
+5. Google Earth is an external map destination. The account hub must support browser geolocation after an explicit user click and browser permission, manual place/address search, and manual coordinate entry (decimal degrees and DMS). A selected result must show latitude/longitude in DMS and open Google Earth at the selected coordinates. Хоругвино (56°04′11″N · 37°04′33″E) is only the default example, not a fixed destination. Place search and reverse geocoding use OpenStreetMap Nominatim; disclose that search text or selected coordinates are sent to that service and provide attribution. Do not request geolocation on page load. This does not constitute an internal KOMAROVA_CORE map, place record, or route service.
 6. The hub itself may be publicly reachable because it contains generic service destinations, but it must not reveal account names, personal addresses, private chat IDs, contact lists, or authenticated session state.
 7. The hub must be visually distinct from the authenticated private family application at `/app/`. The external quick links do not replace sign-in, private archive search, family records, or permission-controlled features.
 8. Until `/account/` exists and passes link, accessibility and responsive-layout tests, the navigation entry remains a target route and must not be represented as a live page.
