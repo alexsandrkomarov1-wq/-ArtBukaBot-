@@ -80,6 +80,25 @@ def test_logout_revokes_access_session(tmp_path):
         assert client.get("/api/v1/auth/me", headers=token_headers).status_code == 401
 
 
+def test_password_change_revokes_all_sessions_and_requires_new_login(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        token_headers = auth(owner["access_token"])
+        changed = client.post(
+            "/api/v1/auth/change-password",
+            headers=token_headers,
+            json={
+                "current_password": "correct-horse-battery-123",
+                "new_password": "a-new-long-password-456",
+            },
+        )
+        assert changed.status_code == 200
+        assert changed.json()["reauthentication_required"] is True
+        assert client.get("/api/v1/auth/me", headers=token_headers).status_code == 401
+        assert login(client, "owner", "correct-horse-battery-123").status_code == 401
+        assert login(client, "owner", "a-new-long-password-456").status_code == 200
+
+
 def test_guest_is_read_only_and_family_member_can_add_people(tmp_path):
     with make_client(tmp_path) as client:
         owner = bootstrap_owner(client)

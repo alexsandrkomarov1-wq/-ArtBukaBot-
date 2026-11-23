@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from .database import build_engine, build_session_factory, run_migrations, session_dependency
 from .models import AuditEvent, AuthSession, Person, RelationshipRecord, User, utc_now
 from .schemas import (
-    BootstrapCreate, LoginRequest, PersonCreate, PersonRead, PersonUpdate,
+    BootstrapCreate, LoginRequest, PasswordChange, PersonCreate, PersonRead, PersonUpdate,
     RelationshipCreate, RelationshipRead, SessionRead, TokenRead,
     UserCreate, UserRead, UserUpdate,
 )
@@ -158,6 +158,31 @@ def create_app(
             audit(db, "auth.session_revoked", "user", user.user_id, user.user_id, {"session_id": session.session_id})
             db.commit()
         return {"status": "revoked"}
+
+    @app.post("/api/v1/auth/change-password")
+    def change_password(
+        payload: PasswordChange,
+        authorization: str | None = Header(default=None, alias="Authorization"),
+        user: User = Depends(require_current_user),
+        db: Session = Depends(get_db),
+    ):
+        if not verify_password(payload.current_password, user.password_hash):
+            raise HTTPException(status_code=400, detail="Current password is incorrect")
+        if payload.current_password == payload.new_password:
+            raise HTTPException(status_code=422, detail="New password must differ from the current password")
+        user.password_hash = hash_password(payload.new_password)
+        now = utc_now()
+        sessions = db.scalars(select(AuthSession).where(
+            AuthSession.user_id == user.user_id,
+            AuthSession.revoked_at.is_(None),
+        )).all()
+        for active_session in sessions:
+            active_session.revoked_at = now
+        audit(db, "auth.password_changed", "user", user.user_id, user.user_id, {
+            "revoked_sessions": len(sessions),
+        })
+        db.commit()
+        return {"status": "password_changed", "reauthentication_required": True}
 
     @app.get("/api/v1/auth/sessions", response_model=list[SessionRead])
     def list_sessions(user: User = Depends(require_current_user), db: Session = Depends(get_db)):
