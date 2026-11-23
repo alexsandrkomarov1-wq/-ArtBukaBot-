@@ -172,3 +172,11 @@ Explicit limitations:
 - Passing CI does not make this service operational. Production use still requires a private host, persistent storage, malware scanning, backup/restore of binary objects, security review and an end-to-end upload/restore drill.
 
 Requirement status remains partial until the above controls and operational gates are verified.
+
+
+### New acceptance requirements
+- REQ-ARC-010: Detect actual media type and codec/container metadata independently of filename extension; preserve original filename as provenance.
+- REQ-ARC-011: Apply EXIF orientation and video display-matrix rotation to separately stored derivatives after malware scanning; never modify originals.
+- REQ-ARC-012: Create browser-compatible image/video derivatives with verified output metadata and separate checksums.
+- REQ-CLIENT-003: Provide contextual page-aware navigation hints and accessible popovers without exposing private records.
+- REQ-AI-007: Provide a provider-neutral conversational site assistant only through a protected backend; distinguish verified system facts from guidance and model inference.

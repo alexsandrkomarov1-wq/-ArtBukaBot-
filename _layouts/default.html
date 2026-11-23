@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ site.lang | default: 'ru' }}">
+<html lang="{{ site.lang | default: 'ru' }}" data-baseurl="{{ site.baseurl }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,5 +25,18 @@
 <footer class="site-footer"><div class="wrapper footer-inner">
 <span>KOMAROVA_CORE</span><span>Публичная версия · {{ site.time | date: '%Y' }}</span>
 </div></footer>
+<div id="site-guide" class="site-guide">
+  <button type="button" class="site-guide-toggle" data-guide-toggle aria-expanded="false" aria-controls="site-guide-panel" aria-label="Открыть помощника навигации">?</button>
+  <section id="site-guide-panel" class="site-guide-panel" data-guide-panel role="dialog" aria-labelledby="site-guide-title" hidden>
+    <div class="site-guide-panel-head">
+      <div><span class="site-guide-kicker">KOMAROVA_CORE</span><h2 id="site-guide-title" data-guide-title>Навигация по сайту</h2></div>
+      <button type="button" data-guide-close class="site-guide-close" aria-label="Закрыть подсказку">×</button>
+    </div>
+    <p data-guide-body></p>
+    <nav data-guide-links aria-label="Полезные переходы"></nav>
+    <p class="site-guide-footnote">Контекстные подсказки работают локально. ИИ-диалог подключается отдельно через защищённый backend.</p>
+  </section>
+</div>
+<script src="{{ '/assets/js/site-guide.js' | relative_url }}" defer></script>
 </body>
 </html>

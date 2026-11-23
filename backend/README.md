@@ -146,3 +146,12 @@ The upload endpoint streams in 1 MiB chunks, enforces a 100 MiB maximum, checks 
 **Quarantine is intentional.** No antivirus scanner, isolated media decoder, derivative generation, preview/download/stream route, event/place registry, cloud storage adapter, browser private UI, or production deployment is configured. The service does not yet make quarantined files viewable. Do not upload real family media to this development repository or an unreviewed host. A persistent private volume and backup policy are mandatory; ephemeral container disk is not durable storage.
 
 The old root-level `komarova_file_engine.py` remains a separate legacy tool for a different SQLite schema. It is not used by the API and must not be pointed at the backend database.
+
+
+## Orientation-aware media derivatives (development utility)
+
+backend.app.media_processing contains post-scan derivative utilities:
+- normalize_photo(..., scanner_state="clean") applies EXIF Orientation and writes a WebP derivative. HEIC/HEIF support uses pillow-heif.
+- normalize_video(..., scanner_state="clean") uses FFprobe and FFmpeg to autorotate and transcode to H.264/AAC MP4.
+
+Both utilities refuse quarantined input and never overwrite the original. They are not called by the upload endpoint or a worker yet. FFmpeg/FFprobe must be installed on the private worker. Do not expose derivatives until a scanner, derivative registry, checksum persistence and authorized preview route are implemented.

@@ -50,6 +50,17 @@
     return null;
   };
 
+  ui.image.addEventListener("error", () => {
+    ui.status.textContent = "Браузер не смог декодировать это изображение. Возможно, формат HEIC/HEIF не поддерживается. Оригинал не изменён; совместимая копия потребует закрытого обработчика архива.";
+  });
+  ui.video.addEventListener("error", () => {
+    const code = ui.video.error ? ui.video.error.code : 0;
+    const reason = code === 4
+      ? "Формат контейнера или видеокодек не поддерживается этим браузером."
+      : "Браузер не смог прочитать или декодировать видео.";
+    ui.status.textContent = reason + " Оригинальный файл не изменён.";
+  });
+
   const stopSlideshow = () => {
     if (slideshowTimer !== null) window.clearInterval(slideshowTimer);
     slideshowTimer = null;

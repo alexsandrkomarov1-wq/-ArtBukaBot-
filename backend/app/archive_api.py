@@ -16,8 +16,8 @@ from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 CHUNK_SIZE = 1024 * 1024
-PHOTO_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".tif", ".tiff", ".heic"}
-VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm"}
+PHOTO_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".tif", ".tiff", ".heic", ".heif"}
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm", ".3gp"}
 
 
 def _safe_filename(value: str | None) -> str:

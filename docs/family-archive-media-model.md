@@ -319,3 +319,13 @@ All received files remain quarantined because antivirus/malware scanning and iso
 The current local filesystem adapter is a development adapter. Configure `CORE_MEDIA_ROOT` to a private persistent volume outside the repository. Do not use ephemeral container storage for family records. A future object-storage adapter must preserve the same blob IDs, checksums, immutable-original rules and authorization contract.
 
 The separate legacy `komarova_file_engine.py` uses an independent SQLite schema and is not an adapter for the backend database. It must not be pointed at the backend database or used as an alternative registry.
+
+
+## 15. Orientation and format adaptation implementation slice
+
+The development worker utilities create derivatives only after an explicit clean malware-scan state:
+- Photos: Pillow reads EXIF Orientation, applies the correct transform (including mirrored orientations), and creates a WebP derivative limited to a 1920-pixel long edge. HEIC/HEIF decoding is enabled by the optional pillow-heif plugin.
+- Videos: FFprobe reads display-matrix/rotate metadata; FFmpeg default autorotation is retained while transcoding to H.264/AAC MP4, limited to a 1920-pixel long edge. FFprobe verifies that the output has no remaining rotation metadata.
+- The original file is never overwritten. The utility returns source and output dimensions, original orientation and output format for later derivative registration.
+
+This is not yet an operational pipeline: uploads remain quarantined; no malware scanner, worker queue, derivative registry, preview endpoint or private host is connected. The browser-local media viewer still relies on native decoders and can report unsupported formats.
