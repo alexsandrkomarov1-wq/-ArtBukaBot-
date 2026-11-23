@@ -1,3 +1,5 @@
+from alembic.autogenerate import compare_metadata
+from alembic.migration import MigrationContext
 from sqlalchemy import inspect, select, text
 
 from backend.app.database import Base, build_engine, run_migrations
@@ -29,6 +31,19 @@ def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
         assert {index["name"] for index in inspector.get_indexes("relationships")} == {
             "ix_relationships_from_person_id", "ix_relationships_to_person_id"
         }
+    finally:
+        engine.dispose()
+
+
+def test_migrated_schema_matches_sqlalchemy_metadata(tmp_path):
+    database = tmp_path / "metadata.sqlite3"
+    engine = build_engine(f"sqlite:///{database}")
+    try:
+        run_migrations(engine)
+        with engine.connect() as connection:
+            context = MigrationContext.configure(connection)
+            differences = compare_metadata(context, Base.metadata)
+        assert differences == []
     finally:
         engine.dispose()
 
