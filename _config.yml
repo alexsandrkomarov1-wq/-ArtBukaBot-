@@ -1,0 +1,21 @@
+title: "KOMAROVA_CORE"
+description: "Семейная история, открытая хроника и цифровой семейный архив"
+lang: ru
+url: "https://alexsandrkomarov1-wq.github.io"
+baseurl: "/-ArtBukaBot-"
+
+theme: minima
+markdown: kramdown
+permalink: pretty
+
+header_pages:
+  - about.md
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - docs/
+  - vendor/
+  - .github/
+  - node_modules/
