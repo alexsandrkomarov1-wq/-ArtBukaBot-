@@ -22,5 +22,9 @@ jobs:
         with:
           source: ./
           destination: ./_site
+      - name: Check media viewer JavaScript syntax
+        run: node --check assets/js/media-library.js
+      - name: Check media viewer interface contract
+        run: python3 scripts/check_media_viewer.py
       - name: Check generated pages and local links
         run: python3 scripts/check_pages_links.py _site
