@@ -11,6 +11,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div class="hero-actions">
       <a class="primary-link" href="{{ '/about/' | relative_url }}">О проекте <span aria-hidden="true">↗</span></a>
       <a class="text-link" href="#archive-directions">Исследовать направления <span aria-hidden="true">↓</span></a>
+      <a class="text-link" href="https://archive.org/" target="_blank" rel="noopener noreferrer">Internet Archive <span aria-hidden="true">↗</span></a>
     </div>
   </div>
   <div class="hero-art" aria-label="Графическая композиция семейного архива">
