@@ -22,6 +22,35 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
   <div class="hero-foot"><span>СОХРАНЯЯ ПРОШЛОЕ</span><span class="hero-foot-rule"></span><span>СОЗДАЁМ СВЯЗЬ С БУДУЩИМ</span></div>
 </section>
+<section class="family-portraits" aria-labelledby="family-portraits-title">
+  <div class="family-portraits-heading">
+    <div>
+      <p class="eyebrow">ЛИЦА И ПОКОЛЕНИЯ</p>
+      <h2 id="family-portraits-title">Семья — <em>в центре истории.</em></h2>
+      <p>Личные портреты участников семьи. Каждый выбирает фотографию сам, а на главной появляется только версия, разрешённая им для публикации.</p>
+    </div>
+    <span class="gallery-status">ПУБЛИЧНАЯ ГАЛЕРЕЯ · ПОДГОТОВЛЕНА</span>
+  </div>
+  <div class="family-portrait-grid" aria-label="Места для семейных портретов">
+    <article class="family-portrait-card">
+      <div class="portrait-frame" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">01</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    </article>
+    <article class="family-portrait-card">
+      <div class="portrait-frame portrait-frame-alt" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">02</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    </article>
+    <article class="family-portrait-card">
+      <div class="portrait-frame portrait-frame-warm" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">03</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    </article>
+    <article class="family-portrait-card">
+      <div class="portrait-frame portrait-frame-dark" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">04</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    </article>
+  </div>
+  <p class="family-portraits-note">Фотографии и имена не подставляются автоматически. Загрузка, выбор главного портрета, замена и отзыв разрешения будут доступны в закрытом кабинете после подключения защищённого хранилища и авторизации.</p>
+</section>
 <section class="section-intro" id="archive-directions">
   <div><p class="eyebrow">СОДЕРЖАНИЕ АРХИВА</p><h2>Не просто страницы.<br><em>Связанные истории.</em></h2></div>
   <p>Каждый материал в будущем будет связан с людьми, датами, событиями, местами и источниками. Так отдельные документы складываются в общую картину.</p>
@@ -40,6 +69,16 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <p class="sharing-note">Внешняя площадка для будущих публикаций. Семейная коллекция KOMAROVA_CORE там пока не создана.</p>
   </div>
   <div class="sharing-seal" aria-hidden="true"><span>OPEN</span><strong>MEMORY</strong><span>SHARED WITH CARE</span></div>
+</section>
+<section class="mars-feature" aria-labelledby="mars-title">
+  <div class="mars-art" role="img" aria-label="Стилизованное изображение планеты Марс"><span class="mars-orbit"></span><span class="mars-planet"></span><span class="mars-star mars-star-one"></span><span class="mars-star mars-star-two"></span></div>
+  <div class="mars-copy">
+    <p class="eyebrow">КОСМОС · ИССЛЕДОВАНИЯ · БУДУЩЕЕ</p>
+    <h2 id="mars-title">Следующая остановка — <em>Марс.</em></h2>
+    <p>Исследование Красной планеты, марсоходы, орбитальные миссии и новые открытия NASA. Отдельное направление для любознательных и тех, кто смотрит дальше горизонта.</p>
+    <a class="outline-link" href="https://science.nasa.gov/mars/" target="_blank" rel="noopener noreferrer">Исследовать Марс · NASA <span aria-hidden="true">↗</span></a>
+    <p class="mars-note">Официальный научный портал NASA. Открывается на сайте NASA, вне KOMAROVA_CORE.</p>
+  </div>
 </section>
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
