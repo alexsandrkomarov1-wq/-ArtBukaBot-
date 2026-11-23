@@ -23,9 +23,8 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("user_id"),
-        sa.UniqueConstraint("username"),
     )
-    op.create_index("ix_users_username", "users", ["username"], unique=False)
+    op.create_index("ix_users_username", "users", ["username"], unique=True)
     op.create_table(
         "auth_sessions",
         sa.Column("session_id", sa.String(length=14), nullable=False),
@@ -36,10 +35,9 @@ def upgrade() -> None:
         sa.Column("revoked_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.user_id"]),
         sa.PrimaryKeyConstraint("session_id"),
-        sa.UniqueConstraint("token_jti"),
     )
     op.create_index("ix_auth_sessions_user_id", "auth_sessions", ["user_id"], unique=False)
-    op.create_index("ix_auth_sessions_token_jti", "auth_sessions", ["token_jti"], unique=False)
+    op.create_index("ix_auth_sessions_token_jti", "auth_sessions", ["token_jti"], unique=True)
 
 
 def downgrade() -> None:
