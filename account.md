@@ -60,12 +60,27 @@ description: Быстрый доступ к семейным сервисам с
   <div class="account-map-copy">
     <p class="eyebrow">03 / ГЕОГРАФИЯ И ПУТЕШЕСТВИЯ</p>
     <h2 id="map-title">Мир становится ближе.</h2>
-    <p>Открыть Google Earth, исследовать карту и перейти к указанному месту в Хоругвино, Московская область.</p>
-    <a class="account-action" href="https://earth.google.com/static/multi-threaded/versions/20261105_1202_RC00/index.html?utm_source=earth7&amp;utm_campaign=vine&amp;hl=ru#search/32,+%D0%A5%D0%BE%D1%80%D1%83%D0%B3%D0%B2%D0%B8%D0%BD%D0%BE,+%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F+%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/@56.06970397,37.07571186,219.08665252a,33717.18137986d,35y,0.12901605h,0.14828729t,0r/data=CigiJgokCTbSOrmDEUxAEYG2WF1KDkxAGX9dlpiBnUJAIXJec_z7mEJA" target="_blank" rel="noopener noreferrer">Открыть Google Earth <span aria-hidden="true">↗</span></a>
+    <p>Выберите точку на планете: определите своё местоположение или найдите любой город, адрес и координаты вручную. Затем откройте выбранное место в Google Earth.</p>
+    <form class="account-map-form" id="earth-place-form">
+      <label for="earth-place-input">Место или координаты</label>
+      <div class="account-map-search-row">
+        <input id="earth-place-input" name="place" type="search" autocomplete="off" placeholder="Например, Хоругвино или 56.0697, 37.0757" required>
+        <button type="submit" class="account-map-button">Найти место</button>
+      </div>
+      <button type="button" class="account-map-location" id="earth-geolocate">◎ Определить моё местоположение</button>
+      <p class="account-map-status" id="earth-map-status" role="status" aria-live="polite">Пример выбран: Хоругвино, Московская область.</p>
+    </form>
+    <div class="account-map-result" aria-live="polite">
+      <span class="account-map-result-label">ВЫБРАННОЕ МЕСТО</span>
+      <strong id="earth-place-name">Хоругвино · Московская область</strong>
+      <span class="account-map-coordinates" id="earth-place-coordinates">56°04′11″N · 37°04′33″E</span>
+      <a class="account-action" id="earth-open-link" href="https://earth.google.com/web/@56.06970397,37.07571186,1500a,25000d,35y,0h,0t,0r" target="_blank" rel="noopener noreferrer">Открыть Google Earth <span aria-hidden="true">↗</span></a>
+    </div>
+    <p class="account-map-attribution">Поиск мест выполняется через OpenStreetMap Nominatim. При поиске или обратном определении адреса координаты передаются этому сервису. Геолокация запрашивается только после нажатия кнопки и с разрешения браузера. <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Условия и атрибуция OpenStreetMap</a>.</p>
   </div>
   <div class="account-map-art" aria-label="Стилизованная карта мира">
     <div class="map-grid-lines"></div><div class="map-globe"><span class="map-latitude"></span><span class="map-longitude"></span><span class="map-marker"></span></div>
-    <span class="map-caption">56°04′11″N · 37°04′33″E<br>ХОРУГВИНО · МОСКОВСКАЯ ОБЛАСТЬ</span>
+    <span class="map-caption" id="earth-map-caption">56°04′11″N · 37°04′33″E<br>ХОРУГВИНО · МОСКОВСКАЯ ОБЛАСТЬ</span>
   </div>
 </section>
 
@@ -73,5 +88,122 @@ description: Быстрый доступ к семейным сервисам с
   <span class="account-privacy-mark" aria-hidden="true">✳</span>
   <div><h2>Ваши учётные записи остаются вашими.</h2><p>KOMAROVA_CORE не запрашивает пароли, коды подтверждения, cookies или токены WhatsApp, Telegram и Outlook. Эта страница содержит только ссылки на внешние сервисы и не подключена к их аккаунтам.</p></div>
 </aside>
+
+<script>
+(function () {
+  const form = document.getElementById('earth-place-form');
+  if (!form) return;
+  const input = document.getElementById('earth-place-input');
+  const status = document.getElementById('earth-map-status');
+  const nameNode = document.getElementById('earth-place-name');
+  const coordinatesNode = document.getElementById('earth-place-coordinates');
+  const caption = document.getElementById('earth-map-caption');
+  const earthLink = document.getElementById('earth-open-link');
+  const geoButton = document.getElementById('earth-geolocate');
+
+  function dms(value, positive, negative) {
+    const direction = value < 0 ? negative : positive;
+    const absolute = Math.abs(value);
+    const degrees = Math.floor(absolute);
+    const minutesFloat = (absolute - degrees) * 60;
+    const minutes = Math.floor(minutesFloat);
+    const seconds = Math.round((minutesFloat - minutes) * 60);
+    return degrees + '°' + String(minutes).padStart(2, '0') + '′' + String(seconds).padStart(2, '0') + '″' + direction;
+  }
+
+  function parseCoordinates(value) {
+    const decimal = value.trim().match(/^(-?\d+(?:[.,]\d+)?)\s*[,; ]+\s*(-?\d+(?:[.,]\d+)?)$/);
+    if (decimal) {
+      const lat = Number(decimal[1].replace(',', '.'));
+      const lon = Number(decimal[2].replace(',', '.'));
+      if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) return { lat, lon };
+    }
+    const matches = [...value.matchAll(/(-?\d+(?:[.,]\d+)?)\s*°\s*(\d+(?:[.,]\d+)?)?\s*[′']?\s*(\d+(?:[.,]\d+)?)?\s*[″"]?\s*([NSEW])/gi)];
+    if (matches.length === 2) {
+      const values = matches.map(match => {
+        const degrees = Number(match[1].replace(',', '.'));
+        const minutes = Number((match[2] || '0').replace(',', '.'));
+        const seconds = Number((match[3] || '0').replace(',', '.'));
+        const direction = match[4].toUpperCase();
+        return (degrees < 0 ? -1 : 1) * (Math.abs(degrees) + minutes / 60 + seconds / 3600) * (direction === 'S' || direction === 'W' ? -1 : 1);
+      });
+      if (Math.abs(values[0]) <= 90 && Math.abs(values[1]) <= 180) return { lat: values[0], lon: values[1] };
+    }
+    return null;
+  }
+
+  async function reverseName(lat, lon) {
+    const url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon);
+    const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!response.ok) throw new Error('Сервис поиска мест временно недоступен.');
+    const data = await response.json();
+    return data.display_name || 'Выбранные координаты';
+  }
+
+  function selectPlace(lat, lon, label) {
+    const latText = dms(lat, 'N', 'S');
+    const lonText = dms(lon, 'E', 'W');
+    const coords = latText + ' · ' + lonText;
+    nameNode.textContent = label;
+    coordinatesNode.textContent = coords;
+    caption.textContent = coords + ' / ' + label.toLocaleUpperCase('ru-RU');
+    earthLink.href = 'https://earth.google.com/web/@' + lat + ',' + lon + ',1500a,25000d,35y,0h,0t,0r';
+    earthLink.setAttribute('aria-label', 'Открыть Google Earth: ' + label + ', ' + coords);
+    const marker = document.querySelector('.map-marker');
+    if (marker) marker.style.transform = 'translate(' + ((lon + 180) / 360 * 80 - 40) + 'px,' + ((90 - lat) / 180 * 80 - 40) + 'px)';
+  }
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    const query = input.value.trim();
+    if (!query) return;
+    status.textContent = 'Ищем место…';
+    try {
+      const coords = parseCoordinates(query);
+      if (coords) {
+        let label = 'Выбранные координаты';
+        try { label = await reverseName(coords.lat, coords.lon); } catch (_) {}
+        selectPlace(coords.lat, coords.lon, label);
+        status.textContent = 'Координаты найдены. Можно открыть выбранную точку в Google Earth.';
+        return;
+      }
+      const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' + encodeURIComponent(query);
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) throw new Error('Сервис поиска мест временно недоступен.');
+      const results = await response.json();
+      if (!results.length) throw new Error('Место не найдено. Уточните название или введите координаты.');
+      const place = results[0];
+      selectPlace(Number(place.lat), Number(place.lon), place.display_name);
+      status.textContent = 'Место найдено. Координаты определены по OpenStreetMap.';
+    } catch (error) {
+      status.textContent = error.message || 'Не удалось найти место. Проверьте соединение и попробуйте ещё раз.';
+    }
+  });
+
+  geoButton.addEventListener('click', function () {
+    if (!navigator.geolocation) {
+      status.textContent = 'Этот браузер не поддерживает геолокацию.';
+      return;
+    }
+    status.textContent = 'Запрашиваем разрешение браузера на геолокацию…';
+    navigator.geolocation.getCurrentPosition(async function (position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      status.textContent = 'Местоположение определено. Получаем название места…';
+      let label = 'Моё местоположение';
+      try { label = await reverseName(lat, lon); } catch (_) {}
+      selectPlace(lat, lon, label);
+      status.textContent = 'Текущие координаты определены браузером. Точность зависит от устройства и разрешения геолокации.';
+    }, function (error) {
+      const messages = {
+        1: 'Доступ к геолокации запрещён. Разрешите его в настройках браузера или введите место вручную.',
+        2: 'Не удалось определить местоположение устройства.',
+        3: 'Время ожидания геолокации истекло. Попробуйте ещё раз или введите место вручную.'
+      };
+      status.textContent = messages[error.code] || 'Не удалось определить местоположение.';
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  });
+})();
+</script>
 
 <p class="account-back"><a href="{{ '/' | relative_url }}">← Вернуться на главную</a></p>
