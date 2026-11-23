@@ -465,3 +465,15 @@ def test_concurrent_bootstrap_creates_exactly_one_initial_owner(tmp_path):
         ]
         assert sum(response.status_code == 200 for response in owner_logins) == 1
         assert all(response.status_code in {200, 401} for response in owner_logins)
+
+
+
+def test_login_lockout_survives_application_restart(tmp_path):
+    with make_client(tmp_path) as client:
+        bootstrap_owner(client)
+        for _ in range(5):
+            assert login(client, "owner", "wrong-password-for-lockout").status_code == 401
+
+    # A new app instance and connection use the same test database.
+    with make_client(tmp_path) as restarted_client:
+        assert login(restarted_client, "owner").status_code == 429

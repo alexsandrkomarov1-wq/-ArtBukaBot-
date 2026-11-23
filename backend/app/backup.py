@@ -24,6 +24,19 @@ def _check_integrity(connection: sqlite3.Connection) -> None:
         raise RuntimeError(f"SQLite integrity_check failed: {result[0] if result else 'no result'}")
 
 
+def _check_archive_schema(connection: sqlite3.Connection) -> None:
+    tables = {
+        row[0] for row in connection.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }
+    required = {"alembic_version", "people", "relationships", "audit_events",
+                "users", "auth_sessions", "system_state", "login_attempts"}
+    missing = required - tables
+    if missing:
+        raise RuntimeError(f"Backup is not a complete KOMAROVA_CORE database; missing tables: {sorted(missing)}")
+
+
 def backup_database(engine: Engine, destination: str | Path) -> Path:
     target = Path(destination).resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -34,6 +47,7 @@ def backup_database(engine: Engine, destination: str | Path) -> Path:
         with sqlite3.connect(target) as backup:
             source.backup(backup)
             _check_integrity(backup)
+            _check_archive_schema(backup)
     except Exception:
         target.unlink(missing_ok=True)
         raise
@@ -56,8 +70,10 @@ def restore_database(backup_path: str | Path, destination: str | Path) -> Path:
     try:
         with sqlite3.connect(source_path) as source, sqlite3.connect(temporary) as restored:
             _check_integrity(source)
+            _check_archive_schema(source)
             source.backup(restored)
             _check_integrity(restored)
+            _check_archive_schema(restored)
         os.replace(temporary, target)
     except Exception:
         temporary.unlink(missing_ok=True)

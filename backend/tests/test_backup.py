@@ -1,3 +1,5 @@
+import pytest
+
 from backend.app.backup import backup_database, restore_database
 from backend.app.database import build_engine, run_migrations
 from backend.app.models import Person
@@ -33,3 +35,13 @@ def test_sqlite_backup_restore_round_trip_on_separate_database(tmp_path):
             assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0003_security_controls"
     finally:
         restored_engine.dispose()
+
+
+
+def test_restore_rejects_non_archive_sqlite_file_without_creating_destination(tmp_path):
+    invalid_backup = tmp_path / "not-a-core-backup.sqlite3"
+    restored_path = tmp_path / "restore" / "should-not-exist.sqlite3"
+    invalid_backup.write_bytes(b"not a KOMAROVA_CORE database")
+    with pytest.raises(RuntimeError, match="not a complete KOMAROVA_CORE database"):
+        restore_database(invalid_backup, restored_path)
+    assert not restored_path.exists()
