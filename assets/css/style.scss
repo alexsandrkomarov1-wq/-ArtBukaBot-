@@ -114,6 +114,62 @@ a { color:var(--green); }
 .site-footer { border-top:1px solid var(--line); color:var(--muted); font-size:11px; }
 .footer-inner { min-height:78px; }
 
+
+/* Homepage family portrait gallery: empty frames are intentional until approved portraits exist. */
+.family-portraits { padding:64px 0 58px; border-bottom:1px solid var(--line); }
+.family-portraits-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:30px; margin-bottom:25px; }
+.family-portraits-heading h2,.mars-copy h2 { margin:12px 0; font-family:Georgia,serif; font-size:clamp(32px,4vw,48px); font-weight:400; line-height:1.08; letter-spacing:-.035em; }
+.family-portraits-heading h2 em,.mars-copy h2 em { color:var(--accent); font-weight:400; }
+.family-portraits-heading p:not(.eyebrow) { max-width:650px; margin:0; color:var(--muted); font-size:13px; line-height:1.8; }
+.gallery-status { flex:0 0 auto; padding:8px 11px; border:1px solid var(--line); color:#77796f; font-size:8px; font-weight:800; letter-spacing:.13em; }
+.family-portrait-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; }
+.family-portrait-card { min-width:0; padding:10px; border:1px solid var(--line); background:var(--card); }
+.portrait-frame { position:relative; display:flex; min-height:225px; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(150deg,#e8e1d5,#d9d0c1); }
+.portrait-frame-alt { background:linear-gradient(150deg,#e2e5dd,#cbd2c7); }
+.portrait-frame-warm { background:linear-gradient(150deg,#eadfd5,#d8c6b5); }
+.portrait-frame-dark { background:linear-gradient(150deg,#d9ded9,#bfc9c1); }
+.portrait-silhouette { position:relative; display:block; width:86px; height:130px; opacity:.38; }
+.portrait-silhouette:before { position:absolute; top:4px; left:27px; width:34px; height:42px; border:1px solid var(--green); border-radius:50%; content:""; }
+.portrait-silhouette:after { position:absolute; bottom:2px; left:5px; width:76px; height:68px; border:1px solid var(--green); border-radius:48% 48% 5px 5px; content:""; }
+.portrait-index { position:absolute; top:10px; left:12px; color:rgba(52,72,61,.7); font-family:Georgia,serif; font-size:13px; }
+.portrait-meta { display:grid; gap:7px; padding:13px 4px 5px; }
+.portrait-label { color:var(--accent); font-size:8px; font-weight:800; letter-spacing:.13em; }
+.portrait-meta strong { color:var(--ink); font-family:Georgia,serif; font-size:16px; font-weight:500; }
+.portrait-state { color:#858477; font-size:8px; font-weight:800; letter-spacing:.1em; }
+.family-portraits-note { max-width:850px; margin:17px 0 0; color:var(--muted); font-size:10px; line-height:1.75; }
+.mars-feature { display:grid; grid-template-columns:minmax(220px,.8fr) 1.2fr; align-items:center; gap:44px; margin-top:18px; padding:34px 40px; background:#202a31; color:#f7f1e7; overflow:hidden; }
+.mars-art { position:relative; display:flex; min-height:250px; align-items:center; justify-content:center; overflow:hidden; background:radial-gradient(ellipse at center,#3b4245 0,#252f35 58%,#1b252b 100%); }
+.mars-planet { position:relative; z-index:1; display:block; width:170px; height:170px; border-radius:50%; background:radial-gradient(circle at 32% 28%,#dca47b 0,#a9573c 32%,#743a31 67%,#382c2c 100%); box-shadow:inset -20px -13px 30px rgba(0,0,0,.42),0 0 50px rgba(191,104,65,.18); }
+.mars-planet:before,.mars-planet:after { position:absolute; border:1px solid rgba(64,37,34,.38); border-radius:50%; content:""; transform:rotate(-25deg); }
+.mars-planet:before { top:45px; left:18px; width:120px; height:24px; }
+.mars-planet:after { top:91px; left:42px; width:74px; height:15px; }
+.mars-orbit { position:absolute; width:225px; height:225px; border:1px solid rgba(221,177,144,.28); border-radius:50%; transform:rotate(-25deg) scaleY(.43); }
+.mars-star { position:absolute; width:3px; height:3px; border-radius:50%; background:#e6d4bf; }
+.mars-star-one { top:42px; left:20%; }
+.mars-star-two { right:17%; bottom:48px; }
+.mars-copy .eyebrow { color:#d4b895; }
+.mars-copy h2 { color:#fbf7ef; }
+.mars-copy h2 em { color:#d9a17d; }
+.mars-copy>p:not(.eyebrow):not(.mars-note) { max-width:600px; color:#cbd0cd; font-size:13px; line-height:1.85; }
+.mars-copy .outline-link { margin-top:9px; border-color:rgba(255,255,255,.5); color:#fff; }
+.mars-note { margin:12px 0 0; color:#aeb8b5; font-size:9px; line-height:1.6; }
+@media (max-width:900px) {
+  .family-portrait-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .family-portraits-heading { align-items:flex-start; flex-direction:column; }
+  .mars-feature { grid-template-columns:.8fr 1.2fr; gap:25px; padding:28px; }
+}
+@media (max-width:600px) {
+  .family-portraits { padding:46px 0; }
+  .family-portrait-grid { gap:9px; }
+  .portrait-frame { min-height:165px; }
+  .portrait-silhouette { transform:scale(.8); }
+  .family-portrait-card { padding:7px; }
+  .portrait-meta strong { font-size:14px; }
+  .gallery-status { white-space:normal; }
+  .mars-feature { grid-template-columns:1fr; gap:22px; padding:20px; }
+  .mars-art { min-height:210px; }
+}
+
 .account-map-form { margin:22px 0 18px; }
 .account-map-form label { display:block; margin-bottom:8px; color:var(--ink); font-size:11px; font-weight:800; letter-spacing:.04em; }
 .account-map-search-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
