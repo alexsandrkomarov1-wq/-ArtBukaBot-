@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'ru' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172b3a">
+{% seo %}
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+{% feed_meta %}
+</head>
+<body>
+<header class="site-header">
+<div class="wrapper header-inner">
+<a class="brand" href="{{ '/' | relative_url }}">KOMAROVA<span>_CORE</span></a>
+<nav aria-label="Основная навигация">
+<a href="{{ '/' | relative_url }}">Главная</a>
+<a href="{{ '/about/' | relative_url }}">О проекте</a>
+</nav>
+</div>
+</header>
+<main class="wrapper page-content">{{ content }}</main>
+<footer class="site-footer"><div class="wrapper footer-inner">
+<span>KOMAROVA_CORE</span><span>Публичная версия · {{ site.time | date: '%Y' }}</span>
+</div></footer>
+</body>
+</html>
