@@ -293,3 +293,48 @@ Treat every Internet Archive upload as potentially public, searchable, downloada
 The first release is a manual, human-reviewed workflow: select an existing archive item, prepare a safe derivative, inspect metadata and rights, obtain explicit approval, upload through the official interface, verify the item page and files, and record the external identifier and URL. No automated connector, account, collection, or upload is configured by this specification. A dedicated Internet Archive collection is not assumed to exist; collection creation is subject to Internet Archive's own eligibility rules and approval.
 
 The authoritative original and independent backups remain under KOMAROVA_CORE control. External availability or removal must never change or destroy the internal archive. Any later automated uploader must be server-side, audited, secret-managed and gated by explicit human approval. GitHub Pages must never hold upload credentials or perform uploads.
+
+## 16. Personal account hub and external quick links
+
+The approved navigation includes a visible **Личный кабинет** entry that opens a lightweight external-services hub at the target route `/account/`. This hub is a convenience page for opening services the family already uses. It is not the authenticated private KOMAROVA_CORE application and must not imply that those third-party services are integrated into the family database.
+
+The public navigation target gains:
+
+| Key | Label | Canonical path | Purpose |
+|---|---|---|---|
+| account-hub | Личный кабинет | /account/ | Quick links to user-opened communication, email and map services |
+
+The hub contains the following user-approved external destinations:
+
+| Service | Destination | Intended action |
+|---|---|---|
+| WhatsApp Web | https://web.whatsapp.com/login/ | Open WhatsApp Web sign-in for messaging and supported calling |
+| Telegram Web | https://web.telegram.org/#/im. | Open Telegram Web |
+| Outlook Mail | https://outlook.live.com/mail/0/inbox | Open Outlook inbox |
+| Google Earth | https://earth.google.com/static/multi-threaded/versions/20261105_1202_RC00/index.html?utm_source=earth7&utm_campaign=vine&hl=ru#search/32,+%D0%A5%D0%BE%D1%80%D1%83%D0%B3%D0%B2%D0%B8%D0%BD%D0%BE,+%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F+%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/@56.06970397,37.07571186,219.08665252a,33717.18137986d,35y,0.12901605h,0.14828729t,0r/data=CigiJgokCTbSOrmDEUxAEYG2WF1KDkxAGX9dlpiBnUJAIXJec_z7mEJA | Open Google Earth at the supplied Хоругвино map view |
+
+The hub also defines two explicit actions:
+
+- **Написать письмо:** use a `mailto:` action to open the visitor's configured mail application. Do not invent or expose a recipient address. A future recipient selector may use only verified, consented contact records and must enforce private access rules.
+- **Позвонить:** use a `tel:` action only after a verified phone number has been deliberately configured or selected by the user. Do not publish or invent a family phone number. If no number is configured, show a clear setup state instead of an inert call button.
+
+Implementation and security requirements:
+
+1. Every external destination must be an ordinary, tested clickable link. Open external destinations safely in a new browsing context where appropriate, with `noopener noreferrer`; provide accessible names and indicate that the destination is external.
+2. Do not embed third-party login pages or collect their passwords, one-time codes, cookies, tokens or session data in KOMAROVA_CORE.
+3. Do not claim that opening WhatsApp Web or Telegram Web creates a connector, imports messages, or guarantees that calling is available. They are external service launch links only.
+4. The Outlook link opens the inbox. The separate compose action opens the visitor's configured mail client; neither action means KOMAROVA_CORE has sent or received mail.
+5. Google Earth is an external map destination. The supplied deep link should preserve its Хоругвино search/view parameters. This does not constitute an internal KOMAROVA_CORE map, place record, or route service.
+6. The hub itself may be publicly reachable because it contains generic service destinations, but it must not reveal account names, personal addresses, private chat IDs, contact lists, or authenticated session state.
+7. The hub must be visually distinct from the authenticated private family application at `/app/`. The external quick links do not replace sign-in, private archive search, family records, or permission-controlled features.
+8. Until `/account/` exists and passes link, accessibility and responsive-layout tests, the navigation entry remains a target route and must not be represented as a live page.
+
+Acceptance tests:
+- The Личный кабинет entry resolves to the implemented `/account/` route.
+- WhatsApp, Telegram, Outlook and Google Earth links open the exact approved destinations.
+- The mail action opens a configured mail client without inventing a recipient.
+- The call action is enabled only for a verified configured number; otherwise a clear setup state is shown.
+- No third-party credentials or private account identifiers are requested, embedded or logged.
+- The page makes clear that external-service shortcuts are not live KOMAROVA_CORE integrations.
+- The external hub and private `/app/` remain separate navigation and security surfaces.
+
