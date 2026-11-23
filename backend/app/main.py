@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 import os
 from contextlib import asynccontextmanager
-from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, status
+from fastapi import Depends, FastAPI, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -40,15 +39,16 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
     def get_db():
         yield from session_dependency(session_factory)
 
-    Db = Annotated[Session, Depends(get_db)]
-    Auth = Annotated[str | None, Depends(require_api_token)]
-
     @app.get("/health")
     def health():
         return {"status": "ok", "service": "komarova-core-api", "version": app.version}
 
     @app.post("/api/v1/people", response_model=PersonRead, status_code=status.HTTP_201_CREATED)
-    def create_person(payload: PersonCreate, db: Db, actor_id: Auth):
+    def create_person(
+        payload: PersonCreate,
+        db: Session = Depends(get_db),
+        actor_id: str | None = Depends(require_api_token),
+    ):
         person = Person(display_name=payload.display_name)
         db.add(person)
         db.flush()
@@ -65,11 +65,11 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
 
     @app.get("/api/v1/people", response_model=list[PersonRead])
     def list_people(
-        db: Db,
-        _: Auth,
         include_archived: bool = False,
         limit: int = Query(default=50, ge=1, le=100),
         offset: int = Query(default=0, ge=0),
+        db: Session = Depends(get_db),
+        _: str | None = Depends(require_api_token),
     ):
         query = select(Person)
         if not include_archived:
@@ -78,14 +78,23 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
         return list(db.scalars(query).all())
 
     @app.get("/api/v1/people/{person_id}", response_model=PersonRead)
-    def get_person(person_id: str, db: Db, _: Auth):
+    def get_person(
+        person_id: str,
+        db: Session = Depends(get_db),
+        _: str | None = Depends(require_api_token),
+    ):
         person = db.get(Person, person_id)
         if person is None:
             raise HTTPException(status_code=404, detail="Person not found")
         return person
 
     @app.patch("/api/v1/people/{person_id}", response_model=PersonRead)
-    def update_person(person_id: str, payload: PersonUpdate, db: Db, actor_id: Auth):
+    def update_person(
+        person_id: str,
+        payload: PersonUpdate,
+        db: Session = Depends(get_db),
+        actor_id: str | None = Depends(require_api_token),
+    ):
         person = db.get(Person, person_id)
         if person is None:
             raise HTTPException(status_code=404, detail="Person not found")
@@ -105,7 +114,11 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
         return person
 
     @app.delete("/api/v1/people/{person_id}", response_model=PersonRead)
-    def archive_person(person_id: str, db: Db, actor_id: Auth):
+    def archive_person(
+        person_id: str,
+        db: Session = Depends(get_db),
+        actor_id: str | None = Depends(require_api_token),
+    ):
         person = db.get(Person, person_id)
         if person is None:
             raise HTTPException(status_code=404, detail="Person not found")
@@ -123,7 +136,11 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
         return person
 
     @app.post("/api/v1/relationships", response_model=RelationshipRead, status_code=status.HTTP_201_CREATED)
-    def create_relationship(payload: RelationshipCreate, db: Db, actor_id: Auth):
+    def create_relationship(
+        payload: RelationshipCreate,
+        db: Session = Depends(get_db),
+        actor_id: str | None = Depends(require_api_token),
+    ):
         if payload.from_person_id == payload.to_person_id:
             raise HTTPException(status_code=422, detail="A person cannot be related to themselves")
         first = db.get(Person, payload.from_person_id)
@@ -155,7 +172,11 @@ def create_app(database_url: str | None = None, api_token: str | None = None) ->
         return record
 
     @app.get("/api/v1/people/{person_id}/relationships", response_model=list[RelationshipRead])
-    def list_relationships(person_id: str, db: Db, _: Auth):
+    def list_relationships(
+        person_id: str,
+        db: Session = Depends(get_db),
+        _: str | None = Depends(require_api_token),
+    ):
         if db.get(Person, person_id) is None:
             raise HTTPException(status_code=404, detail="Person not found")
         query = select(RelationshipRecord).where(
