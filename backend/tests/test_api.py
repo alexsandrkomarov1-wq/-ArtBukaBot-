@@ -459,6 +459,9 @@ def test_concurrent_bootstrap_creates_exactly_one_initial_owner(tmp_path):
             responses = [first.result(), second.result()]
 
         assert sorted(response.status_code for response in responses) == [201, 409]
-        assert login(client, "first_owner", "a-long-bootstrap-password-123").status_code + login(
-            client, "second_owner", "a-long-bootstrap-password-123"
-        ).status_code in {602, 603}
+        owner_logins = [
+            login(client, "first_owner", "a-long-bootstrap-password-123"),
+            login(client, "second_owner", "a-long-bootstrap-password-123"),
+        ]
+        assert sum(response.status_code == 200 for response in owner_logins) == 1
+        assert all(response.status_code in {200, 401} for response in owner_logins)
