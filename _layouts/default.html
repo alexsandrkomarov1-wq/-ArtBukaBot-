@@ -38,6 +38,6 @@
     <p class="site-guide-footnote">Контекстные подсказки работают локально. ИИ-диалог подключается отдельно через защищённый backend.</p>
   </section>
 </div>
-<script src="{{ '/assets/js/site-guide.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/site-guide.js' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" defer></script>
 </body>
 </html>
