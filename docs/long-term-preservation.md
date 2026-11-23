@@ -25,6 +25,27 @@ The following approved concepts remain architectural invariants:
 
 These principles are preserved; implementation details may be replaced as technology changes.
 
+### Approved domain implementation status
+
+The conceptual architecture is broader than the current backend. The following status prevents a design decision from being mistaken for a finished feature:
+
+| Approved domain | Current implementation status |
+|---|---|
+| Identity and people | Partial: person records and stable-in-record IDs exist; aliases, duplicate resolution, merge history, and external identities are not implemented. |
+| Family and social relationships | Partial: basic directed relationship records exist; typed relationship governance and richer social graph rules remain. |
+| Documents and sources | Not implemented. |
+| Events and chronology | Not implemented. |
+| Calendar and tasks | Not implemented. |
+| Notes and knowledge base | Not implemented. |
+| Analytics and reports | Not implemented. |
+| Users and access | Partial: four roles, sessions, password change, bootstrap, audit events, and role controls exist; recovery, succession, MFA, and independent security review remain. |
+| Storage and synchronization | Not implemented as a production capability. |
+| Administration and audit | Partial: audit records and migrations exist; tamper evidence, retention, monitoring, and operational controls remain. |
+| External connectors | Not implemented. |
+| Web/mobile clients | Not implemented as connected clients. The GitHub Pages Jekyll site remains a static shell, not the family application. |
+
+No module should be marked "implemented" merely because its name appears in the approved architecture or its future interface has been discussed.
+
 ## 3. Critical gaps found in the current foundation
 
 | Area | Current state | Required before real family data |
