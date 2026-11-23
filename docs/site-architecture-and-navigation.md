@@ -167,17 +167,25 @@ Every detail page has breadcrumbs and contextual links. Example chains:
 
 Back navigation should preserve the previous list's filters and page position where feasible. Deep links must work in a new browser tab after authentication.
 
-## 8. Telegram boundary
+## 8. Telegram Web browser workflow
 
-Telegram bots and group remain external tools. Existing bot code and behavior are not to be rewritten.
+Telegram access is designed around the existing Telegram Web user interface in a browser, using the owner's own authenticated session. This is distinct from Telegram Bot API integration. Existing family bots remain unchanged.
 
-- Bot links use canonical HTTPS links supplied by the owner.
-- The supplied group Web Telegram locator is not a public invite URL.
-- Do not expose the group publicly until a valid invite URL and visibility approval exist.
-- Do not download or import group photos/videos in bulk.
-- Future import is individually selected, authenticated, audited, quarantined and reviewed.
-- Telegram IDs are provenance only, never PERSON-ID, PHOTO-ID, EVENT-ID or primary registry keys.
-- Telegram API connector is optional and must not be required for the website to work.
+Target workflow:
+1. Open https://web.telegram.org/k/ in the owner's controlled browser profile.
+2. The owner enters their Telegram password and confirmation code directly in Telegram Web. KOMAROVA_CORE must never request or store these credentials.
+3. Use only the authenticated account's existing access and permissions.
+4. Let the owner select an attachment or approve a bounded batch of messages/files for intake.
+5. Download selected photos/videos/documents through the authorized browser session.
+6. Copy them to the local intake path `KOMAROVA_CORE/intake/telegram/attachments` and hand them to File Engine.
+7. File Engine validates content, calculates SHA-256, checks duplicates, records source provenance and registers MATERIAL-ID before reporting successful intake.
+8. Archive preservation and public publication remain separate decisions. No automatic publication.
+
+Security: never store or export Telegram passwords, one-time codes, session cookies, auth keys or browser profile data in Git, logs, project documentation, public hosting or frontend JavaScript. Do not bypass Telegram access controls, CAPTCHA, rate limits or privacy restrictions. If authentication expires, pause for the owner to sign in interactively. Do not expose the authenticated browser profile to the public website or backend clients.
+
+The ability to access Telegram Web does not authorize downloading the entire group history. At this stage there is no bulk download or continuous monitoring. Support deliberate item selection or a bounded batch approved by the owner. Any future automatic rule for new posts requires a separate specification and explicit activation.
+
+The supplied group Web Telegram locator is not a public invite URL. Do not expose the group publicly until a valid invitation URL and visibility approval exist. Telegram IDs remain provenance only, never PERSON-ID, PHOTO-ID, EVENT-ID or primary registry keys. Telegram API integration is optional and is not required for this browser-based workflow.
 
 ## 9. Authorization and publication
 
