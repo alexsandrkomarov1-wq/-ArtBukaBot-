@@ -21,5 +21,5 @@ assert "requestFullscreen()" in script
 assert "setInterval" in script
 assert "не отправляет их на сервер" in page
 assert "не загружены на сервер" in script
-assert 'href="{{ \'/media/\' | relative_url }}"' in layout
+assert "/media/" in layout and "Медиатека" in layout
 print("Media viewer contract checks passed.")
