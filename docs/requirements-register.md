@@ -296,6 +296,19 @@ The authenticated homepage includes a shared, interactive family bulletin board 
 - Keep the map provider and place-discovery source replaceable. Cache external data with source, retrieval time and expiry; preserve attribution and usage conditions.
 - No separate family places database or new cloud project. The board and map are modules of KOMAROVA_CORE.
 
+### Family board and map acceptance requirements
+- REQ-BOARD-001: Create and display a private family announcement/proposal feed with stable POST-ID and author PERSON-ID.
+- REQ-BOARD-002: Support comments, replies, reactions/votes, pinning and proposal lifecycle states with audit history.
+- REQ-BOARD-003: Link board posts to canonical EVENT-ID, PLACE-ID and ARCHIVE-ID without duplicate records.
+- REQ-BOARD-004: Enforce per-post visibility and role permissions; public publication requires explicit approval.
+- REQ-MAP-001: Display saved places on an interactive map with visited, wishlist, proposed, planned and verified unavailable states.
+- REQ-MAP-002: Track visits per person and date; distinguish places visited by some family members from places not visited by anyone.
+- REQ-MAP-003: Allow a participant to confirm a visit and attach notes, rating and archive photos.
+- REQ-MAP-004: Discover nearby places by selected city, map center or explicit one-time location, with adjustable radius and categories.
+- REQ-MAP-005: Filter nearby places by family visit history, distance, category and verified availability; do not infer a visit from GPS proximity.
+- REQ-MAP-006: Provide map/list modes, marker clustering, a legend and place cards linked to canonical PLACE-ID.
+- REQ-PRIV-002: Prevent private board posts, visit history, location and interests from being exposed through maps, notifications or AI recommendations.
+
 ### Homepage and discovery acceptance requirements
 - REQ-HOME-001: Render a private family dashboard only after authenticated session and authorization checks; keep the public landing page free of private plans.
 - REQ-HOME-002: Show upcoming shared events, invitations, tasks and reminders from the authoritative family calendar.
