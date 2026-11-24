@@ -48,6 +48,19 @@ description: Локальный просмотр фотографий и вид�
     </div>
   </div>
 </section>
+<style>
+.cloud-archive{margin:2rem 0;padding:1.5rem;border:1px solid rgba(100,130,150,.35);border-radius:18px;background:rgba(255,255,255,.035)}
+.cloud-auth-form,.cloud-upload-form{display:flex;flex-wrap:wrap;gap:1rem;align-items:end;margin:1rem 0}
+.cloud-auth-form label,.cloud-upload-form label{display:grid;gap:.35rem;min-width:180px;flex:1;font-size:.9rem}
+.cloud-auth-form input,.cloud-upload-form input,.cloud-upload-form select{width:100%;padding:.7rem;border:1px solid #78909c;border-radius:8px;background:transparent;color:inherit}
+.cloud-toolbar,.cloud-preview-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin:1rem 0}
+.cloud-bootstrap{margin-top:1rem}.cloud-bootstrap summary{cursor:pointer}
+.cloud-item-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.cloud-preview{margin-top:1rem;padding:1rem;border:1px solid rgba(100,130,150,.35);border-radius:12px}
+.cloud-preview img,.cloud-preview video{display:block;max-width:100%;max-height:70vh;margin:1rem auto}
+.cloud-archive [hidden]{display:none!important}
+@media(max-width:650px){.cloud-auth-form,.cloud-upload-form{display:grid}.cloud-item-actions{width:100%}}
+</style>
 <section class="media-workspace" aria-label="Локальный просмотр фотографий и видео">
   <div class="media-toolbar">
     <label class="media-open-button" for="media-file-input">＋ Открыть фото и видео</label>
@@ -95,11 +108,11 @@ description: Локальный просмотр фотографий и вид�
   <h2>Что работает сейчас, а что ещё впереди</h2>
   <ul>
     <li><strong>Работает в этой версии:</strong> локальный выбор фотографий и видео, просмотр изображений, встроенное воспроизведение видео, переключение файлов, слайдшоу фотографий, полноэкранный режим и скачивание выбранного файла.</li>
-    <li><strong>Пока не реализовано:</strong> загрузка в постоянное семейное хранилище, общие альбомы между устройствами, учёт PERSON-ID/EVENT-ID/PLACE-ID, ИИ-описания, экспорт ZIP и синхронизация.</li>
+    <li><strong>Подключается в закрытом кабинете:</strong> загрузка в приватный Neon bucket uploads, просмотр и удаление файлов, связь фотографии с существующим PERSON-ID. Общие альбомы, EVENT-ID/PLACE-ID, ИИ-описания, экспорт ZIP и синхронизация остаются следующими этапами.</li>
     <li><strong>Ориентация:</strong> браузер применяет EXIF Orientation для поддерживаемых изображений. Для видео с метаданными поворота и HEIC/HEIF универсального браузерного решения нет. В закрытом архиве предусмотрен отдельный обработчик, который создаёт выровненную копию, не меняя оригинал; он пока не подключён к загрузке.</li>
     <li><strong>Совместимость:</strong> расширение не доказывает реальный формат и кодек. MP4/H.264 обычно поддерживается шире, чем MKV или HEVC. Ошибка декодирования будет показана отдельно, а не маскироваться под пустую фотографию.</li>
   </ul>
-  <p>Не выбирайте файлы на чужом устройстве. До подключения закрытого кабинета медиатека не является семейным облачным архивом и не передаёт содержимое файлов на KOMAROVA_CORE.</p>
+  <p>Не выбирайте файлы на чужом устройстве. Локальный просмотр не отправляет файлы на сервер. Облачный архив выше использует отдельный вход и закрытую авторизацию.</p>
 </section>
 <script>window.KOMAROVA_API_BASE = "https://komarova-core-api.onrender.com";</script>
 <script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=1" defer></script>

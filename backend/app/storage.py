@@ -3,12 +3,11 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
-from typing import BinaryIO, Iterator
+from typing import Iterator
 from urllib.parse import urlparse
 
 import boto3
 from botocore.config import Config
-from botocore.exceptions import ClientError
 
 
 class PrivateMediaStorage:
@@ -61,13 +60,28 @@ class PrivateMediaStorage:
             with Path(source).open("rb") as stream:
                 self.client.put_object(
                     Bucket=self.bucket, Key=object_key, Body=stream,
-                    ContentType=content_type, ServerSideEncryption="AES256",
+                    ContentType=content_type,
                 )
             return
         destination = self._local_path(object_key)
         destination.parent.mkdir(parents=True, exist_ok=True)
         with Path(source).open("rb") as src, destination.open("xb") as dst:
             shutil.copyfileobj(src, dst, length=1024 * 1024)
+
+    def verify(self, object_key: str, expected_size: int) -> None:
+        if self.client is not None:
+            response = self.client.head_object(Bucket=self.bucket, Key=object_key)
+            if int(response.get("ContentLength", -1)) != expected_size:
+                raise IOError("Uploaded object size does not match the source file")
+            return
+        if self._local_path(object_key).stat().st_size != expected_size:
+            raise IOError("Stored object size does not match the source file")
+
+    def check(self) -> bool:
+        if self.client is not None:
+            self.client.list_objects_v2(Bucket=self.bucket, MaxKeys=1)
+            return True
+        return self.local_root.exists()
 
     def open_stream(self, object_key: str) -> tuple[Iterator[bytes], int, str | None]:
         if self.client is not None:

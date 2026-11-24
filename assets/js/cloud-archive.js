@@ -6,6 +6,7 @@
   const tokenKey = "komarova_core_session";
   let token = sessionStorage.getItem(tokenKey) || "";
   let previewUrl = "";
+  let currentRole = "";
   const auth = $("cloud-auth");
   const panel = $("cloud-private-panel");
   const status = $("cloud-archive-status");
@@ -28,6 +29,7 @@
   function showSession(user) {
     auth.hidden = true;
     panel.hidden = false;
+    currentRole = user.role;
     $("cloud-user-label").textContent = user.username + " · " + user.role;
     connection.textContent = "Подключено · закрытая сессия";
   }
@@ -74,10 +76,13 @@
       const view = document.createElement("button");
       view.type = "button"; view.className = "media-button"; view.textContent = "Просмотр";
       view.addEventListener("click", () => preview(item));
-      const remove = document.createElement("button");
-      remove.type = "button"; remove.className = "media-button"; remove.textContent = "Удалить";
-      remove.addEventListener("click", () => removeItem(item));
-      actions.append(view, remove);
+      actions.append(view);
+      if (currentRole === "owner" || currentRole === "moderator") {
+        const remove = document.createElement("button");
+        remove.type = "button"; remove.className = "media-button"; remove.textContent = "Удалить";
+        remove.addEventListener("click", () => removeItem(item));
+        actions.append(remove);
+      }
       row.append(info, actions);
       list.append(row);
     }
@@ -125,6 +130,7 @@
       token = result.access_token;
       sessionStorage.setItem(tokenKey, token);
       showSession(result.user);
+      await request("/api/v1/archive/storage-status");
       await loadPeople(); await loadArchive();
       $("cloud-password").value = "";
     } catch (error) { connection.textContent = "Ошибка входа: " + error.message; }
@@ -176,11 +182,11 @@
     previewUrl = "";
   });
   fetch(apiBase + "/health").then(r => r.ok ? r.json() : Promise.reject()).then(() => {
-    connection.textContent = "API доступен · Neon storage настроен";
+    connection.textContent = "API доступен · войдите в закрытый кабинет";
   }).catch(() => { connection.textContent = "API пока недоступен"; });
   if (token) {
     request("/api/v1/auth/me").then(async user => {
-      showSession(user); await loadPeople(); await loadArchive();
+      showSession(user); await request("/api/v1/archive/storage-status"); await loadPeople(); await loadArchive();
     }).catch(clearSession);
   }
 })();
