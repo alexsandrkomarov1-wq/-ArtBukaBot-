@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - core-backend-foundation
+      - feature/komarova-neon-media-integration
   pull_request:
     branches:
       - main
