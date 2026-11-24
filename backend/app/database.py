@@ -9,6 +9,7 @@ from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -22,6 +23,12 @@ def build_engine(database_url: str | None = None) -> Engine:
     options: dict = {"pool_pre_ping": True}
     if url.startswith("sqlite"):
         options["connect_args"] = {"check_same_thread": False}
+    elif url.startswith("postgresql"):
+        # Neon serverless endpoints are short-lived; avoid idle pooled sockets.
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+        options["poolclass"] = NullPool
+        options["connect_args"] = {"connect_timeout": 10}
     return create_engine(url, **options)
 
 

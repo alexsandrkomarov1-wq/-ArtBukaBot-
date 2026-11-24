@@ -7,10 +7,48 @@ description: Локальный просмотр фотографий и вид�
 <section class="media-heading">
   <p class="eyebrow">KOMAROVA_CORE · MEDIA</p>
   <h1>Семейная <em>медиатека.</em></h1>
-  <p class="media-lead">Открывайте фотографии и видео прямо в браузере. Выбранные файлы остаются на вашем устройстве: эта версия не отправляет их на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
+  <p class="media-lead">Закрытый облачный архив подключается через защищённый backend и приватное хранилище Neon. Локальный просмотр ниже остаётся отдельным инструментом и не отправляет файлы на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
 </section>
 
-<section class="media-workspace" aria-label="Просмотр фотографий и видео">
+<section class="cloud-archive" aria-labelledby="cloud-archive-title">
+  <div class="media-library-heading"><div><p class="eyebrow">ЗАКРЫТЫЙ КАБИНЕТ · NEON OBJECT STORAGE</p><h2 id="cloud-archive-title">Семейный облачный архив</h2></div><span id="cloud-connection-state" class="media-status">Проверка подключения…</span></div>
+  <div id="cloud-auth">
+    <form id="cloud-login-form" class="cloud-auth-form">
+      <label>Логин<input id="cloud-username" name="username" autocomplete="username" required minlength="3"></label>
+      <label>Пароль<input id="cloud-password" name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit" class="media-open-button">Войти в семейный кабинет</button>
+    </form>
+    <details class="cloud-bootstrap">
+      <summary>Первичная настройка владельца</summary>
+      <form id="cloud-bootstrap-form" class="cloud-auth-form">
+        <label>Одноразовый код настройки<input id="cloud-bootstrap-token" type="password" autocomplete="off" required></label>
+        <label>Новый логин владельца<input id="cloud-owner-username" autocomplete="username" required minlength="3"></label>
+        <label>Пароль владельца (не менее 12 символов)<input id="cloud-owner-password" type="password" autocomplete="new-password" required minlength="12"></label>
+        <button type="submit" class="media-button">Создать учётную запись владельца</button>
+      </form>
+    </details>
+  </div>
+  <div id="cloud-private-panel" hidden>
+    <div class="cloud-toolbar">
+      <span id="cloud-user-label"></span>
+      <button type="button" id="cloud-logout" class="media-button">Выйти</button>
+    </div>
+    <form id="cloud-upload-form" class="cloud-upload-form">
+      <label>Фотография или видео<input id="cloud-upload-file" type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/tiff,image/heic,image/heif,video/mp4,video/quicktime,video/webm,video/x-matroska" required></label>
+      <label>Название (необязательно)<input id="cloud-upload-title" maxlength="300" placeholder="Например, семейная встреча"></label>
+      <label>Связать с человеком / PERSON-ID<select id="cloud-person-id"><option value="">Без привязки к человеку</option></select></label>
+      <button type="submit" class="media-open-button">Загрузить в закрытый архив</button>
+    </form>
+    <p id="cloud-archive-status" class="media-status" role="status" aria-live="polite">После входа здесь появятся файлы из приватного bucket uploads.</p>
+    <div id="cloud-archive-list" class="media-list"><p class="media-list-empty">Архив ещё не загружен.</p></div>
+    <div id="cloud-preview" class="cloud-preview" hidden>
+      <div class="cloud-preview-head"><strong id="cloud-preview-name"></strong><button type="button" id="cloud-preview-close" class="media-button">Закрыть просмотр</button></div>
+      <img id="cloud-preview-image" alt="" hidden>
+      <video id="cloud-preview-video" controls playsinline hidden></video>
+    </div>
+  </div>
+</section>
+<section class="media-workspace" aria-label="Локальный просмотр фотографий и видео">
   <div class="media-toolbar">
     <label class="media-open-button" for="media-file-input">＋ Открыть фото и видео</label>
     <input id="media-file-input" class="media-file-input" type="file" accept="image/*,video/*" multiple>
@@ -63,4 +101,6 @@ description: Локальный просмотр фотографий и вид�
   </ul>
   <p>Не выбирайте файлы на чужом устройстве. До подключения закрытого кабинета медиатека не является семейным облачным архивом и не передаёт содержимое файлов на KOMAROVA_CORE.</p>
 </section>
+<script>window.KOMAROVA_API_BASE = "https://komarova-core-api.onrender.com";</script>
+<script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=1" defer></script>
 <script src="{{ '/assets/js/media-library.js' | relative_url }}" defer></script>
