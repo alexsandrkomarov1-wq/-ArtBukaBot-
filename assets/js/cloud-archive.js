@@ -6,6 +6,7 @@
   const tokenKey = "komarova_core_session";
   let token = sessionStorage.getItem(tokenKey) || "";
   let previewUrl = "";
+  let sessionRole = "";
   const auth = $("cloud-auth");
   const panel = $("cloud-private-panel");
   const status = $("cloud-archive-status");
@@ -28,6 +29,7 @@
   function showSession(user) {
     auth.hidden = true;
     panel.hidden = false;
+    sessionRole = user.role;
     $("cloud-user-label").textContent = user.username + " · " + user.role;
     connection.textContent = "Закрытая сессия активна · проверяем хранилище";
   }
@@ -44,6 +46,7 @@
   }
   function clearSession() {
     token = "";
+    sessionRole = "";
     sessionStorage.removeItem(tokenKey);
     auth.hidden = false;
     panel.hidden = true;
@@ -93,10 +96,15 @@
         view.disabled = true;
         view.title = "Оригинал нельзя открыть до антивирусной проверки";
       }
-      const remove = document.createElement("button");
-      remove.type = "button"; remove.className = "media-button"; remove.textContent = "Удалить";
-      remove.addEventListener("click", () => removeItem(item));
-      actions.append(view, remove);
+      actions.append(view);
+      if (sessionRole === "owner" || sessionRole === "moderator") {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "media-button";
+        remove.textContent = "Удалить";
+        remove.addEventListener("click", () => removeItem(item));
+        actions.append(remove);
+      }
       row.append(info, actions);
       list.append(row);
     }
