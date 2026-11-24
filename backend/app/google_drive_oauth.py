@@ -5,7 +5,7 @@ import hashlib
 import json
 import os
 import secrets
-from datetime import timedelta
+from datetime import timedelta, timezone
 from urllib.parse import urlencode
 
 import httpx
@@ -140,7 +140,8 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         pending = db.scalar(select(GoogleOAuthState).where(
             GoogleOAuthState.state_hash == state_hash
         ))
-        if pending is None or pending.expires_at <= utc_now():
+        expires_at = pending.expires_at if pending is None or pending.expires_at.tzinfo else pending.expires_at.replace(tzinfo=timezone.utc)
+        if pending is None or expires_at <= utc_now():
             if pending is not None:
                 db.delete(pending)
                 db.commit()
