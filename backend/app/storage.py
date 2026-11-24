@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from pathlib import Path
 from typing import BinaryIO, Iterator
 from urllib.parse import urlparse
@@ -100,6 +101,26 @@ class PrivateMediaStorage:
         path = self._local_path(object_key)
         if path.exists():
             path.unlink()
+
+    def health_check(self) -> dict[str, str]:
+        """Check the configured backend without exposing credentials or object keys."""
+        backend = "s3-compatible" if self.client is not None else "local-private"
+        try:
+            if self.client is not None:
+                self.client.head_bucket(Bucket=self.bucket)
+            else:
+                descriptor, temporary_name = tempfile.mkstemp(
+                    prefix=".komarova-storage-health-", dir=self.local_root
+                )
+                try:
+                    os.write(descriptor, b"ok")
+                    os.fsync(descriptor)
+                finally:
+                    os.close(descriptor)
+                    Path(temporary_name).unlink(missing_ok=True)
+        except Exception:
+            return {"status": "unavailable", "backend": backend}
+        return {"status": "ok", "backend": backend}
 
     def _local_path(self, object_key: str) -> Path:
         candidate = (self.local_root / object_key).resolve()
