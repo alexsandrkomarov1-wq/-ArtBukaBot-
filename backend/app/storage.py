@@ -103,23 +103,59 @@ class PrivateMediaStorage:
             path.unlink()
 
     def health_check(self) -> dict[str, str]:
-        """Check the configured backend without exposing credentials or object keys."""
+        """Verify read/write/delete capability without exposing credentials."""
         backend = "s3-compatible" if self.client is not None else "local-private"
+        payload = b"KOMAROVA_CORE_STORAGE_HEALTH_V1"
+        probe_key = f".health-check/{os.urandom(16).hex()}"
+        probe_path: Path | None = None
+        descriptor: int | None = None
+        remote_created = False
         try:
             if self.client is not None:
-                self.client.head_bucket(Bucket=self.bucket)
+                self.client.put_object(
+                    Bucket=self.bucket,
+                    Key=probe_key,
+                    Body=payload,
+                    ContentType="application/octet-stream",
+                    ServerSideEncryption="AES256",
+                )
+                remote_created = True
+                response = self.client.get_object(Bucket=self.bucket, Key=probe_key)
+                body = response["Body"]
+                try:
+                    actual = body.read()
+                finally:
+                    body.close()
+                if actual != payload:
+                    raise RuntimeError("Storage read-back verification failed")
+                self.client.delete_object(Bucket=self.bucket, Key=probe_key)
+                remote_created = False
             else:
                 descriptor, temporary_name = tempfile.mkstemp(
                     prefix=".komarova-storage-health-", dir=self.local_root
                 )
-                try:
-                    os.write(descriptor, b"ok")
-                    os.fsync(descriptor)
-                finally:
-                    os.close(descriptor)
-                    Path(temporary_name).unlink(missing_ok=True)
+                probe_path = Path(temporary_name)
+                with os.fdopen(descriptor, "wb") as stream:
+                    descriptor = None
+                    stream.write(payload)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                if probe_path.read_bytes() != payload:
+                    raise RuntimeError("Local storage read-back verification failed")
+                probe_path.unlink()
+                probe_path = None
         except Exception:
             return {"status": "unavailable", "backend": backend}
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+            if probe_path is not None:
+                probe_path.unlink(missing_ok=True)
+            if remote_created and self.client is not None:
+                try:
+                    self.client.delete_object(Bucket=self.bucket, Key=probe_key)
+                except Exception:
+                    pass
         return {"status": "ok", "backend": backend}
 
     def _local_path(self, object_key: str) -> Path:
