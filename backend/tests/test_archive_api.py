@@ -120,7 +120,37 @@ def test_archive_upload_requires_authentication_and_guest_cannot_upload(tmp_path
             files={"file": ("photo.jpg", jpeg_fixture(), "image/jpeg")},
         )
         assert forbidden.status_code == 403
-        assert client.get("/api/v1/archive/items", headers=auth(guest_token)).status_code == 200
+        assert client.get("/api/v1/archive/items", headers=auth(guest_token)).status_code == 403
+
+
+def test_quarantined_original_cannot_be_viewed_even_by_owner(tmp_path):
+    with make_client(tmp_path) as client:
+        token = owner_token(client)
+        uploaded = client.post(
+            "/api/v1/archive/items", headers=auth(token),
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        assert uploaded.status_code == 201
+        item_id = uploaded.json()["archive_item_id"]
+
+        response = client.get(
+            f"/api/v1/archive/items/{item_id}/content", headers=auth(token)
+        )
+        assert response.status_code == 423
+        assert "quarantined" in response.json()["detail"].lower()
+
+
+def test_storage_health_reports_actual_local_backend_and_requires_login(tmp_path):
+    with make_client(tmp_path) as client:
+        anonymous = client.get("/api/v1/archive/storage/health")
+        assert anonymous.status_code == 401
+
+        token = owner_token(client)
+        response = client.get(
+            "/api/v1/archive/storage/health", headers=auth(token)
+        )
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok", "backend": "local-private"}
 
 
 def test_invalid_signature_and_extension_mismatch_are_rejected(tmp_path):
