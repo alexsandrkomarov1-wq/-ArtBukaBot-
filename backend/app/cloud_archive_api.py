@@ -83,6 +83,16 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     intake_root = Path(os.getenv("CORE_MEDIA_ROOT", str(storage_root))).expanduser().resolve()
     intake_root.mkdir(parents=True, exist_ok=True)
 
+    @router.get("/storage/health")
+    def storage_health(
+        _: User = Depends(require_roles("owner", "moderator", "family_member")),
+    ):
+        """Report the configured storage backend; never expose bucket names or secrets."""
+        result = storage.health_check()
+        if result["status"] != "ok":
+            raise HTTPException(status_code=503, detail="Configured media storage is unavailable")
+        return result
+
     @router.post("/items", response_model=ArchiveItemRead, status_code=201)
     async def upload_media(
         file: UploadFile = File(...),
@@ -203,7 +213,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     def list_archive_items(
         limit: int = 50, offset: int = 0,
         db: Session = Depends(get_db),
-        _: User = Depends(require_roles("owner", "moderator", "family_member", "guest")),
+        _: User = Depends(require_roles("owner", "moderator", "family_member")),
     ):
         if limit < 1 or limit > 100 or offset < 0:
             raise HTTPException(status_code=422, detail="Invalid pagination")
@@ -239,12 +249,18 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         row = db.execute(
             select(ArchiveItem, StoredBlob)
             .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
-            .where(ArchiveItem.archive_item_id == archive_item_id,
-                   ArchiveItem.record_status == "quarantined")
+            .where(ArchiveItem.archive_item_id == archive_item_id)
         ).first()
         if row is None:
             raise HTTPException(status_code=404, detail="Archive item not found")
         item, blob = row
+        # Fail closed: no original may leave quarantine until a scanner and
+        # verification workflow explicitly marks both records as released.
+        if item.record_status != "available" or blob.storage_state != "verified":
+            raise HTTPException(
+                status_code=423,
+                detail="Media is quarantined and cannot be viewed before malware scanning and verification",
+            )
         try:
             chunks, length, stored_type = storage.open_stream(blob.storage_object_key)
         except Exception:
