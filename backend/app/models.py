@@ -106,3 +106,30 @@ class ArchiveEntityLink(Base):
     source_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class GoogleOAuthState(Base):
+    __tablename__ = "google_oauth_states"
+    state_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class GoogleDriveAccount(Base):
+    __tablename__ = "google_drive_accounts"
+    drive_account_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("GD"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    google_user_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    email_address: Mapped[str] = mapped_column(String(320), nullable=False)
+    display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    refresh_token_ciphertext: Mapped[str] = mapped_column(Text, nullable=False)
+    granted_scopes: Mapped[str] = mapped_column(Text, nullable=False)
+    quota_limit_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    quota_usage_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    quota_usage_in_drive_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    quota_usage_in_trash_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    last_quota_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

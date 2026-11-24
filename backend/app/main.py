@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
 from .cloud_archive_api import build_archive_router
+from .google_drive_oauth import build_google_drive_router
 from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
 from .navigation import build_navigation
 from .schemas import (
@@ -113,6 +114,7 @@ def create_app(
         max_age=600,
     )
     app.include_router(build_archive_router(get_db, require_roles, configured_media_root))
+    app.include_router(build_google_drive_router(get_db, require_current_user))
 
     def acquire_security_lock(db: Session) -> None:
         # A single database row serializes bootstrap and owner-administration writes

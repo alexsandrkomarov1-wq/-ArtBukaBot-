@@ -29,7 +29,7 @@ def test_portable_archive_export_verify_and_restore(tmp_path):
     manifest = verify_archive(archive_path)
     assert manifest["format"] == "KOMAROVA_CORE_ARCHIVE"
     assert manifest["format_version"] == 1
-    assert manifest["schema_revision"] == "0005_private_media_intake"
+    assert manifest["schema_revision"] == "0006_google_drive_oauth"
     assert manifest["contents"] == ["relational_database"]
     assert manifest["database_sha256"]
     assert manifest["database_size_bytes"] > 0
