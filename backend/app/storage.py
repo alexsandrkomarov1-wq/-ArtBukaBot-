@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from pathlib import Path
 from typing import BinaryIO, Iterator
 from urllib.parse import urlparse
@@ -39,7 +40,7 @@ class PrivateMediaStorage:
             parsed = urlparse(endpoint)
             if parsed.scheme != "https" or not parsed.netloc:
                 raise RuntimeError("CORE_S3_ENDPOINT_URL must be a valid HTTPS endpoint")
-            self.provider = "neon-object-storage"
+            self.provider = "s3-compatible"
             self.client = boto3.client(
                 "s3",
                 endpoint_url=endpoint,
@@ -60,7 +61,7 @@ class PrivateMediaStorage:
             with Path(source).open("rb") as stream:
                 self.client.put_object(
                     Bucket=self.bucket, Key=object_key, Body=stream,
-                    ContentType=content_type, ServerSideEncryption="AES256",
+                    ContentType=content_type,
                 )
             return
         destination = self._local_path(object_key)
@@ -100,6 +101,61 @@ class PrivateMediaStorage:
         path = self._local_path(object_key)
         if path.exists():
             path.unlink()
+
+    def health_check(self) -> dict[str, str]:
+        """Verify read/write/delete capability without exposing credentials."""
+        backend = "s3-compatible" if self.client is not None else "local-private"
+        payload = b"KOMAROVA_CORE_STORAGE_HEALTH_V1"
+        probe_key = f".health-check/{os.urandom(16).hex()}"
+        probe_path: Path | None = None
+        descriptor: int | None = None
+        remote_created = False
+        try:
+            if self.client is not None:
+                self.client.put_object(
+                    Bucket=self.bucket,
+                    Key=probe_key,
+                    Body=payload,
+                    ContentType="application/octet-stream",
+                )
+                remote_created = True
+                response = self.client.get_object(Bucket=self.bucket, Key=probe_key)
+                body = response["Body"]
+                try:
+                    actual = body.read()
+                finally:
+                    body.close()
+                if actual != payload:
+                    raise RuntimeError("Storage read-back verification failed")
+                self.client.delete_object(Bucket=self.bucket, Key=probe_key)
+                remote_created = False
+            else:
+                descriptor, temporary_name = tempfile.mkstemp(
+                    prefix=".komarova-storage-health-", dir=self.local_root
+                )
+                probe_path = Path(temporary_name)
+                with os.fdopen(descriptor, "wb") as stream:
+                    descriptor = None
+                    stream.write(payload)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                if probe_path.read_bytes() != payload:
+                    raise RuntimeError("Local storage read-back verification failed")
+                probe_path.unlink()
+                probe_path = None
+        except Exception:
+            return {"status": "unavailable", "backend": backend}
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+            if probe_path is not None:
+                probe_path.unlink(missing_ok=True)
+            if remote_created and self.client is not None:
+                try:
+                    self.client.delete_object(Bucket=self.bucket, Key=probe_key)
+                except Exception:
+                    pass
+        return {"status": "ok", "backend": backend}
 
     def _local_path(self, object_key: str) -> Path:
         candidate = (self.local_root / object_key).resolve()

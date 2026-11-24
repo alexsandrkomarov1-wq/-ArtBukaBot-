@@ -120,7 +120,70 @@ def test_archive_upload_requires_authentication_and_guest_cannot_upload(tmp_path
             files={"file": ("photo.jpg", jpeg_fixture(), "image/jpeg")},
         )
         assert forbidden.status_code == 403
-        assert client.get("/api/v1/archive/items", headers=auth(guest_token)).status_code == 200
+        assert client.get("/api/v1/archive/items", headers=auth(guest_token)).status_code == 403
+
+
+def test_guest_cannot_read_private_archive_metadata_or_content(tmp_path):
+    with make_client(tmp_path) as client:
+        owner = owner_token(client)
+        uploaded = client.post(
+            "/api/v1/archive/items", headers=auth(owner),
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        assert uploaded.status_code == 201
+        item_id = uploaded.json()["archive_item_id"]
+
+        created = client.post(
+            "/api/v1/users", headers=auth(owner),
+            json={"username": "guest", "password": "a-long-test-password-123", "role": "guest"},
+        )
+        assert created.status_code == 201
+        login = client.post(
+            "/api/v1/auth/login",
+            json={"username": "guest", "password": "a-long-test-password-123"},
+        )
+        guest = login.json()["access_token"]
+
+        assert client.get("/api/v1/archive/items", headers=auth(guest)).status_code == 403
+        assert client.get(
+            f"/api/v1/archive/items/{item_id}", headers=auth(guest)
+        ).status_code == 403
+        assert client.get(
+            f"/api/v1/archive/items/{item_id}/content", headers=auth(guest)
+        ).status_code == 403
+        assert client.get(
+            f"/api/v1/archive/items/{item_id}/links", headers=auth(guest)
+        ).status_code == 403
+
+
+def test_quarantined_original_cannot_be_viewed_even_by_owner(tmp_path):
+    with make_client(tmp_path) as client:
+        token = owner_token(client)
+        uploaded = client.post(
+            "/api/v1/archive/items", headers=auth(token),
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        assert uploaded.status_code == 201
+        item_id = uploaded.json()["archive_item_id"]
+
+        response = client.get(
+            f"/api/v1/archive/items/{item_id}/content", headers=auth(token)
+        )
+        assert response.status_code == 423
+        assert "quarantined" in response.json()["detail"].lower()
+
+
+def test_storage_health_reports_actual_local_backend_and_requires_login(tmp_path):
+    with make_client(tmp_path) as client:
+        anonymous = client.get("/api/v1/archive/storage/health")
+        assert anonymous.status_code == 401
+
+        token = owner_token(client)
+        response = client.get(
+            "/api/v1/archive/storage/health", headers=auth(token)
+        )
+        assert response.status_code == 200
+        assert response.json() == {"status": "ok", "backend": "local-private"}
 
 
 def test_invalid_signature_and_extension_mismatch_are_rejected(tmp_path):
