@@ -80,15 +80,36 @@ def _oauth_config() -> tuple[str, str, str]:
 
 
 def _google_about(access_token: str) -> dict:
-    response = httpx.get(
-        GOOGLE_ABOUT_URL,
-        params={"fields": "user(permissionId,emailAddress,displayName),storageQuota(limit,usage,usageInDrive,usageInDriveTrash)"},
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=20.0,
-    )
+    try:
+        response = httpx.get(
+            GOOGLE_ABOUT_URL,
+            params={"fields": "user(permissionId,emailAddress,displayName),storageQuota(limit,usage,usageInDrive,usageInDriveTrash)"},
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=20.0,
+        )
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Google Drive account metadata request failed",
+        ) from exc
+
     if response.status_code != 200:
         raise HTTPException(status_code=502, detail="Google Drive account metadata could not be read")
-    return response.json()
+
+    try:
+        payload = response.json()
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Google Drive returned invalid account metadata",
+        ) from exc
+
+    if not isinstance(payload, dict):
+        raise HTTPException(
+            status_code=502,
+            detail="Google Drive returned invalid account metadata",
+        )
+    return payload
 
 
 def build_google_drive_router(get_db, require_current_user) -> APIRouter:
