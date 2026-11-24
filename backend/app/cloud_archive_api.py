@@ -134,7 +134,6 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             object_key = f"quarantine/{sha256[:2]}/{sha256}"
             storage.put_file(object_key, temp_path, mime_type)
             stored = True
-            storage.verify(object_key, size)
 
             blob = StoredBlob(
                 blob_id=new_id("BL"), sha256=sha256, size_bytes=size,
@@ -191,21 +190,6 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 except Exception:
                     pass
             await file.close()
-
-    @router.get("/storage-status")
-    def storage_status(
-        _: User = Depends(require_roles("owner", "moderator", "family_member", "guest")),
-    ):
-        try:
-            storage.check()
-        except Exception:
-            raise HTTPException(status_code=503, detail="Private object storage is unavailable")
-        return {
-            "status": "connected",
-            "provider": storage.provider,
-            "bucket": storage.bucket or None,
-            "private": True,
-        }
 
     @router.get("/items", response_model=list[ArchiveItemRead])
     def list_archive_items(
@@ -306,8 +290,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         archive_item_id: str, db: Session = Depends(get_db),
         _: User = Depends(require_roles("owner", "moderator", "family_member", "guest")),
     ):
-        archive_item = db.get(ArchiveItem, archive_item_id)
-        if archive_item is None or archive_item.record_status != "quarantined":
+        if db.get(ArchiveItem, archive_item_id) is None:
             raise HTTPException(status_code=404, detail="Archive item not found")
         return list(db.scalars(
             select(ArchiveEntityLink).where(ArchiveEntityLink.archive_item_id == archive_item_id)
