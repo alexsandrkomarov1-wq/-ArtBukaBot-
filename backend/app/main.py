@@ -10,6 +10,7 @@ from pathlib import Path
 
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -57,6 +58,20 @@ def create_app(
         description="Private family information core. Development foundation; not yet production-certified.",
         docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan,
     )
+
+    cors_origins = [
+        origin.strip().rstrip("/")
+        for origin in os.getenv("CORE_CORS_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
+    if cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=cors_origins,
+            allow_credentials=True,
+            allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+            allow_headers=["Authorization", "Content-Type", "X-Core-Bootstrap-Token"],
+        )
 
     def get_db():
         yield from session_dependency(session_factory)

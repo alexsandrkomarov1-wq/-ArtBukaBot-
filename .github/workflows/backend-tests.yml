@@ -43,6 +43,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
       - name: Check JavaScript syntax
-        run: node --check assets/js/site-guide.js && node --check assets/js/media-library.js && node --check assets/js/places-gallery.js
+        run: node --check assets/js/site-guide.js && node --check assets/js/media-library.js && node --check assets/js/places-gallery.js && node --check assets/js/family-portal.js
       - name: Run backend tests
         run: pytest -q

@@ -19,3 +19,6 @@ exclude:
   - vendor
   - README.md
   - desktop
+
+# Set only after the private API has a verified HTTPS deployment.
+api_base_url: ""
