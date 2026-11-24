@@ -189,7 +189,7 @@
       $("[data-fb-place-detail]").innerHTML='<p class="fb-kicker">РЕЗУЛЬТАТ ПОИСКА</p><h3>Места рядом загружены</h3><p>Выберите точку, чтобы добавить личную отметку. Посещение не определяется автоматически.</p>';
     }catch(error){setMapStatus((error.message||"Поиск не выполнен")+". Можно продолжить с демонстрационными точками.");}
   };
-  $("[data-fb-city-search]").addEventListener("submit",event=>{event.preventDefault();searchCity($("[data-fb-city]").value.trim());});
+  $("[data-fb-city-search]").addEventListener("submit",event=>{event.preventDefault();searchCity($("#fb-city").value.trim());});
   $("[data-fb-person]").addEventListener("change",()=>{renderMarkers();if(selectedPlace)selectPlace(selectedPlace,false);});
   $("[data-fb-radius]").addEventListener("change",()=>setMapStatus("Радиус изменён. Нажмите ↻ для нового поиска."));
   $("[data-fb-refresh]").addEventListener("click",findNearby);
