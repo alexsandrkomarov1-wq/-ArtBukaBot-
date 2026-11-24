@@ -13,6 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from . import archive_api as legacy_archive_api
 from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Person, StoredBlob, User, new_id
 from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
 from .storage import PrivateMediaStorage
@@ -113,7 +114,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                     if not chunk:
                         break
                     size += len(chunk)
-                    if size > MAX_UPLOAD_BYTES:
+                    if size > legacy_archive_api.MAX_UPLOAD_BYTES:
                         raise HTTPException(status_code=413, detail="File exceeds the 100 MiB upload limit")
                     if len(header) < 64:
                         header.extend(chunk[:64 - len(header)])
@@ -127,9 +128,13 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             sha256 = digest.hexdigest()
             existing = db.scalar(select(StoredBlob).where(StoredBlob.sha256 == sha256))
             if existing is not None:
+                existing_item = db.scalar(select(ArchiveItem).where(
+                    ArchiveItem.original_blob_id == existing.blob_id
+                ))
                 raise HTTPException(status_code=409, detail={
                     "code": "duplicate_content",
                     "message": "An identical file is already registered; no second archive item was created.",
+                    "archive_item_id": existing_item.archive_item_id if existing_item else None,
                 })
             object_key = f"quarantine/{sha256[:2]}/{sha256}"
             storage.put_file(object_key, temp_path, mime_type)
@@ -175,6 +180,9 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         except HTTPException:
             db.rollback()
             raise
+        except FileExistsError:
+            db.rollback()
+            raise HTTPException(status_code=409, detail="An object with this content hash already occupies the storage key")
         except IntegrityError:
             db.rollback()
             raise HTTPException(status_code=409, detail="The file was registered concurrently; retry to resolve the duplicate")
