@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - core-backend-foundation
+      - feature/neon-postgres-readiness
   pull_request:
     branches:
       - main
