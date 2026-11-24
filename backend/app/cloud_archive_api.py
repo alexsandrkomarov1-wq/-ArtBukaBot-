@@ -229,7 +229,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     @router.get("/items/{archive_item_id}", response_model=ArchiveItemRead)
     def get_archive_item(
         archive_item_id: str, db: Session = Depends(get_db),
-        _: User = Depends(require_roles("owner", "moderator", "family_member", "guest")),
+        _: User = Depends(require_roles("owner", "moderator", "family_member")),
     ):
         row = db.execute(
             select(ArchiveItem, StoredBlob)
@@ -244,7 +244,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     @router.get("/items/{archive_item_id}/content")
     def view_archive_item(
         archive_item_id: str, db: Session = Depends(get_db),
-        _: User = Depends(require_roles("owner", "moderator", "family_member", "guest")),
+        _: User = Depends(require_roles("owner", "moderator", "family_member")),
     ):
         row = db.execute(
             select(ArchiveItem, StoredBlob)
@@ -312,7 +312,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     @router.get("/items/{archive_item_id}/links", response_model=list[ArchiveLinkRead])
     def list_item_links(
         archive_item_id: str, db: Session = Depends(get_db),
-        _: User = Depends(require_roles("owner", "moderator", "family_member", "guest")),
+        _: User = Depends(require_roles("owner", "moderator", "family_member")),
     ):
         if db.get(ArchiveItem, archive_item_id) is None:
             raise HTTPException(status_code=404, detail="Archive item not found")
