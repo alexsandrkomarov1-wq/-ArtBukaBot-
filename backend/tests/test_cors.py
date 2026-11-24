@@ -1,10 +1,14 @@
 from fastapi.testclient import TestClient
 
+from backend.app.database import build_engine, run_migrations
 from backend.app.main import create_app
 
 
 def test_configured_origin_can_call_private_api_preflight(tmp_path, monkeypatch):
     database_url = "sqlite:///" + str(tmp_path / "cors.sqlite3")
+    migration_engine = build_engine(database_url)
+    run_migrations(migration_engine)
+    migration_engine.dispose()
     monkeypatch.setenv("CORE_CORS_ORIGINS", "https://family.example")
     app = create_app(
         database_url=database_url,
