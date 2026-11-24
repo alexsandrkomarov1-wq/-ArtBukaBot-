@@ -38,7 +38,7 @@ Also configure the existing production variables: `DATABASE_URL`, `CORE_JWT_SECR
 - The callback reads Google account identity and Drive quota, then discards the short-lived access token.
 - The long-lived refresh token is encrypted with AES-256-GCM before it is stored in Neon. The encryption key is separate from the database.
 - API responses and logs must never expose access tokens, refresh tokens, client secrets, or encryption keys.
-- Each family member must connect their own Google account while signed in to their own KOMAROVA_CORE account. No automatic cross-family sharing is granted.
+- Each KOMAROVA_CORE user may connect multiple distinct Google accounts while signed in. Each Google identity is globally unique and cannot be linked to a second KOMAROVA_CORE user. No automatic cross-family sharing is granted.
 - File contents and write scopes are deliberately out of scope for this first authorization milestone. They require a separately reviewed incremental authorization and file-operation implementation.
 - Disconnect revokes the Google token and removes the local account link.
 
@@ -48,9 +48,11 @@ All endpoints except the OAuth callback require a valid KOMAROVA_CORE bearer ses
 
 - `GET /api/v1/integrations/google-drive/connect` returns the Google authorization URL.
 - `GET /api/v1/integrations/google-drive/callback` receives Google's authorization response.
-- `GET /api/v1/integrations/google-drive/status` reports the linked account and last observed quota.
-- `POST /api/v1/integrations/google-drive/refresh-quota` refreshes quota using the stored offline token.
-- `DELETE /api/v1/integrations/google-drive/disconnect` revokes and removes the link.
+- `GET /api/v1/integrations/google-drive/status` reports all linked accounts and their quotas.
+- `POST /api/v1/integrations/google-drive/accounts/{drive_account_id}/refresh-quota` refreshes one selected account quota.
+- `DELETE /api/v1/integrations/google-drive/accounts/{drive_account_id}` revokes and removes only the selected account.
+
+One KOMAROVA_CORE user may link multiple distinct Google accounts. Each has a permanent `drive_account_id`, separate encrypted refresh token and quota. A Google identity cannot be linked to a second KOMAROVA_CORE user.
 
 ## Deployment gate
 
