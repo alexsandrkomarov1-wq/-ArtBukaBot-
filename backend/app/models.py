@@ -118,7 +118,6 @@ class GoogleOAuthState(Base):
 
 class GoogleDriveAccount(Base):
     __tablename__ = "google_drive_accounts"
-    __table_args__ = (UniqueConstraint("user_id", name="uq_google_drive_accounts_user_id"),)
     drive_account_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("GD"))
     user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     google_user_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
