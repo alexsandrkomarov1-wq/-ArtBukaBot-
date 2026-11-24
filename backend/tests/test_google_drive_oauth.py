@@ -4,6 +4,7 @@ import base64
 from urllib.parse import parse_qs, urlparse
 
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 
 from backend.app.database import build_engine, run_migrations
 from backend.app.main import create_app
