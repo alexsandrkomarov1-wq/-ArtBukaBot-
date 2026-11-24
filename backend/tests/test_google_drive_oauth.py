@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import pytest
 from urllib.parse import parse_qs, urlparse
 
 from fastapi.testclient import TestClient
@@ -51,11 +52,10 @@ def test_refresh_token_is_authenticated_encrypted_and_user_bound(monkeypatch):
     ciphertext = encrypt_refresh_token("refresh-secret", "U-123", "GD-ONE")
     assert ciphertext != "refresh-secret"
     assert decrypt_refresh_token(ciphertext, "U-123", "GD-ONE") == "refresh-secret"
-    try:
+    with pytest.raises(Exception):
         decrypt_refresh_token(ciphertext, "U-456", "GD-ONE")
-        assert False, "Ciphertext must not decrypt for another user"
-    except Exception:
-        pass
+    with pytest.raises(Exception):
+        decrypt_refresh_token(ciphertext, "U-123", "GD-TWO")
 
 
 def test_google_drive_connect_returns_offline_read_only_authorization_url(tmp_path, monkeypatch):
