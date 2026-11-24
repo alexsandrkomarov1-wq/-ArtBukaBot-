@@ -68,7 +68,7 @@ def test_google_drive_connect_returns_offline_read_only_authorization_url(tmp_pa
     assert query["access_type"] == ["offline"]
     assert query["prompt"] == ["consent"]
     assert query["scope"] == ["https://www.googleapis.com/auth/drive.metadata.readonly"]
-    assert query["redirect_uri"] == ["https://api.example.test/oauth/google-drive/callback"]
+    assert query["redirect_uri"] == ["https://api.example.test/api/v1/integrations/google-drive/callback"]
     assert len(query["state"][0]) >= 32
 
 
