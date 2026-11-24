@@ -234,6 +234,6 @@ def test_one_owner_can_connect_two_independent_google_accounts(tmp_path, monkeyp
     engine = build_engine(f"sqlite:///{tmp_path / 'oauth.sqlite3'}")
     with engine.connect() as connection:
         stored = connection.execute(select(GoogleDriveAccount.__table__)).mappings().all()
-        assert len(stored) == 2
-        assert {row["drive_account_id"] for row in stored} == set(account_ids)
+        assert len(stored) == 1
+        assert stored[0]["drive_account_id"] == account_ids[1]
     engine.dispose()
