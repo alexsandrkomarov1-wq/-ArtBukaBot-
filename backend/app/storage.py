@@ -40,7 +40,7 @@ class PrivateMediaStorage:
             parsed = urlparse(endpoint)
             if parsed.scheme != "https" or not parsed.netloc:
                 raise RuntimeError("CORE_S3_ENDPOINT_URL must be a valid HTTPS endpoint")
-            self.provider = "neon-object-storage"
+            self.provider = "s3-compatible"
             self.client = boto3.client(
                 "s3",
                 endpoint_url=endpoint,
@@ -61,7 +61,7 @@ class PrivateMediaStorage:
             with Path(source).open("rb") as stream:
                 self.client.put_object(
                     Bucket=self.bucket, Key=object_key, Body=stream,
-                    ContentType=content_type, ServerSideEncryption="AES256",
+                    ContentType=content_type,
                 )
             return
         destination = self._local_path(object_key)
@@ -117,7 +117,6 @@ class PrivateMediaStorage:
                     Key=probe_key,
                     Body=payload,
                     ContentType="application/octet-stream",
-                    ServerSideEncryption="AES256",
                 )
                 remote_created = True
                 response = self.client.get_object(Bucket=self.bucket, Key=probe_key)
