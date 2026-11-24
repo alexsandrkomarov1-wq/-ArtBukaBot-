@@ -148,6 +148,9 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         user_id = pending.user_id
         db.delete(pending)
         db.commit()
+        linked_user = db.get(User, user_id)
+        if linked_user is None or linked_user.status != "active":
+            raise HTTPException(status_code=401, detail="KOMAROVA_CORE account is unavailable")
         if error:
             raise HTTPException(status_code=400, detail="Google authorization was not granted")
         if not code:
@@ -213,6 +216,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             account.refresh_token_ciphertext = encrypted_token
             account.granted_scopes = " ".join(sorted(granted_scopes))
             account.revoked_at = None
+        db.flush()
         account.quota_limit_bytes = int(quota["limit"]) if quota.get("limit") else None
         account.quota_usage_bytes = int(quota["usage"]) if quota.get("usage") else None
         account.quota_usage_in_drive_bytes = int(quota["usageInDrive"]) if quota.get("usageInDrive") else None
