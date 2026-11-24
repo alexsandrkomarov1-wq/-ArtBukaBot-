@@ -28,6 +28,9 @@ def test_configured_origin_can_call_private_api_preflight(tmp_path, monkeypatch)
 
 def test_unlisted_origin_is_not_granted_cors_access(tmp_path, monkeypatch):
     database_url = "sqlite:///" + str(tmp_path / "cors.sqlite3")
+    migration_engine = build_engine(database_url)
+    run_migrations(migration_engine)
+    migration_engine.dispose()
     monkeypatch.setenv("CORE_CORS_ORIGINS", "https://family.example")
     app = create_app(
         database_url=database_url,
