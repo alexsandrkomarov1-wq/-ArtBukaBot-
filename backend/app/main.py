@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
 from .archive_api import build_archive_router
+from .storage import create_private_storage
 from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
 from .navigation import build_navigation
 from .schemas import (
@@ -95,7 +96,8 @@ def create_app(
     configured_media_root = Path(
         media_root if media_root is not None else os.getenv("CORE_MEDIA_ROOT", "./private_media")
     )
-    app.include_router(build_archive_router(get_db, require_roles, configured_media_root))
+    configured_storage = create_private_storage(configured_media_root)
+    app.include_router(build_archive_router(get_db, require_roles, configured_media_root, configured_storage))
 
     def acquire_security_lock(db: Session) -> None:
         # A single database row serializes bootstrap and owner-administration writes

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Person, StoredBlob, User, new_id, utc_now
 from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
+from .storage import LocalPrivateStorage, PrivateObjectStorage
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 CHUNK_SIZE = 1024 * 1024
@@ -75,9 +76,12 @@ def _item_payload(item: ArchiveItem, blob: StoredBlob) -> dict:
     }
 
 
-def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter:
+def build_archive_router(
+    get_db, require_roles, storage_root: Path, storage: PrivateObjectStorage | None = None
+) -> APIRouter:
     router = APIRouter(prefix="/api/v1/archive", tags=["private-archive"])
     storage_root = Path(storage_root).expanduser().resolve()
+    storage = storage or LocalPrivateStorage(storage_root)
 
     @router.post("/items", response_model=ArchiveItemRead, status_code=201)
     async def upload_media(
@@ -95,7 +99,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         digest = hashlib.sha256()
         size = 0
         header = bytearray()
-        final_path: Path | None = None
+        object_key: str | None = None
         created_final = False
         committed = False
         try:
@@ -133,14 +137,10 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 )
 
             object_key = f"quarantine/{sha256[:2]}/{sha256}"
-            final_path = storage_root / object_key
-            final_path.parent.mkdir(parents=True, exist_ok=True)
-            # os.replace() is unsafe here: concurrent uploads of identical bytes can
-            # overwrite one another, and a losing request could later delete the winner's
-            # object during rollback. A hard link is an atomic create-if-absent operation
-            # on the same filesystem; it never replaces an existing content-addressed file.
+            # Both local and S3 adapters implement create-if-absent semantics.
+            # Existing content-addressed objects are never overwritten.
             try:
-                os.link(temp_path, final_path)
+                storage.put_file(temp_path, object_key, mime_type)
             except FileExistsError:
                 raise HTTPException(
                     status_code=409,
@@ -155,7 +155,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 size_bytes=size,
                 detected_mime_type=mime_type,
                 original_filename=filename,
-                storage_provider="local-private",
+                storage_provider=storage.provider,
                 storage_object_key=object_key,
                 storage_state="quarantined",
             )
@@ -200,8 +200,8 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         finally:
             if temp_path.exists():
                 temp_path.unlink()
-            if created_final and not committed and final_path and final_path.exists():
-                final_path.unlink()
+            if created_final and not committed and object_key:
+                storage.delete(object_key)
             await file.close()
 
     @router.get("/items", response_model=list[ArchiveItemRead])
