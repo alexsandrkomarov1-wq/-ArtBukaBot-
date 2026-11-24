@@ -29,7 +29,18 @@
     auth.hidden = true;
     panel.hidden = false;
     $("cloud-user-label").textContent = user.username + " · " + user.role;
-    connection.textContent = "Подключено · закрытая сессия";
+    connection.textContent = "Закрытая сессия активна · проверяем хранилище";
+  }
+  async function checkStorage() {
+    try {
+      const result = await request("/api/v1/archive/storage/health");
+      const label = result.backend === "local-private"
+        ? "локальное приватное хранилище"
+        : "S3-совместимое объектное хранилище";
+      connection.textContent = "API доступен · " + label + " проверено";
+    } catch (_) {
+      connection.textContent = "API доступен · хранилище не подтверждено";
+    }
   }
   function clearSession() {
     token = "";
@@ -72,8 +83,16 @@
       const actions = document.createElement("span");
       actions.className = "cloud-item-actions";
       const view = document.createElement("button");
-      view.type = "button"; view.className = "media-button"; view.textContent = "Просмотр";
-      view.addEventListener("click", () => preview(item));
+      view.type = "button";
+      view.className = "media-button";
+      if (item.record_status === "available" && item.storage_state === "verified") {
+        view.textContent = "Просмотр";
+        view.addEventListener("click", () => preview(item));
+      } else {
+        view.textContent = "На проверке";
+        view.disabled = true;
+        view.title = "Оригинал нельзя открыть до антивирусной проверки";
+      }
       const remove = document.createElement("button");
       remove.type = "button"; remove.className = "media-button"; remove.textContent = "Удалить";
       remove.addEventListener("click", () => removeItem(item));
@@ -81,7 +100,7 @@
       row.append(info, actions);
       list.append(row);
     }
-    setStatus("Загружено записей: " + items.length + ". Файлы читаются из приватного облачного архива.");
+    setStatus("Записей: " + items.length + ". Новые материалы остаются в карантине до антивирусной проверки.");
   }
   async function preview(item) {
     try {
@@ -125,6 +144,7 @@
       token = result.access_token;
       sessionStorage.setItem(tokenKey, token);
       showSession(result.user);
+      await checkStorage();
       await loadPeople(); await loadArchive();
       $("cloud-password").value = "";
     } catch (error) { connection.textContent = "Ошибка входа: " + error.message; }
@@ -156,11 +176,11 @@
     form.append("title", $("cloud-upload-title").value);
     if ($("cloud-person-id").value) form.append("person_id", $("cloud-person-id").value);
     try {
-      setStatus("Загружаю файл в приватное хранилище…");
+      setStatus("Загружаю файл в закрытое хранилище…");
       await request("/api/v1/archive/items", { method: "POST", body: form });
       $("cloud-upload-form").reset();
       await loadArchive();
-      setStatus("Загрузка завершена. Запись архива и PERSON-ID сохранены.");
+      setStatus("Загрузка завершена. Материал сохранён в карантине; просмотр станет доступен после проверки.");
     } catch (error) { setStatus("Загрузка не выполнена: " + error.message, true); }
   });
   $("cloud-logout").addEventListener("click", async () => {
@@ -176,11 +196,11 @@
     previewUrl = "";
   });
   fetch(apiBase + "/health").then(r => r.ok ? r.json() : Promise.reject()).then(() => {
-    connection.textContent = "API доступен · Neon storage настроен";
+    connection.textContent = "API доступен · войдите для проверки хранилища";
   }).catch(() => { connection.textContent = "API пока недоступен"; });
   if (token) {
     request("/api/v1/auth/me").then(async user => {
-      showSession(user); await loadPeople(); await loadArchive();
+      showSession(user); await checkStorage(); await loadPeople(); await loadArchive();
     }).catch(clearSession);
   }
 })();
