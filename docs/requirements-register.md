@@ -263,6 +263,39 @@ The authenticated home page is the family's shared planning workspace. It must n
 - The first delivery must work without continuous location tracking. Manual city and starting-point selection is a supported baseline.
 - Do not enable real family data until authentication, role-based authorization, private hosting, audit, backups and restore gates pass.
 
+### Family bulletin board and visited / nearby places map
+
+The authenticated homepage includes a shared, interactive family bulletin board and a map-based memory/discovery layer. These are connected views over the same family records, not independent mini-applications.
+
+#### Interactive family bulletin board
+- Provide a chronological and filterable board feed for family announcements, questions, proposals, invitations, trip/walk ideas, recommendations, photos from completed activities and practical notes.
+- Each post has a stable POST-ID, author PERSON-ID, created/updated timestamps, content, optional attachments, visibility, linked EVENT-ID/PLACE-ID and moderation/audit history.
+- Support comments, replies, reactions or lightweight votes, pinning important posts, editing/deleting own posts, and marking a proposal as accepted, declined, postponed or completed.
+- A post can become a calendar event or draft trip/walk without copying the content into duplicate entities.
+- Allow mentions/invitations only to authorized family members. Notify participants according to their settings.
+- Board visibility follows family roles and per-post visibility. It is private to the family by default; nothing is published publicly unless explicitly approved.
+- Provide board filters: all family, my posts, proposals, upcoming, completed, places, photos and announcements.
+
+#### Family map: visited, planned and nearby
+- Provide an interactive map with distinct, filterable states: visited, want to visit, proposed to family, planned, and temporarily unavailable/closed where source data confirms it.
+- Visit history is a separate record per person and visit date, not a single boolean on the place. One family member may have visited while another has not.
+- Each visit record links PERSON-ID, canonical PLACE-ID, optional EVENT-ID, visit date/time, notes, rating, photos/ARCHIVE-ID and source/provenance.
+- Let family members mark a place as visited, add a short memory/photo, or add it to a personal or shared wishlist.
+- Nearby discovery uses a user-selected city, map center or explicitly granted one-time location. It must work without continuous GPS tracking.
+- Allow radius selection and categories such as museums, theatres, exhibitions, parks, monuments, nature, cafés and family attractions.
+- Show nearby places not yet visited by the selected participant(s), and distinguish places never visited by anyone in the family from places visited by some members.
+- Filters include distance, category, opening status when verified, budget, age suitability, accessibility, wishlist status and family visit history.
+- From a map marker, open the place card, source details, family notes, visit history, proposed dates and route options.
+- Provide list and map modes, clustering at wider zoom levels, and a clear legend. Do not imply a place was visited based only on GPS proximity; a participant must confirm the visit.
+- Map markers and visit history reference canonical PLACE-ID and PERSON-ID. External map-provider IDs remain source metadata.
+
+#### Integration rules
+- The board, calendar, family places and archive share the authoritative registry and audit model. A post, place, event, route, visit and media file each retain their own stable ID and typed links.
+- AI may draft a board proposal, suggest nearby places not yet visited by relevant family members, or turn a discussion into a draft plan. A human must approve publication, invitations and calendar changes.
+- Search and recommendations must respect each participant's visibility permissions. Do not leak private plans, visit history, location or interests into another member's AI response.
+- Keep the map provider and place-discovery source replaceable. Cache external data with source, retrieval time and expiry; preserve attribution and usage conditions.
+- No separate family places database or new cloud project. The board and map are modules of KOMAROVA_CORE.
+
 ### Homepage and discovery acceptance requirements
 - REQ-HOME-001: Render a private family dashboard only after authenticated session and authorization checks; keep the public landing page free of private plans.
 - REQ-HOME-002: Show upcoming shared events, invitations, tasks and reminders from the authoritative family calendar.
