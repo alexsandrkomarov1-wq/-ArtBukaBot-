@@ -135,9 +135,18 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             object_key = f"quarantine/{sha256[:2]}/{sha256}"
             final_path = storage_root / object_key
             final_path.parent.mkdir(parents=True, exist_ok=True)
-            if final_path.exists():
-                raise HTTPException(status_code=409, detail="An unregistered storage object already occupies this key")
-            os.replace(temp_path, final_path)
+            # os.replace() is unsafe here: concurrent uploads of identical bytes can
+            # overwrite one another, and a losing request could later delete the winner's
+            # object during rollback. A hard link is an atomic create-if-absent operation
+            # on the same filesystem; it never replaces an existing content-addressed file.
+            try:
+                os.link(temp_path, final_path)
+            except FileExistsError:
+                raise HTTPException(
+                    status_code=409,
+                    detail="An object with this content hash already occupies the storage key",
+                )
+            temp_path.unlink()
             created_final = True
 
             blob = StoredBlob(
