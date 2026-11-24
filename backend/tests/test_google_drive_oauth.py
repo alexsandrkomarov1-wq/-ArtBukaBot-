@@ -237,3 +237,51 @@ def test_one_owner_can_connect_two_independent_google_accounts(tmp_path, monkeyp
         assert len(stored) == 1
         assert stored[0]["drive_account_id"] == account_ids[1]
     engine.dispose()
+
+
+def test_google_identity_cannot_be_linked_to_another_core_user(tmp_path, monkeypatch):
+    client, owner_token = make_client(tmp_path, monkeypatch)
+
+    class FakeResponse:
+        def __init__(self, status_code, payload):
+            self.status_code, self.payload = status_code, payload
+        def json(self):
+            return self.payload
+
+    def fake_post(url, **kwargs):
+        code = kwargs["data"]["code"]
+        return FakeResponse(200, {
+            "access_token": f"access-{code}", "refresh_token": f"refresh-{code}",
+            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
+        })
+
+    def fake_get(url, **kwargs):
+        return FakeResponse(200, {"user": {
+            "permissionId": "one-google-identity",
+            "emailAddress": "same-google@example.test",
+            "displayName": "Same Google account",
+        }, "storageQuota": {"limit": "10000", "usage": "100"}})
+
+    monkeypatch.setattr("backend.app.google_drive_oauth.httpx.post", fake_post)
+    monkeypatch.setattr("backend.app.google_drive_oauth.httpx.get", fake_get)
+
+    connect = client.get("/api/v1/integrations/google-drive/connect", headers=auth(owner_token))
+    state = parse_qs(urlparse(connect.json()["authorization_url"]).query)["state"][0]
+    first = client.get("/api/v1/integrations/google-drive/callback",
+                       params={"code": "owner", "state": state})
+    assert first.status_code == 200
+
+    created = client.post("/api/v1/users", headers=auth(owner_token), json={
+        "username": "family", "password": "family-member-password-123",
+        "role": "family_member",
+    })
+    assert created.status_code == 201
+    login = client.post("/api/v1/auth/login", json={
+        "username": "family", "password": "family-member-password-123",
+    })
+    family_token = login.json()["access_token"]
+    connect = client.get("/api/v1/integrations/google-drive/connect", headers=auth(family_token))
+    state = parse_qs(urlparse(connect.json()["authorization_url"]).query)["state"][0]
+    second = client.get("/api/v1/integrations/google-drive/callback",
+                        params={"code": "family", "state": state})
+    assert second.status_code == 409
