@@ -208,3 +208,34 @@ def test_upload_limit_is_enforced_before_archive_registration(tmp_path, monkeypa
         assert response.status_code == 413
         assert client.get("/api/v1/archive/items", headers=auth(token)).json() == []
         assert not list((tmp_path / "private-media").rglob("*.part"))
+
+
+
+def test_upload_does_not_overwrite_an_existing_content_addressed_object(tmp_path, monkeypatch):
+    import backend.app.archive_api as archive_api
+
+    def simulate_storage_key_collision(source, destination):
+        destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(b"pre-existing-object")
+        raise FileExistsError(destination)
+
+    monkeypatch.setattr(archive_api.os, "link", simulate_storage_key_collision)
+    with make_client(tmp_path) as client:
+        token = owner_token(client)
+        response = client.post(
+            "/api/v1/archive/items",
+            headers=auth(token),
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        assert response.status_code == 409
+        assert "already occupies the storage key" in response.json()["detail"]
+
+        stored_files = [
+            path for path in (tmp_path / "private-media").rglob("*")
+            if path.is_file() and path.name != ".keep"
+        ]
+        assert len(stored_files) == 1
+        assert stored_files[0].read_bytes() == b"pre-existing-object"
+        assert client.get("/api/v1/archive/items", headers=auth(token)).json() == []
+        assert not list((tmp_path / "private-media").rglob("*.part"))
