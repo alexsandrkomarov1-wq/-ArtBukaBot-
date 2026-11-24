@@ -151,8 +151,8 @@ def test_google_drive_callback_stores_encrypted_refresh_token_and_quota(tmp_path
 
     status = client.get("/api/v1/integrations/google-drive/status", headers=auth(token))
     assert status.status_code == 200
-    assert status.json()["email_address"] == "owner@example.test"
-    assert status.json()["access"] == "metadata_read_only"
+    assert status.json()["accounts"][0]["email_address"] == "owner@example.test"
+    assert status.json()["accounts"][0]["access"] == "metadata_read_only"
 
     from backend.app.database import build_engine
     from backend.app.models import GoogleDriveAccount
@@ -175,7 +175,14 @@ def test_one_owner_can_connect_two_independent_google_accounts(tmp_path, monkeyp
             return self.payload
 
     def fake_post(url, **kwargs):
-        code = kwargs["data"]["code"]
+        if url == "https://oauth2.googleapis.com/revoke":
+            return FakeResponse(200, {})
+        assert url == "https://oauth2.googleapis.com/token"
+        data = kwargs["data"]
+        if data["grant_type"] == "refresh_token":
+            code = data["refresh_token"].removeprefix("refresh-")
+            return FakeResponse(200, {"access_token": f"access-{code}"})
+        code = data["code"]
         return FakeResponse(200, {
             "access_token": f"access-{code}", "refresh_token": f"refresh-{code}",
             "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
@@ -206,6 +213,22 @@ def test_one_owner_can_connect_two_independent_google_accounts(tmp_path, monkeyp
     assert {item["email_address"] for item in status["accounts"]} == {
         "first@example.test", "second@example.test"
     }
+
+    refreshed = client.post(
+        f"/api/v1/integrations/google-drive/accounts/{account_ids[0]}/refresh-quota",
+        headers=auth(token),
+    )
+    assert refreshed.status_code == 200
+    assert refreshed.json()["drive_account_id"] == account_ids[0]
+    disconnected = client.delete(
+        f"/api/v1/integrations/google-drive/accounts/{account_ids[0]}",
+        headers=auth(token),
+    )
+    assert disconnected.status_code == 200
+    remaining = client.get(
+        "/api/v1/integrations/google-drive/status", headers=auth(token)
+    ).json()["accounts"]
+    assert [item["drive_account_id"] for item in remaining] == [account_ids[1]]
 
     from backend.app.database import build_engine
     engine = build_engine(f"sqlite:///{tmp_path / 'oauth.sqlite3'}")
