@@ -9,19 +9,47 @@ from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 
 class Base(DeclarativeBase):
     pass
 
 
+def normalize_database_url(database_url: str | None = None) -> str:
+    """Normalize provider URLs to the installed PostgreSQL driver.
+
+    Neon supplies postgresql:// URLs. The project deliberately uses psycopg 3
+    rather than relying on an implicitly installed psycopg2 driver.
+    """
+    raw = database_url or os.getenv("DATABASE_URL", "sqlite:///./komarova_core.db")
+    raw = raw.strip()
+    if raw.startswith("postgres://"):
+        return "postgresql+psycopg://" + raw[len("postgres://"):]
+    if raw.startswith("postgresql://"):
+        return "postgresql+psycopg://" + raw[len("postgresql://"):]
+    return raw
+
+
 def build_engine(database_url: str | None = None) -> Engine:
-    url = database_url or os.getenv("DATABASE_URL", "sqlite:///./komarova_core.db")
+    url = normalize_database_url(database_url)
     options: dict = {"pool_pre_ping": True}
     if url.startswith("sqlite"):
         options["connect_args"] = {"check_same_thread": False}
+    elif url.startswith("postgresql+psycopg://"):
+        # Serverless instances should not retain idle connections between invocations.
+        # Use Neon's pooled connection string in Vercel/serverless deployments.
+        is_serverless = any(os.getenv(name) for name in (
+            "VERCEL", "AWS_LAMBDA_FUNCTION_NAME", "FUNCTIONS_WORKER_RUNTIME",
+        ))
+        if is_serverless:
+            options["poolclass"] = NullPool
+        else:
+            options["pool_size"] = int(os.getenv("CORE_DB_POOL_SIZE", "3"))
+            options["max_overflow"] = int(os.getenv("CORE_DB_MAX_OVERFLOW", "2"))
+            options["pool_recycle"] = 300
     return create_engine(url, **options)
 
 
@@ -38,7 +66,6 @@ def run_migrations(engine: Engine) -> None:
     with engine.begin() as connection:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
-
 
 
 def verify_migrations_current(engine: Engine) -> None:
