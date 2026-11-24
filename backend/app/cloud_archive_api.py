@@ -25,7 +25,7 @@ VIDEO_EXTENSIONS = {".mp4", ".mov", ".m4v", ".avi", ".mkv", ".webm", ".3gp"}
 
 def _safe_filename(value: str | None) -> str:
     name = (value or "upload.bin").replace(chr(92), "/").split("/")[-1]
-    name = "".join(ch for ch in name if ch.isprintable() and ch not in "/\\r\\n")
+    name = "".join(ch for ch in name if ch.isprintable() and ch not in "/\r\n")
     return name.strip(" .")[:255] or "upload.bin"
 
 
