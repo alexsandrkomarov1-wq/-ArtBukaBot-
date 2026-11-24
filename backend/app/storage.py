@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 from pathlib import Path
 from typing import BinaryIO, Iterator
 from urllib.parse import urlparse
@@ -66,8 +65,8 @@ class PrivateMediaStorage:
             return
         destination = self._local_path(object_key)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        with Path(source).open("rb") as src, destination.open("xb") as dst:
-            shutil.copyfileobj(src, dst, length=1024 * 1024)
+        # Atomic create-if-absent; never overwrite an object with the same content key.
+        os.link(Path(source), destination)
 
     def open_stream(self, object_key: str) -> tuple[Iterator[bytes], int, str | None]:
         if self.client is not None:
