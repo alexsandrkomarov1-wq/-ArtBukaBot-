@@ -13,7 +13,9 @@ class FakeS3Client:
 
     def put_object(self, **kwargs):
         self.calls.append(("put_object", kwargs))
-        self.objects[(kwargs["Bucket"], kwargs["Key"])] = kwargs["Body"]
+        body = kwargs["Body"]
+        payload = body.read() if hasattr(body, "read") else body
+        self.objects[(kwargs["Bucket"], kwargs["Key"])] = payload
 
     def get_object(self, **kwargs):
         self.calls.append(("get_object", kwargs))
