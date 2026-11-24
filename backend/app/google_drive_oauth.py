@@ -37,19 +37,19 @@ def _encryption_key() -> bytes:
     return key
 
 
-def encrypt_refresh_token(token: str, user_id: str) -> str:
+def encrypt_refresh_token(token: str, user_id: str, drive_account_id: str) -> str:
     nonce = secrets.token_bytes(12)
     ciphertext = AESGCM(_encryption_key()).encrypt(
-        nonce, token.encode("utf-8"), f"google-drive:{user_id}".encode("utf-8")
+        nonce, token.encode("utf-8"), f"google-drive:{user_id}:{drive_account_id}".encode("utf-8")
     )
     return base64.urlsafe_b64encode(nonce + ciphertext).decode("ascii")
 
 
-def decrypt_refresh_token(value: str, user_id: str) -> str:
+def decrypt_refresh_token(value: str, user_id: str, drive_account_id: str) -> str:
     payload = base64.urlsafe_b64decode(value.encode("ascii"))
     nonce, ciphertext = payload[:12], payload[12:]
     plaintext = AESGCM(_encryption_key()).decrypt(
-        nonce, ciphertext, f"google-drive:{user_id}".encode("utf-8")
+        nonce, ciphertext, f"google-drive:{user_id}:{drive_account_id}".encode("utf-8")
     )
     return plaintext.decode("utf-8")
 
@@ -198,10 +198,13 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             raise HTTPException(status_code=502, detail="Google Drive did not return a stable account identity")
         quota = about.get("storageQuota") or {}
 
+        # One CORE user may link multiple Google identities; a Google identity
+        # remains globally unique and cannot be attached to another CORE user.
         account = db.scalar(select(GoogleDriveAccount).where(
-            GoogleDriveAccount.user_id == user_id
+            GoogleDriveAccount.google_user_id == google_user_id
         ))
-        encrypted_token = encrypt_refresh_token(refresh_token, user_id)
+        if account is not None and account.user_id != user_id:
+            raise HTTPException(status_code=409, detail="This Google account is already linked to another family user")
         if account is None:
             account = GoogleDriveAccount(
                 drive_account_id=new_id("GD"),
@@ -209,18 +212,18 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
                 google_user_id=google_user_id,
                 email_address=email,
                 display_name=google_user.get("displayName"),
-                refresh_token_ciphertext=encrypted_token,
+                refresh_token_ciphertext="pending",
                 granted_scopes=" ".join(sorted(granted_scopes)),
             )
             db.add(account)
-        else:
-            account.google_user_id = google_user_id
-            account.email_address = email
-            account.display_name = google_user.get("displayName")
-            account.refresh_token_ciphertext = encrypted_token
-            account.granted_scopes = " ".join(sorted(granted_scopes))
-            account.revoked_at = None
-        db.flush()
+            db.flush()
+        account.refresh_token_ciphertext = encrypt_refresh_token(
+            refresh_token, user_id, account.drive_account_id
+        )
+        account.email_address = email
+        account.display_name = google_user.get("displayName")
+        account.granted_scopes = " ".join(sorted(granted_scopes))
+        account.revoked_at = None
         account.quota_limit_bytes = int(quota["limit"]) if quota.get("limit") else None
         account.quota_usage_bytes = int(quota["usage"]) if quota.get("usage") else None
         account.quota_usage_in_drive_bytes = int(quota["usageInDrive"]) if quota.get("usageInDrive") else None
@@ -241,6 +244,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         return {
             "status": "connected",
             "provider": "google-drive",
+            "drive_account_id": account.drive_account_id,
             "email_address": email,
             "display_name": google_user.get("displayName"),
             "access": "metadata_read_only",
@@ -252,53 +256,48 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         }
 
     @router.get("/status")
-    def connection_status(
-        db: Session = Depends(get_db),
-        user: User = Depends(require_current_user),
-    ):
-        account = db.scalar(select(GoogleDriveAccount).where(
+    def connection_status(db: Session = Depends(get_db), user: User = Depends(require_current_user)):
+        accounts = db.scalars(select(GoogleDriveAccount).where(
             GoogleDriveAccount.user_id == user.user_id,
             GoogleDriveAccount.revoked_at.is_(None),
-        ))
-        if account is None:
-            return {"status": "not_connected", "provider": "google-drive"}
+        ).order_by(GoogleDriveAccount.created_at, GoogleDriveAccount.drive_account_id)).all()
+        if not accounts:
+            return {"status": "not_connected", "provider": "google-drive", "accounts": []}
         return {
-            "status": "connected",
-            "provider": "google-drive",
-            "email_address": account.email_address,
-            "display_name": account.display_name,
-            "access": "metadata_read_only",
-            "quota_limit_bytes": account.quota_limit_bytes,
-            "quota_usage_bytes": account.quota_usage_bytes,
-            "quota_usage_in_drive_bytes": account.quota_usage_in_drive_bytes,
-            "quota_usage_in_trash_bytes": account.quota_usage_in_trash_bytes,
-            "last_quota_at": account.last_quota_at.isoformat() if account.last_quota_at else None,
+            "status": "connected", "provider": "google-drive",
+            "accounts": [{
+                "drive_account_id": account.drive_account_id,
+                "email_address": account.email_address,
+                "display_name": account.display_name,
+                "access": "metadata_read_only",
+                "quota_limit_bytes": account.quota_limit_bytes,
+                "quota_usage_bytes": account.quota_usage_bytes,
+                "quota_usage_in_drive_bytes": account.quota_usage_in_drive_bytes,
+                "quota_usage_in_trash_bytes": account.quota_usage_in_trash_bytes,
+                "last_quota_at": account.last_quota_at.isoformat() if account.last_quota_at else None,
+            } for account in accounts],
         }
 
-    @router.post("/refresh-quota")
-    def refresh_quota(
-        db: Session = Depends(get_db),
-        user: User = Depends(require_current_user),
-    ):
+    @router.post("/accounts/{drive_account_id}/refresh-quota")
+    def refresh_quota(drive_account_id: str, db: Session = Depends(get_db),
+                      user: User = Depends(require_current_user)):
         _, client_secret, _ = _oauth_config()
         account = db.scalar(select(GoogleDriveAccount).where(
+            GoogleDriveAccount.drive_account_id == drive_account_id,
             GoogleDriveAccount.user_id == user.user_id,
             GoogleDriveAccount.revoked_at.is_(None),
         ))
         if account is None:
             raise HTTPException(status_code=404, detail="Google Drive account is not connected")
-        refresh_token = decrypt_refresh_token(account.refresh_token_ciphertext, user.user_id)
+        refresh_token = decrypt_refresh_token(
+            account.refresh_token_ciphertext, user.user_id, account.drive_account_id
+        )
         try:
-            token_response = httpx.post(
-                GOOGLE_TOKEN_URL,
-                data={
-                    "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip(),
-                    "client_secret": client_secret,
-                    "refresh_token": refresh_token,
-                    "grant_type": "refresh_token",
-                },
-                timeout=20.0,
-            )
+            token_response = httpx.post(GOOGLE_TOKEN_URL, data={
+                "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip(),
+                "client_secret": client_secret, "refresh_token": refresh_token,
+                "grant_type": "refresh_token",
+            }, timeout=20.0)
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail="Google access token refresh failed") from exc
         if token_response.status_code != 200:
@@ -310,16 +309,13 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         account.quota_usage_in_drive_bytes = int(quota["usageInDrive"]) if quota.get("usageInDrive") else None
         account.quota_usage_in_trash_bytes = int(quota["usageInDriveTrash"]) if quota.get("usageInDriveTrash") else None
         account.last_quota_at = utc_now()
-        db.add(AuditEvent(
-            event_type="google_drive.quota_refreshed",
-            entity_type="google_drive_account",
-            entity_id=account.drive_account_id,
-            actor_id=user.user_id,
-            details=json.dumps({"quota_updated": True}),
-        ))
+        db.add(AuditEvent(event_type="google_drive.quota_refreshed",
+            entity_type="google_drive_account", entity_id=account.drive_account_id,
+            actor_id=user.user_id, details=json.dumps({"quota_updated": True})))
         db.commit()
         return {
-            "status": "ok",
+            "status": "ok", "drive_account_id": account.drive_account_id,
+            "email_address": account.email_address,
             "quota_limit_bytes": account.quota_limit_bytes,
             "quota_usage_bytes": account.quota_usage_bytes,
             "quota_usage_in_drive_bytes": account.quota_usage_in_drive_bytes,
@@ -327,34 +323,32 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             "last_quota_at": account.last_quota_at.isoformat(),
         }
 
-    @router.delete("/disconnect")
-    def disconnect(
-        db: Session = Depends(get_db),
-        user: User = Depends(require_current_user),
-    ):
-        _, _, _ = _oauth_config()
+    @router.delete("/accounts/{drive_account_id}")
+    def disconnect(drive_account_id: str, db: Session = Depends(get_db),
+                   user: User = Depends(require_current_user)):
+        _oauth_config()
         account = db.scalar(select(GoogleDriveAccount).where(
+            GoogleDriveAccount.drive_account_id == drive_account_id,
             GoogleDriveAccount.user_id == user.user_id,
             GoogleDriveAccount.revoked_at.is_(None),
         ))
         if account is None:
             return {"status": "not_connected"}
-        refresh_token = decrypt_refresh_token(account.refresh_token_ciphertext, user.user_id)
+        refresh_token = decrypt_refresh_token(
+            account.refresh_token_ciphertext, user.user_id, account.drive_account_id
+        )
         try:
             response = httpx.post(GOOGLE_REVOKE_URL, params={"token": refresh_token}, timeout=20.0)
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail="Google token revocation request failed") from exc
         if response.status_code not in (200, 400):
             raise HTTPException(status_code=502, detail="Google token revocation was not confirmed")
-        db.add(AuditEvent(
-            event_type="google_drive.account_disconnected",
-            entity_type="google_drive_account",
-            entity_id=account.drive_account_id,
+        db.add(AuditEvent(event_type="google_drive.account_disconnected",
+            entity_type="google_drive_account", entity_id=account.drive_account_id,
             actor_id=user.user_id,
-            details=json.dumps({"revoked_at_provider": response.status_code == 200}),
-        ))
+            details=json.dumps({"revoked_at_provider": response.status_code == 200})))
         db.delete(account)
         db.commit()
-        return {"status": "disconnected"}
+        return {"status": "disconnected", "drive_account_id": drive_account_id}
 
     return router
