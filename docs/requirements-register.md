@@ -213,6 +213,56 @@ The calendar is a shared planning capability of KOMAROVA_CORE, not a separate ap
 - Calendar data follows the same backup, export, privacy, access-control and retention rules as other family records.
 - Do not introduce a second people registry, independent calendar database or new cloud project for this capability.
 
+### Homepage family dashboard and city discovery
+
+The authenticated home page is the family's shared planning workspace. It must not expose private family plans on the public landing page.
+
+#### Family home dashboard
+- Show a concise upcoming schedule for the next days/weeks, shared family plans, pending invitations, tasks and reminders.
+- Each participant can create a personal plan, mark selected time as available/busy, and choose whether an item is private, visible to selected people, or visible to all family members.
+- Family-wide plans are visible to all authorized family participants. Personal events are visible only according to the owner's explicit visibility setting and the viewer's role.
+- Show who is interested, invited, confirmed, declined or still undecided for each joint activity.
+- Allow a participant to propose a joint walk, excursion, museum/theatre visit or trip from the home page and invite all or selected family members.
+- Provide a shared availability view that reveals only free/busy information for private events, not their titles, locations or descriptions.
+- Provide filters by person, date, city, activity type and participation status.
+- Keep the public home page free of private schedule data. The authenticated family dashboard is rendered only after successful session and authorization checks.
+
+#### City culture, events and listings
+- Provide a unified discovery area for museums, galleries, exhibitions, theatres, concerts, festivals, lectures, children's activities, parks, historical sites and other local attractions.
+- Provide an events poster/agenda view with date, start time, venue, city, age guidance, language where available, accessibility information, price or free-entry status, booking/ticket link and source.
+- Support searches by city, date range, category, interests, age suitability, budget, indoor/outdoor and accessibility needs.
+- Show currentness: source, last checked time, event date and a clear unavailable/expired state. Do not invent schedules, ticket prices, availability or opening hours.
+- Prefer official venue, museum, theatre, city and ticket-provider sources. Preserve source links and distinguish official information from third-party listings.
+- Allow a user to save a place/event, suggest it to the family, attach it to a calendar event and add it to a draft trip or walk.
+- Support more than one family city. Each participant may set a preferred city or choose a city for a particular search; location access must be optional and explicit. Do not assume all family members live in the same city.
+
+#### AI family activity planner
+- AI may propose shared activities by combining participants' explicitly shared availability, selected city, interests, age suitability, budget, duration, weather or indoor/outdoor preference when those data are available and authorized.
+- AI recommendations must explain why an activity was suggested, identify which family members it may suit, show conflicts/unknowns and cite the source of event/place information.
+- AI may draft one-day or multi-day itineraries, group nearby attractions, estimate visit duration and propose alternatives for bad weather, closures or schedule conflicts.
+- AI may suggest a date/time only from available family free/busy data and must ask for confirmation before creating or changing calendar events, sending invitations, booking tickets or spending money.
+- AI must not reveal private events, personal interests or location data to other participants unless the owner has shared them.
+- Family members can accept, reject, edit or ignore suggestions. Rejections and preference feedback may tune future recommendations only under the relevant privacy settings.
+- If live event data, weather or route data cannot be verified, label the result as an unverified suggestion rather than presenting it as current fact.
+
+#### Maps and route planning
+- Every place/event card should offer a map view and route from a user-selected starting point or an explicitly authorized saved starting point.
+- Offer separate route modes: public transport, walking and, where supported later, cycling/car. Public transport and walking are required for the first route-planning release.
+- Public transport routes should show route legs, transport mode, line/route number, stop/station names, transfers, estimated duration, walking segments and service-data timestamp where provider data supports them.
+- Walking routes should show distance, estimated walking time, route geometry/map link and accessibility or surface notes where available.
+- Allow a user to choose a departure time or arrival-by time. Show route alternatives and explain when live disruption data is unavailable.
+- Keep map and routing providers replaceable. Select providers only after reviewing API coverage, licensing, privacy, cost and service availability for each city.
+- Do not expose a participant's home address or live location to other family members by default. Use an explicit origin selection and privacy controls.
+- Store canonical PLACE-ID and route references in KOMAROVA_CORE; provider-specific place/route identifiers remain external references, not new family entities.
+
+#### Architecture and delivery rules
+- The home dashboard consumes the existing authoritative people registry, family calendar, places, access control and audit services. It must not create parallel people, calendar, places or event registries.
+- City listings and external event feeds are cached external discovery data with source/provenance and expiry; they are not authoritative family records until a participant saves or links them.
+- AI, event listings, maps, public transport and geocoding are replaceable adapters. Do not introduce a separate cloud project or database for these capabilities.
+- Personal availability, saved interests, preferred cities, starting points and location permissions are protected personal data with explicit visibility and retention controls.
+- The first delivery must work without continuous location tracking. Manual city and starting-point selection is a supported baseline.
+- Do not enable real family data until authentication, role-based authorization, private hosting, audit, backups and restore gates pass.
+
 ### Acceptance criteria and status
 
 - REQ-CAL-001: Create, view, edit, cancel and archive calendar events with stable EVENT-ID.
