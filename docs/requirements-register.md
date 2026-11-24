@@ -181,6 +181,56 @@ Explicit limitations:
 Requirement status remains partial until the above controls and operational gates are verified.
 
 
+## 11. Family calendar and planning
+
+The calendar is a shared planning capability of KOMAROVA_CORE, not a separate application or a substitute for FAMILY_TIMELINE. It must be connected to the existing family identity, places, archive, access-control and audit model.
+
+**Purpose:** let authorized family members plan future activities and appointments, coordinate participants, schedule walks and trips, manage reminders and tasks, and see the family's shared commitments. The existing places/walks capability describes routes and destinations; the calendar adds when an activity happens, who participates, preparation tasks and notifications.
+
+### Functional scope
+
+- **Calendar views:** month, week, day and agenda/list views; navigation by date; clear distinction between all-day and timed events.
+- **Event planning:** create, edit, cancel, duplicate and archive planned events. Each event has a stable EVENT-ID, title, description, start/end, timezone, location or linked PLACE-ID, status, creator, participants and visibility.
+- **Event types:** family meeting, birthday/anniversary, appointment, trip, walk, excursion, school/work commitment, reminder and custom type. Types must be configurable without changing the core schema.
+- **Participants:** link existing people by PERSON-ID; record invitation/confirmation/decline status. Do not create duplicate person records when inviting someone already in the registry.
+- **Walks and trips:** schedule an existing walk/trip from FAMILY_PLACES, or create a draft walk from a calendar event. Preserve one canonical event and one canonical place/route record, linked by IDs; do not copy the same details into competing records.
+- **Tasks and preparation:** attach checklist items and responsible people to an event, with due dates, completion status and optional notes. Tasks must also be available in a unified family task list.
+- **Recurrence:** support repeat rules (daily, weekly, monthly, yearly, custom interval), end date or occurrence limit, and exceptions. Editing one occurrence must not silently rewrite the entire series.
+- **Reminders and notifications:** configurable reminders before an event and task deadline; in-app notifications first, with optional email/push adapters later. Notification delivery status and failures must be visible; never claim a reminder was sent without provider confirmation.
+- **Conflict detection:** warn about overlapping events for the same participant and allow the user to review conflicts. Do not automatically delete, move or reject events.
+- **Search and filters:** filter by date range, participant, event type, place, status and calendar; search titles and descriptions subject to access permissions.
+- **Shared calendars:** support family-wide and restricted calendars, with explicit read, create, edit, invite and administration permissions. Guest access is read-only unless separately granted.
+- **External calendar access:** design replaceable adapters for importing/exporting standard calendar data (ICS) and, after provider review and user authorization, connecting external calendars. External calendars are not the authoritative family registry.
+- **Accessibility and clients:** responsive desktop/mobile calendar, keyboard navigation, readable event labels and timezone-aware display.
+- **Audit and recovery:** record event creation, edits, cancellation, participant changes, permission changes and synchronization conflicts. Preserve event history and stable IDs.
+
+### Data and architecture rules
+
+- Calendar scheduling records are future/planned commitments; FAMILY_TIMELINE records sourced life events and historical chronology. A completed calendar activity may be linked to a timeline event, but the two records have distinct purposes and must not be conflated.
+- A calendar event may link to PERSON-ID, PLACE-ID, ARCHIVE-ID and a walk/trip record. References must use the authoritative IDs from the shared registry.
+- Store timestamps in a timezone-safe form and retain the event's intended timezone. All-day events must remain date-based and must not shift dates when viewed in another timezone.
+- Recurrence, reminders, invitations and external synchronization must be idempotent and auditable. Conflicts require user review.
+- Calendar data follows the same backup, export, privacy, access-control and retention rules as other family records.
+- Do not introduce a second people registry, independent calendar database or new cloud project for this capability.
+
+### Acceptance criteria and status
+
+- REQ-CAL-001: Create, view, edit, cancel and archive calendar events with stable EVENT-ID.
+- REQ-CAL-002: Display month, week, day and agenda views on supported screen sizes.
+- REQ-CAL-003: Link events to existing PERSON-ID and place/walk records without duplicate entities.
+- REQ-CAL-004: Manage participants and invitation responses under role-based permissions.
+- REQ-CAL-005: Create event checklists and assign tasks with deadlines and completion states.
+- REQ-CAL-006: Support recurring events, exceptions and safe single-occurrence/series editing.
+- REQ-CAL-007: Configure reminders and report actual notification delivery/failure.
+- REQ-CAL-008: Detect participant schedule overlaps and present them as warnings for human resolution.
+- REQ-CAL-009: Enforce shared-calendar visibility and separate read/create/edit/invite/admin permissions.
+- REQ-CAL-010: Import/export ICS and verify round-trip behavior before enabling external calendar synchronization.
+- REQ-CAL-011: Preserve timezone and all-day event semantics across clients and exports.
+- REQ-CAL-012: Maintain audit history, stable IDs, backup and restore coverage for calendar records.
+
+**Current implementation status: Planned.** Repository inspection found no calendar page, calendar-specific JavaScript, calendar API routes or calendar data tables in the current working branch. The places gallery is a separate existing interface and does not provide calendar planning. This section records approved product requirements only; it does not claim that the calendar has been implemented.
+
+
 ### New acceptance requirements
 - REQ-ARC-010: Detect actual media type and codec/container metadata independently of filename extension; preserve original filename as provenance.
 - REQ-ARC-011: Apply EXIF orientation and video display-matrix rotation to separately stored derivatives after malware scanning; never modify originals.
