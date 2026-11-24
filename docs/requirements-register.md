@@ -263,6 +263,20 @@ The authenticated home page is the family's shared planning workspace. It must n
 - The first delivery must work without continuous location tracking. Manual city and starting-point selection is a supported baseline.
 - Do not enable real family data until authentication, role-based authorization, private hosting, audit, backups and restore gates pass.
 
+### Homepage and discovery acceptance requirements
+- REQ-HOME-001: Render a private family dashboard only after authenticated session and authorization checks; keep the public landing page free of private plans.
+- REQ-HOME-002: Show upcoming shared events, invitations, tasks and reminders from the authoritative family calendar.
+- REQ-HOME-003: Let each participant control personal event visibility: private, selected family members or all authorized family members.
+- REQ-HOME-004: Provide a privacy-safe shared availability view that reveals free/busy only for private events.
+- REQ-HOME-005: Let participants propose joint trips, walks and cultural visits and manage invitations/responses.
+- REQ-DISC-001: Search and display museums, exhibitions, theatres, concerts, festivals, parks, historic sites and family activities by city and date.
+- REQ-DISC-002: Display event date/time, venue, price, age/language/accessibility details, ticket link, source and last-checked time when available.
+- REQ-DISC-003: Save a discovery result and link it to a canonical PLACE-ID and calendar EVENT-ID without creating duplicate records.
+- REQ-AI-008: Generate explainable family activity suggestions from authorized availability, city, interests and constraints; require human confirmation before committing plans or purchases.
+- REQ-ROUTE-001: Offer public-transport and walking routes with duration, route legs, transfers/stops or walking distance, and data freshness where supported.
+- REQ-ROUTE-002: Support explicit origin and departure/arrival time selection without exposing home addresses or live location by default.
+- REQ-PRIV-001: Enforce privacy and authorization for schedule, availability, interests, preferred cities, starting points and location data across UI, API, AI prompts and audit records.
+
 ### Acceptance criteria and status
 
 - REQ-CAL-001: Create, view, edit, cancel and archive calendar events with stable EVENT-ID.
