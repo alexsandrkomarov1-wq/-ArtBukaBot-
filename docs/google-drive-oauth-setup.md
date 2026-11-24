@@ -8,6 +8,8 @@ This integration starts with read-only Google Drive account metadata and quota a
 2. Enable the Google Drive API: https://console.cloud.google.com/apis/library/drive.googleapis.com
 3. Configure Google Auth Platform consent screen / branding and audience. For initial testing, use External + Testing and add the Google accounts that will test the integration as test users. Do not publish the app yet.
 4. Create an OAuth client ID with application type **Web application**.
+
+   **Important:** Google OAuth projects in External / Testing mode issue refresh tokens that expire after 7 days for Drive scopes. Use Testing only for a short initial test; before ongoing family use, review Google's production-readiness and verification requirements and publish appropriately. Do not treat a testing token as permanent storage authorization.
 5. Add this exact Authorized redirect URI:
 
    `https://YOUR_API_HOST/api/v1/integrations/google-drive/callback`
