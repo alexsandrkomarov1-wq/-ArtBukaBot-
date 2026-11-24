@@ -47,11 +47,11 @@ def test_refresh_token_is_authenticated_encrypted_and_user_bound(monkeypatch):
         "CORE_OAUTH_ENCRYPTION_KEY",
         base64.urlsafe_b64encode(b"0123456789abcdef0123456789abcdef").decode("ascii").rstrip("="),
     )
-    ciphertext = encrypt_refresh_token("refresh-secret", "U-123")
+    ciphertext = encrypt_refresh_token("refresh-secret", "U-123", "GD-ONE")
     assert ciphertext != "refresh-secret"
-    assert decrypt_refresh_token(ciphertext, "U-123") == "refresh-secret"
+    assert decrypt_refresh_token(ciphertext, "U-123", "GD-ONE") == "refresh-secret"
     try:
-        decrypt_refresh_token(ciphertext, "U-456")
+        decrypt_refresh_token(ciphertext, "U-456", "GD-ONE")
         assert False, "Ciphertext must not decrypt for another user"
     except Exception:
         pass
@@ -91,7 +91,7 @@ def test_google_drive_status_is_private_and_starts_disconnected(tmp_path, monkey
     client, token = make_client(tmp_path, monkeypatch)
     response = client.get("/api/v1/integrations/google-drive/status", headers=auth(token))
     assert response.status_code == 200
-    assert response.json() == {"status": "not_connected", "provider": "google-drive"}
+    assert response.json() == {"status": "not_connected", "provider": "google-drive", "accounts": []}
 
 
 def test_google_drive_callback_stores_encrypted_refresh_token_and_quota(tmp_path, monkeypatch):
@@ -162,4 +162,55 @@ def test_google_drive_callback_stores_encrypted_refresh_token_and_quota(tmp_path
         stored = connection.execute(select(GoogleDriveAccount.__table__)).mappings().one()
         assert stored["refresh_token_ciphertext"] != "long-lived-refresh-token"
         assert stored["refresh_token_ciphertext"]
+    engine.dispose()
+
+
+def test_one_owner_can_connect_two_independent_google_accounts(tmp_path, monkeypatch):
+    client, token = make_client(tmp_path, monkeypatch)
+
+    class FakeResponse:
+        def __init__(self, status_code, payload):
+            self.status_code, self.payload = status_code, payload
+        def json(self):
+            return self.payload
+
+    def fake_post(url, **kwargs):
+        code = kwargs["data"]["code"]
+        return FakeResponse(200, {
+            "access_token": f"access-{code}", "refresh_token": f"refresh-{code}",
+            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
+        })
+
+    def fake_get(url, **kwargs):
+        code = kwargs["headers"]["Authorization"].split("access-")[1]
+        return FakeResponse(200, {"user": {
+            "permissionId": f"google-id-{code}", "emailAddress": f"{code}@example.test",
+            "displayName": f"Drive {code}",
+        }, "storageQuota": {"limit": "10000", "usage": "100", "usageInDrive": "90", "usageInDriveTrash": "10"}})
+
+    monkeypatch.setattr("backend.app.google_drive_oauth.httpx.post", fake_post)
+    monkeypatch.setattr("backend.app.google_drive_oauth.httpx.get", fake_get)
+
+    account_ids = []
+    for code in ("first", "second"):
+        connect = client.get("/api/v1/integrations/google-drive/connect", headers=auth(token))
+        state = parse_qs(urlparse(connect.json()["authorization_url"]).query)["state"][0]
+        callback = client.get("/api/v1/integrations/google-drive/callback",
+                              params={"code": code, "state": state})
+        assert callback.status_code == 200
+        account_ids.append(callback.json()["drive_account_id"])
+
+    assert account_ids[0] != account_ids[1]
+    status = client.get("/api/v1/integrations/google-drive/status", headers=auth(token)).json()
+    assert len(status["accounts"]) == 2
+    assert {item["email_address"] for item in status["accounts"]} == {
+        "first@example.test", "second@example.test"
+    }
+
+    from backend.app.database import build_engine
+    engine = build_engine(f"sqlite:///{tmp_path / 'oauth.sqlite3'}")
+    with engine.connect() as connection:
+        stored = connection.execute(select(GoogleDriveAccount.__table__)).mappings().all()
+        assert len(stored) == 2
+        assert {row["drive_account_id"] for row in stored} == set(account_ids)
     engine.dispose()
