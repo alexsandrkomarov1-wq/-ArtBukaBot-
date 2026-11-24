@@ -15,3 +15,14 @@ description: Публичная витрина семейного проекта
 <article class="info-card"><span class="card-number">03</span><h2>Публикации</h2><p>Статьи, фотографии и другие материалы, разрешённые к публикации.</p></article>
 </section>
 <section class="notice"><div class="notice-mark" aria-hidden="true">i</div><div><h2>Публичная часть проекта</h2><p>Этот сайт не содержит закрытого семейного архива. Личные данные, адреса, контакты, документы и переписки не публикуются.</p></div></section>
+
+<section class="notice project-status" aria-labelledby="project-status-title">
+  <div class="notice-mark" aria-hidden="true">i</div>
+  <div>
+    <p class="eyebrow">ТЕКУЩИЙ ЭТАП</p>
+    <h2 id="project-status-title">Проект развивается поэтапно</h2>
+    <p>Публичная витрина уже опубликована в начальной версии. Основное ядро KOMAROVA_CORE и защищённый backend находятся в разработке. Подключение Google Drive подготовлено на уровне кода, но ещё не развёрнуто и не работает как действующая синхронизация.</p>
+    <p>Подключение облачного хранилища будет включено после размещения backend на постоянном HTTPS-адресе, настройки OAuth и проверки обмена данными.</p>
+    <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-">Репозиторий проекта на GitHub ↗</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/pull/13">Техническая подготовка Google Drive OAuth ↗</a></p>
+  </div>
+</section>
