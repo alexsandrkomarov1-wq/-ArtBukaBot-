@@ -286,3 +286,59 @@ def test_google_identity_cannot_be_linked_to_another_core_user(tmp_path, monkeyp
     second = client.get("/api/v1/integrations/google-drive/callback",
                         params={"code": "family", "state": state})
     assert second.status_code == 409
+
+
+def test_google_about_maps_network_errors_to_bad_gateway(monkeypatch):
+    import httpx
+    from fastapi import HTTPException
+    from backend.app.google_drive_oauth import _google_about
+
+    def fail_request(*args, **kwargs):
+        raise httpx.ConnectError("simulated connection failure")
+
+    monkeypatch.setattr("backend.app.google_drive_oauth.httpx.get", fail_request)
+    with pytest.raises(HTTPException) as exc:
+        _google_about("temporary-access-token")
+    assert exc.value.status_code == 502
+    assert exc.value.detail == "Google Drive account metadata request failed"
+
+
+@pytest.mark.parametrize("payload", [ValueError("invalid JSON"), TypeError("invalid response")])
+def test_google_about_maps_json_decode_errors_to_bad_gateway(monkeypatch, payload):
+    from fastapi import HTTPException
+    from backend.app.google_drive_oauth import _google_about
+
+    class InvalidJsonResponse:
+        status_code = 200
+
+        def json(self):
+            raise payload
+
+    monkeypatch.setattr(
+        "backend.app.google_drive_oauth.httpx.get",
+        lambda *args, **kwargs: InvalidJsonResponse(),
+    )
+    with pytest.raises(HTTPException) as exc:
+        _google_about("temporary-access-token")
+    assert exc.value.status_code == 502
+    assert exc.value.detail == "Google Drive returned invalid account metadata"
+
+
+def test_google_about_rejects_non_object_json(monkeypatch):
+    from fastapi import HTTPException
+    from backend.app.google_drive_oauth import _google_about
+
+    class NonObjectResponse:
+        status_code = 200
+
+        def json(self):
+            return ["unexpected", "array"]
+
+    monkeypatch.setattr(
+        "backend.app.google_drive_oauth.httpx.get",
+        lambda *args, **kwargs: NonObjectResponse(),
+    )
+    with pytest.raises(HTTPException) as exc:
+        _google_about("temporary-access-token")
+    assert exc.value.status_code == 502
+    assert exc.value.detail == "Google Drive returned invalid account metadata"
