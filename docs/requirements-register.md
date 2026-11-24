@@ -347,3 +347,19 @@ The authenticated homepage includes a shared, interactive family bulletin board 
 - REQ-ARC-012: Create browser-compatible image/video derivatives with verified output metadata and separate checksums.
 - REQ-CLIENT-003: Provide contextual page-aware navigation hints and accessible popovers without exposing private records.
 - REQ-AI-007: Provide a provider-neutral conversational site assistant only through a protected backend; distinguish verified system facts from guidance and model inference.
+
+
+### Family board and discovery map — first browser prototype
+
+**Approved module name:** Семейная интерактивная доска объявлений + карта семейных открытий.
+
+**Prototype delivery:** A public, non-sensitive demonstration page is being added to the static site so the interaction can be inspected before private backend deployment. It is not the authenticated family board and must not contain real family information.
+
+- The demo supports creating/filtering/pinning/deleting sample posts, local comments and lightweight reactions.
+- The map supports per-demo-participant place states, map/list selection, city geocoding and on-demand nearby POI discovery through OpenStreetMap.
+- Demo records use clearly marked demo identifiers and browser-local storage only. They are not inserted into the authoritative registry, Neon database or cloud storage.
+- The map uses OpenStreetMap tiles and attribution. Nearby POI search is an explicit request to the public Overpass API; no continuous GPS tracking is used.
+- No real family members, visit history, addresses, private plans or archive media are preloaded.
+- The prototype does not provide authentication, cross-device synchronization, server persistence, role permissions, production audit, or verified notifications.
+
+**Implementation status:** Browser prototype, pending CI and live-page verification. Production family functionality remains planned until the backend, private hosting, access control, authoritative IDs, backup/restore and integration tests are available.
