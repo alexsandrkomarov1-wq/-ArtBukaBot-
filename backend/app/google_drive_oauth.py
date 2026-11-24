@@ -140,11 +140,14 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         pending = db.scalar(select(GoogleOAuthState).where(
             GoogleOAuthState.state_hash == state_hash
         ))
-        expires_at = pending.expires_at if pending is None or pending.expires_at.tzinfo else pending.expires_at.replace(tzinfo=timezone.utc)
-        if pending is None or expires_at <= utc_now():
-            if pending is not None:
-                db.delete(pending)
-                db.commit()
+        if pending is None:
+            raise HTTPException(status_code=400, detail="OAuth state is invalid, expired, or already used")
+        expires_at = pending.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at <= utc_now():
+            db.delete(pending)
+            db.commit()
             raise HTTPException(status_code=400, detail="OAuth state is invalid, expired, or already used")
         user_id = pending.user_id
         db.delete(pending)
