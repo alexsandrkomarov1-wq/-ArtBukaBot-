@@ -8,7 +8,7 @@
   const now = () => new Date().toISOString();
   const makeId = prefix => prefix + "-" + (window.crypto && crypto.randomUUID ? crypto.randomUUID().slice(0, 8).toUpperCase() : Date.now().toString(36).toUpperCase());
   const seedPosts = [{
-    id: "POST-DEMO-001", title: "Идея для семейной прогулки", body: "Можно выбрать музей или парк на выходные. Отметьте интересные места на карте и обсудим общий маршрут.", kind: "Предложение", author: "Демо-участник", createdAt: "2026-11-24T10:00:00.000Z", pinned: true, votes: 2, comments: ["Пример комментария. В реальной версии ответ будет связан с участником семьи."]
+    id: "POST-SEED-001", title: "Идея для семейной прогулки", body: "Можно выбрать музей или парк на выходные. Отметьте интересные места на карте и обсудим общий маршрут.", kind: "Предложение", author: "Демо-участник", createdAt: "2026-11-24T10:00:00.000Z", pinned: true, votes: 2, comments: ["Пример комментария. В реальной версии ответ будет связан с участником семьи."]
   }];
   const seedPlaces = [
     { id:"PLACE-DEMO-001", osmType:"node", osmId:0, name:"Государственный Эрмитаж", category:"Музей", lat:59.9398, lon:30.3146, city:"Санкт-Петербург", demo:true },
