@@ -1,4 +1,4 @@
-"""Add encrypted per-user Google Drive OAuth account connections.
+"""Add encrypted multi-account Google Drive OAuth connections.
 
 Revision ID: 0006_google_drive_oauth
 Revises: 0005_private_media_intake
@@ -39,7 +39,6 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("revoked_at", sa.DateTime(timezone=True), nullable=True),
-        sa.UniqueConstraint("user_id", name="uq_google_drive_accounts_user_id"),
     )
     op.create_index("ix_google_drive_accounts_google_user_id", "google_drive_accounts", ["google_user_id"], unique=True)
 
