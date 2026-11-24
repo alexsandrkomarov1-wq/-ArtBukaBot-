@@ -10,12 +10,13 @@ from pathlib import Path
 
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
-from .archive_api import build_archive_router
+from .cloud_archive_api import build_archive_router
 from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
 from .navigation import build_navigation
 from .schemas import (
@@ -94,6 +95,22 @@ def create_app(
 
     configured_media_root = Path(
         media_root if media_root is not None else os.getenv("CORE_MEDIA_ROOT", "./private_media")
+    )
+    cors_origins = [
+        origin.strip().rstrip("/")
+        for origin in os.getenv(
+            "CORE_CORS_ORIGINS",
+            "https://alexsandrkomarov1-wq.github.io",
+        ).split(",")
+        if origin.strip()
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Core-Bootstrap-Token"],
+        max_age=600,
     )
     app.include_router(build_archive_router(get_db, require_roles, configured_media_root))
 
