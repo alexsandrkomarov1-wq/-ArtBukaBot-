@@ -7,6 +7,8 @@
   let token = sessionStorage.getItem(tokenKey) || "";
   let previewUrl = "";
   let sessionRole = "";
+  let archiveItems = [];
+  let archiveFilter = "all";
   const auth = $("cloud-auth");
   const panel = $("cloud-private-panel");
   const status = $("cloud-archive-status");
@@ -63,10 +65,16 @@
       select.add(option);
     });
   }
-  async function loadArchive() {
-    const items = await request("/api/v1/archive/items?limit=100");
+  function renderArchive() {
     const list = $("cloud-archive-list");
     list.replaceChildren();
+    const items = archiveItems.filter(item => {
+      if (archiveFilter === "original") return !item.original_material_id;
+      if (archiveFilter === "derivative") return Boolean(item.original_material_id);
+      if (archiveFilter === "photo") return item.item_type === "photo";
+      if (archiveFilter === "video") return item.item_type === "video";
+      return true;
+    });
     if (!items.length) {
       const empty = document.createElement("p");
       empty.className = "media-list-empty";
@@ -81,7 +89,7 @@
       const name = document.createElement("strong");
       name.textContent = item.title || item.original_filename;
       const meta = document.createElement("small");
-      meta.textContent = item.item_type + " · " + Math.round(item.size_bytes / 1024) + " КБ · " + item.archive_item_id;
+      meta.textContent = (item.item_type === "photo" ? "Фото" : "Видео") + " · " + Math.round(item.size_bytes / 1024) + " КБ · MATERIAL-ID: " + item.material_id + (item.original_material_id ? " · производная от " + item.original_material_id : " · оригинал") + " · ARCHIVE-ID: " + item.archive_item_id;
       info.append(name, meta);
       const actions = document.createElement("span");
       actions.className = "cloud-item-actions";
@@ -110,6 +118,20 @@
     }
     setStatus("Записей: " + items.length + ". Новые материалы остаются в карантине до антивирусной проверки.");
   }
+  async function loadArchive() {
+    archiveItems = await request("/api/v1/archive/items?limit=100");
+    renderArchive();
+    setStatus("Материалов в архиве: " + archiveItems.length + ". MATERIAL-ID отображается из ответа API; оригиналы и производные версии разделены.");
+  }
+  document.querySelectorAll("[data-cloud-filter]").forEach(button => button.addEventListener("click", () => {
+    archiveFilter = button.dataset.cloudFilter;
+    document.querySelectorAll("[data-cloud-filter]").forEach(item => {
+      const active = item === button;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+    renderArchive();
+  }));
   async function preview(item) {
     try {
       const response = await fetch(apiBase + "/api/v1/archive/items/" + encodeURIComponent(item.archive_item_id) + "/content", { headers: headers() });
