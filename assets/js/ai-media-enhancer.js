@@ -30,6 +30,9 @@
   let resultUrl = null;
   let generation = 0;
   let archiveResult = null;
+  let apiBase = "";
+  let accessToken = "";
+  let accountRole = "";
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
@@ -86,7 +89,7 @@
     mode.textContent = "ОЖИДАЕТ ФАЙЛ";
     setStage("Автоматическое улучшение", "Запускается сразу после проверки выбранного оригинала");
     info.textContent = "Файл ещё не выбран. Выберите фотографию или видео.";
-    status.textContent = "Оригинал не изменяется. После выбора начнётся автоматическая проверка.";
+    status.textContent = "Оригинал не изменяется. После выбора выполняются локальные проверки; ClamAV и AI-обработка требуют входа в частный backend.";
   }
 
   function showOriginal(file) {
@@ -111,11 +114,105 @@
     reset.disabled = false;
   }
 
+  function friendlyNetworkError(error) {
+    if (error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(error && error.message || "")) {
+      return "Частный backend не отвечает. Проверьте адрес API, доступность сервиса и настройки HTTPS/CORS";
+    }
+    return error && error.message ? error.message : "Неизвестная ошибка";
+  }
+
+  function normalizeApiBase(value) {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:" && !(url.hostname === "localhost" || url.hostname === "127.0.0.1")) {
+      throw new Error("Для удалённого частного API требуется HTTPS.");
+    }
+    return url.href.replace(/\/+$/, "");
+  }
+
+  async function validateImageDimensions(file) {
+    if (!file.type.startsWith("image/") || typeof createImageBitmap !== "function") return;
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file);
+      if (bitmap.width * bitmap.height > MAX_PIXELS) {
+        throw new Error("Изображение превышает безопасный предел 30 мегапикселей.");
+      }
+    } catch (error) {
+      if (error instanceof Error && /30 мегапикселей/.test(error.message)) throw error;
+      // Some browsers cannot decode HEIC/HEIF locally. The private worker performs authoritative decoding.
+    } finally {
+      if (bitmap) bitmap.close();
+    }
+  }
+
+  async function connectPrivateBackend(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const apiInput = form.querySelector("[data-ai-api-url]");
+    const usernameInput = form.querySelector("[data-ai-username]");
+    const passwordInput = form.querySelector("[data-ai-password]");
+    const connectButton = form.querySelector("[data-ai-connect-submit]");
+    const connectionStatus = root.querySelector("[data-ai-backend-status]");
+    accessToken = "";
+    accountRole = "";
+    try {
+      apiBase = normalizeApiBase(apiInput.value);
+      if (!usernameInput.value.trim() || !passwordInput.value) {
+        throw new Error("Введите логин и пароль вручную. Пароль не сохраняется.");
+      }
+      connectButton.disabled = true;
+      connectionStatus.textContent = "Проверяем частный backend…";
+      const health = await fetch(apiBase + "/health", { cache: "no-store" });
+      if (!health.ok) throw new Error("Backend ответил HTTP " + health.status + ".");
+      const response = await fetch(apiBase + "/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ username: usernameInput.value.trim(), password: passwordInput.value }),
+        cache: "no-store"
+      });
+      passwordInput.value = "";
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.access_token) {
+        throw new Error(response.status === 401 ? "Логин или пароль не принят." : "Вход не выполнен. HTTP " + response.status + ".");
+      }
+      accessToken = payload.access_token;
+      accountRole = payload.user && payload.user.role || "";
+      if (!accountRole) {
+        const me = await fetch(apiBase + "/api/v1/auth/me", {
+          headers: { Authorization: "Bearer " + accessToken, "Accept": "application/json" },
+          cache: "no-store"
+        });
+        if (!me.ok) throw new Error("Не удалось подтвердить роль учётной записи.");
+        const user = await me.json();
+        accountRole = user.role || "";
+      }
+      connectionStatus.textContent = "Частный API подключён · вход выполнен · роль: " + (accountRole || "не определена") + ". Пароль очищен и не сохранён.";
+      if (!["owner", "moderator"].includes(accountRole)) {
+        connectionStatus.textContent += " AI-обработка доступна владельцу или модератору.";
+      } else if (sourceFile) {
+        void processSelected(sourceFile, generation);
+      }
+    } catch (error) {
+      accessToken = "";
+      accountRole = "";
+      connectionStatus.textContent = "Подключение не выполнено: " + friendlyNetworkError(error) + ". Поле пароля очищено.";
+      status.textContent = "Частный AI worker не запущен. Оригинал не изменяется.";
+    } finally {
+      passwordInput.value = "";
+      connectButton.disabled = false;
+    }
+  }
+
+  const connectionForm = root.querySelector("[data-ai-connect-form]");
+  if (connectionForm) connectionForm.addEventListener("submit", connectPrivateBackend);
+
   async function runPrivateWorker(file, token) {
-    const config = window.KOMAROVA_CORE_API;
-    if (!config || !config.baseUrl || !config.accessToken) return null;
-    const base = config.baseUrl.replace(/\/+$/, "");
-    const headers = { Authorization: "Bearer " + config.accessToken };
+    if (!apiBase || !accessToken) return null;
+    if (!["owner", "moderator"].includes(accountRole)) {
+      throw new Error("Для запуска ClamAV и Real-ESRGAN нужна роль владельца или модератора.");
+    }
+    const base = apiBase;
+    const headers = { Authorization: "Bearer " + accessToken };
     const form = new FormData();
     form.append("file", file, file.name);
     const uploadedResponse = await fetch(base + "/api/v1/archive/items", {
@@ -181,6 +278,7 @@
     status.textContent = "Проверяется оригинал. Исходный файл не изменяется.";
     const sourceHashBefore = await sha256(file);
     try {
+      await validateImageDimensions(file);
       const serverResult = await runPrivateWorker(file, token);
       if (serverResult) {
         const sourceHashAfter = await sha256(file);
@@ -202,13 +300,13 @@
       resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался, поскольку публичный сайт не подключён к частному backend. Для AI-улучшения требуется Real-ESRGAN worker и файлы модели. Внешний EzEnhancer доступен отдельно по ссылке ниже.";
+      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался. Войдите в частный backend для антивирусной проверки и обработки Real-ESRGAN. Внешний EzEnhancer доступен отдельно по ссылке ниже.";
       exportButton.disabled = true;
     } catch (error) {
       if (token !== generation) return;
       setStage("Обработка остановлена", "Оригинал сохранён без изменений");
       mode.textContent = "ОШИБКА ОБРАБОТКИ";
-      status.textContent = "Не удалось создать проверенную копию: " + error.message + ". Исходный файл не изменён.";
+      status.textContent = "Не удалось создать проверенную копию: " + friendlyNetworkError(error) + ". Исходный файл не изменён.";
     }
   }
 
