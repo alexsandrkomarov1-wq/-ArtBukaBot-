@@ -173,7 +173,20 @@
       return;
     }
     map=L.map("fb-map",{scrollWheelZoom:false}).setView([fallbackCenter.lat,fallbackCenter.lon],13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
+    const tiles=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
+    let tileErrors=0;
+    tiles.on("tileerror",()=>{
+      tileErrors+=1;
+      if(tileErrors>=4&&map){
+        map.remove();
+        map=null;
+        markerLayer=null;
+        setMapStatus("Подложка OpenStreetMap временно недоступна. Список мест и отметки работают в резервном режиме.");
+        renderMapFallback("Не удалось загрузить карту OpenStreetMap. Выберите место из списка справа или откройте область на внешней карте.");
+        renderMarkers();
+      }
+    });
+    tiles.addTo(map);
     markerLayer=L.layerGroup().addTo(map);
     renderMarkers();
     map.on("moveend",renderPlaceList);
