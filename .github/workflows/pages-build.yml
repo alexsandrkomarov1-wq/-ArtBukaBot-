@@ -35,6 +35,7 @@ jobs:
           node --check assets/js/places-gallery.js
           node --check assets/js/family-board-map.js
           node --check assets/js/ai-media-enhancer.js
+          node --check neon/functions/aistatus/index.mjs
       - name: Compile AI media worker syntax
         run: python3 -m py_compile backend/app/ai_media_worker.py
       - name: Check media viewer interface contract
