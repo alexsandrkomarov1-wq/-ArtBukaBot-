@@ -18,31 +18,36 @@
   const resultImage = root.querySelector("[data-ai-result-preview]");
   const originalEmpty = root.querySelector("[data-ai-original-empty]");
   const resultEmpty = root.querySelector("[data-ai-result-empty]");
+  const motion = document.querySelector("[data-ai-motion]");
+  const scanStage = motion && motion.querySelector("[data-ai-scan-stage]");
+  const scanImage = motion && motion.querySelector("[data-ai-scan-image]");
+  const scanState = motion && motion.querySelector("[data-ai-scan-state]");
+  const scanNote = motion && motion.querySelector("[data-ai-scan-note]");
+  const scanProgress = motion && motion.querySelector("[data-ai-scan-progress]");
+  const defaultScanImage = scanImage ? scanImage.getAttribute("src") : "";
 
   let sourceFile = null;
   let sourceUrl = null;
-  let resultUrl = null;
-  let resultBlob = null;
+  let scanTimer = null;
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
   }
 
-  function clearResult() {
-    releaseUrl(resultUrl);
-    resultUrl = null;
-    resultBlob = null;
-    resultImage.removeAttribute("src");
-    resultImage.hidden = true;
-    resultEmpty.hidden = false;
-    exportButton.disabled = true;
+  function stopScan() {
+    if (scanTimer) window.clearTimeout(scanTimer);
+    scanTimer = null;
+    if (motion) motion.classList.remove("is-scanning");
+    if (scanStage) scanStage.classList.remove("is-scanning");
+    if (scanProgress) scanProgress.style.width = "0";
+    if (scanState) scanState.textContent = sourceFile ? "ФОТО ГОТОВО К СКАНИРОВАНИЮ" : "ОЖИДАЕТ ФОТОГРАФИЮ";
   }
 
   function clearWorkspace() {
+    stopScan();
     releaseUrl(sourceUrl);
     sourceUrl = null;
     sourceFile = null;
-    clearResult();
     input.value = "";
     originalImage.removeAttribute("src");
     originalImage.hidden = true;
@@ -51,11 +56,17 @@
     originalVideo.load();
     originalVideo.hidden = true;
     originalEmpty.hidden = false;
+    resultImage.removeAttribute("src");
+    resultImage.hidden = true;
+    resultEmpty.hidden = false;
+    if (scanImage && defaultScanImage) scanImage.src = defaultScanImage;
     view.disabled = true;
+    exportButton.disabled = true;
     reset.disabled = true;
     mode.textContent = "ОЖИДАЕТ ФАЙЛ";
     info.textContent = "Файл ещё не выбран. Нажмите «Выбрать фото или видео».";
-    status.textContent = "Локальный режим готов. Выбранный файл останется в этом браузере и пока не отправляется в Google Drive.";
+    status.textContent = "Оригинал не изменяется. Сканирующая анимация не является AI-восстановлением.";
+    if (scanNote) scanNote.textContent = "Это визуальная анимация сканера. Она не изменяет фотографию и не выдаёт себя за AI-восстановление.";
   }
 
   function formatBytes(bytes) {
@@ -65,24 +76,34 @@
   }
 
   function showFile(file) {
+    stopScan();
     releaseUrl(sourceUrl);
-    clearResult();
     sourceFile = file;
     sourceUrl = URL.createObjectURL(file);
     originalEmpty.hidden = true;
     originalImage.hidden = true;
     originalVideo.hidden = true;
+    resultImage.removeAttribute("src");
+    resultImage.hidden = true;
+    resultEmpty.hidden = false;
+    exportButton.disabled = true;
 
     if (file.type.startsWith("image/")) {
       originalImage.src = sourceUrl;
       originalImage.hidden = false;
-      mode.textContent = "ФОТОГРАФИЯ ВЫБРАНА";
-      status.textContent = "Фотография проверена по типу и размеру. Нажмите VIEW для просмотра и создания локальной демонстрационной копии.";
+      if (scanImage) scanImage.src = sourceUrl;
+      mode.textContent = "ФОТО ВЫБРАНО";
+      view.disabled = false;
+      status.textContent = "Оригинал открыт локально. Нажмите VIEW, чтобы запустить сканирующий проход. AI-обработка пока не подключена.";
+      if (scanState) scanState.textContent = "ФОТО ГОТОВО К СКАНИРОВАНИЮ";
     } else if (file.type.startsWith("video/")) {
       originalVideo.src = sourceUrl;
       originalVideo.hidden = false;
+      if (scanImage && defaultScanImage) scanImage.src = defaultScanImage;
       mode.textContent = "ВИДЕО ВЫБРАНО";
-      status.textContent = "Видеофайл выбран и доступен для просмотра. ИИ-обработка видео и экспорт улучшенной версии пока не подключены.";
+      view.disabled = true;
+      status.textContent = "Видео доступно для локального просмотра. Сканирование кадров, AI-улучшение и экспорт видео пока не реализованы.";
+      if (scanState) scanState.textContent = "СКАНИРОВАНИЕ ВИДЕО НЕ ПОДКЛЮЧЕНО";
     } else {
       clearWorkspace();
       status.textContent = "Браузер не распознал тип файла. Выберите изображение или видео.";
@@ -90,8 +111,33 @@
     }
 
     info.textContent = file.name + " · " + formatBytes(file.size) + " · " + file.type;
-    view.disabled = false;
     reset.disabled = false;
+  }
+
+  function runScanner() {
+    if (!sourceFile || !sourceFile.type.startsWith("image/") || !motion || !scanStage) return;
+    stopScan();
+    motion.classList.add("is-scanning");
+    scanStage.classList.add("is-scanning");
+    if (scanState) scanState.textContent = "СКАНИРУЮЩИЙ ПРОХОД";
+    if (scanNote) scanNote.textContent = "Сканирующая линия проходит по выбранному оригиналу. Это анимация интерфейса, а не вычисление нейросети.";
+    if (scanProgress) {
+      scanProgress.style.width = "0";
+      window.requestAnimationFrame(() => { scanProgress.style.width = "100%"; });
+    }
+    mode.textContent = "СКАНИРОВАНИЕ";
+    view.disabled = true;
+    status.textContent = "Выполняется визуальный сканирующий проход по оригиналу. Файл не изменяется.";
+    scanTimer = window.setTimeout(() => {
+      motion.classList.remove("is-scanning");
+      scanStage.classList.remove("is-scanning");
+      scanTimer = null;
+      if (scanState) scanState.textContent = "СКАНИРУЮЩИЙ ПРОХОД ЗАВЕРШЁН";
+      if (scanNote) scanNote.textContent = "Проход завершён. Качество фотографии не менялось: AI-модель не подключена, улучшенная копия не создана.";
+      mode.textContent = "ОЖИДАЕТ AI-МОДЕЛЬ";
+      status.textContent = "Анимация сканера завершена. Настоящее AI-восстановление не выполнялось; оригинал остался неизменным, экспорт результата отключён.";
+      view.disabled = false;
+    }, 6200);
   }
 
   upload.addEventListener("click", () => input.click());
@@ -112,57 +158,12 @@
     showFile(file);
   });
 
-  view.addEventListener("click", async () => {
-    if (!sourceFile) return;
-    if (sourceFile.type.startsWith("video/")) {
-      status.textContent = "Видео открыто в локальном проигрывателе. Стабилизация, шумоподавление и ИИ-улучшение станут доступны после подключения видеообработчика.";
-      return;
-    }
-
-    status.textContent = "Подготавливается локальная демонстрационная копия…";
-    view.disabled = true;
-    try {
-      const bitmap = await createImageBitmap(sourceFile);
-      const canvas = document.createElement("canvas");
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const context = canvas.getContext("2d");
-      if (!context) throw new Error("Canvas недоступен");
-      context.filter = "contrast(1.06) saturate(1.06) brightness(1.02)";
-      context.drawImage(bitmap, 0, 0);
-      bitmap.close();
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.94));
-      if (!blob) throw new Error("Не удалось создать копию");
-      clearResult();
-      resultBlob = blob;
-      resultUrl = URL.createObjectURL(blob);
-      resultImage.src = resultUrl;
-      resultImage.hidden = false;
-      resultEmpty.hidden = true;
-      exportButton.disabled = false;
-      status.textContent = "Готова локальная демонстрационная копия с лёгкой коррекцией контраста и цвета. Это НЕ ИИ-реставрация. Оригинал не изменён.";
-    } catch (error) {
-      status.textContent = "Не удалось подготовить копию в этом браузере: " + error.message;
-    } finally {
-      view.disabled = false;
-    }
-  });
-
-  exportButton.addEventListener("click", () => {
-    if (!resultBlob || !sourceFile) return;
-    const link = document.createElement("a");
-    const baseName = sourceFile.name.replace(/\.[^.]+$/, "") || "media";
-    link.href = resultUrl;
-    link.download = baseName + "-local-demo-copy.jpg";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    status.textContent = "Копия скачана на устройство. Она не загружена в Google Drive и не зарегистрирована в архивном реестре.";
-  });
-
+  view.addEventListener("click", runScanner);
   reset.addEventListener("click", clearWorkspace);
   window.addEventListener("pagehide", () => {
+    if (scanTimer) window.clearTimeout(scanTimer);
     releaseUrl(sourceUrl);
-    releaseUrl(resultUrl);
   });
+
+  clearWorkspace();
 })();
