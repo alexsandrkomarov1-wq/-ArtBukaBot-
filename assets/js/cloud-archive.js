@@ -3,8 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const apiBase = String(window.KOMAROVA_API_BASE || "").replace(/\/$/, "");
   if (!apiBase) return;
-  const tokenKey = "komarova_core_session";
-  let token = sessionStorage.getItem(tokenKey) || "";
+  let token = "";
   let previewUrl = "";
   let sessionRole = "";
   let archiveItems = [];
@@ -49,7 +48,7 @@
   function clearSession() {
     token = "";
     sessionRole = "";
-    sessionStorage.removeItem(tokenKey);
+    $("cloud-password").value = "";
     auth.hidden = false;
     panel.hidden = true;
     connection.textContent = "Не выполнен вход";
@@ -154,12 +153,17 @@
         body: JSON.stringify({ username: $("cloud-username").value, password: $("cloud-password").value })
       });
       token = result.access_token;
-      sessionStorage.setItem(tokenKey, token);
       showSession(result.user);
       await checkStorage();
       await loadPeople(); await loadArchive();
       $("cloud-password").value = "";
-    } catch (error) { connection.textContent = "Ошибка входа: " + error.message; }
+    } catch (error) {
+      token = "";
+      $("cloud-password").value = "";
+      connection.textContent = error instanceof TypeError
+        ? "API недоступен: частный backend не отвечает или не настроен. Проверьте URL, HTTPS и CORS."
+        : "Ошибка входа: " + (error.message || "запрос не выполнен");
+    }
   });
   $("cloud-bootstrap-form").addEventListener("submit", async event => {
     event.preventDefault();
@@ -177,7 +181,13 @@
       connection.textContent = "Владелец создан. Теперь войдите под новым логином.";
       $("cloud-username").value = body.username;
       $("cloud-password").focus();
-    } catch (error) { connection.textContent = "Настройка не выполнена: " + error.message; }
+    } catch (error) {
+      $("cloud-bootstrap-token").value = "";
+      $("cloud-owner-password").value = "";
+      connection.textContent = error instanceof TypeError
+        ? "API недоступен: частный backend не отвечает или не настроен. Код настройки и пароль очищены."
+        : "Настройка не выполнена: " + (error.message || "запрос не выполнен");
+    }
   });
   $("cloud-upload-form").addEventListener("submit", async event => {
     event.preventDefault();
@@ -207,12 +217,7 @@
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = "";
   });
-  fetch(apiBase + "/health").then(r => r.ok ? r.json() : Promise.reject()).then(() => {
-    connection.textContent = "API доступен · войдите для проверки хранилища";
-  }).catch(() => { connection.textContent = "API пока недоступен"; });
-  if (token) {
-    request("/api/v1/auth/me").then(async user => {
-      showSession(user); await checkStorage(); await loadPeople(); await loadArchive();
-    }).catch(clearSession);
-  }
+  fetch(apiBase + "/health", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status))).then(() => {
+    connection.textContent = "API доступен · войдите вручную для открытия закрытого архива";
+  }).catch(() => { connection.textContent = "Частный backend пока недоступен. Закрытый архив не подключён; локальная медиатека работает отдельно."; });
 })();
