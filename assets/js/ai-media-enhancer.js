@@ -122,6 +122,7 @@
   }
 
   function normalizeApiBase(value) {
+    if (!value || !value.trim()) throw new Error("Адрес частного API пока не указан: сервер ещё не опубликован.");
     const url = new URL(value.trim());
     if (url.protocol !== "https:" && !(url.hostname === "localhost" || url.hostname === "127.0.0.1")) {
       throw new Error("Для удалённого частного API требуется HTTPS.");
