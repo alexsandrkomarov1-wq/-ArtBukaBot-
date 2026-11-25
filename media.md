@@ -43,7 +43,14 @@ description: Локальный просмотр фотографий и вид�
       <label>Связать с человеком / PERSON-ID<select id="cloud-person-id"><option value="">Без привязки к человеку</option></select></label>
       <button type="submit" class="media-open-button">Загрузить в закрытый архив</button>
     </form>
-    <p id="cloud-archive-status" class="media-status" role="status" aria-live="polite">После входа здесь появятся файлы из приватного bucket uploads.</p>
+    <p id="cloud-archive-status" class="media-status" role="status" aria-live="polite">После входа здесь появятся материалы из подключённого приватного хранилища.</p>
+    <div class="media-filters cloud-archive-filters" role="group" aria-label="Подкаталоги закрытого архива">
+      <button type="button" class="media-filter is-active" data-cloud-filter="all" aria-pressed="true">Все материалы</button>
+      <button type="button" class="media-filter" data-cloud-filter="original" aria-pressed="false">Оригиналы</button>
+      <button type="button" class="media-filter" data-cloud-filter="derivative" aria-pressed="false">Обработанные копии</button>
+      <button type="button" class="media-filter" data-cloud-filter="photo" aria-pressed="false">Фото</button>
+      <button type="button" class="media-filter" data-cloud-filter="video" aria-pressed="false">Видео</button>
+    </div>
     <div id="cloud-archive-list" class="media-list"><p class="media-list-empty">Архив ещё не загружен.</p></div>
     <div id="cloud-preview" class="cloud-preview" hidden>
       <div class="cloud-preview-head"><strong id="cloud-preview-name"></strong><button type="button" id="cloud-preview-close" class="media-button">Закрыть просмотр</button></div>
