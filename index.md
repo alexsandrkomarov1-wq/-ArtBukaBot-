@@ -57,7 +57,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Оригинал проходит проверку и остаётся неизменным. AI worker на базе Real-ESRGAN создаёт отдельную копию с восстановлением деталей и увеличением разрешения до 4×.</p>
+      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Оригинал остаётся неизменным. После подключения частного backend ClamAV проверит файл, а AI worker на базе Real-ESRGAN создаст отдельную копию с восстановлением деталей и увеличением разрешения до 4×.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
@@ -72,7 +72,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
         <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор файла · проверка и автоматическая обработка · до 100 МБ</small>
+        <small class="ai-media-action-note">Выбор файла · проверка формата · AI-обработка после подключения worker · до 100 МБ</small>
       </button>
       <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
