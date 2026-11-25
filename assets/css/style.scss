@@ -786,3 +786,7 @@ body {
 .ai-media-result-select{display:block;width:100%;margin-top:9px;text-align:center}
 .ai-media-copy-note{display:block;margin-top:7px;color:#667166;font-size:10px;line-height:1.5}
 .ai-media-file-input[data-ai-result-input]{display:none}
+
+.ai-media-stage{cursor:default;}
+.ai-media-live-preview[hidden]{display:none!important;}
+.ai-media-stage .ai-media-action-note{color:#d4d9d2;}
