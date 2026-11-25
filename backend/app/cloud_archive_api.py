@@ -329,9 +329,10 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         try:
             with tempfile.TemporaryDirectory(prefix="core-enhance-", dir=intake_root) as temp_name:
                 work = Path(temp_name)
-                source_path = work / _safe_filename(original_blob.original_filename)
+                source_path = work / "original" / _safe_filename(original_blob.original_filename)
+                source_path.parent.mkdir(parents=True, exist_ok=True)
                 output_suffix = ".webp" if original_item.item_type == "photo" else ".mp4"
-                output_path = work / ("enhanced" + output_suffix)
+                output_path = work / "derivative" / ("enhanced" + output_suffix)
                 digest = hashlib.sha256()
                 total = 0
                 chunks, expected_length, _ = storage.open_stream(original_blob.storage_object_key)
