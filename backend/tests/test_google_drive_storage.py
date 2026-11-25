@@ -49,7 +49,7 @@ def test_upload_uses_configured_folder_and_requires_google_file_id(monkeypatch, 
 
     def fake_put(*args, **kwargs):
         list(kwargs["content"])
-        return FakeResponse(status_code=200, payload={"id": "drive-file-1", "parents": [folder_id]})
+        return FakeResponse(status_code=200, payload={"id": "drive-file-1", "parents": [folder_id], "size": str(source.stat().st_size), "mimeType": "image/jpeg"})
 
     monkeypatch.setattr(google_drive_storage.httpx, "post", fake_post)
     monkeypatch.setattr(google_drive_storage.httpx, "put", fake_put)
@@ -67,7 +67,7 @@ def test_upload_rejects_file_not_confirmed_in_archive_folder(monkeypatch, tmp_pa
     monkeypatch.setattr(google_drive_storage.httpx, "post", lambda *a, **k: FakeResponse(
         headers={"Location": "https://upload.example.test/session"}))
     monkeypatch.setattr(google_drive_storage.httpx, "put", lambda *a, **k: FakeResponse(
-        payload={"id": "drive-file-2", "parents": ["different-folder"]}))
+        payload={"id": "drive-file-2", "parents": ["different-folder"], "size": str(source.stat().st_size), "mimeType": "image/jpeg"}))
     source = tmp_path / "portrait.jpg"
     source.write_bytes(b"\\xff\\xd8\\xfftest")
     with pytest.raises(HTTPException) as exc:
