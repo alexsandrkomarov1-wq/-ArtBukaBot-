@@ -1,6 +1,6 @@
 # Google Drive OAuth setup
 
-This integration starts with read-only Google Drive account metadata and quota access. It does not read file contents, upload, modify, or delete files.
+This integration authorizes the signed-in family account and supports temporary private archive storage in the configured Google Drive folder. Original files are uploaded into that folder and remain quarantined in the KOMAROVA_CORE registry until a verified malware-scanning workflow releases them.
 
 ## Google Cloud setup
 
@@ -34,19 +34,21 @@ Also configure the existing production variables: `DATABASE_URL`, `CORE_JWT_SECR
 ## Authorization and data handling
 
 - OAuth uses `access_type=offline` and a one-time, 10-minute state value bound to the signed-in KOMAROVA_CORE user.
-- The initial scope is only `https://www.googleapis.com/auth/drive.metadata.readonly`.
+- The temporary archive upload requires the broad `https://www.googleapis.com/auth/drive` scope because the target folder already exists and is configured by its exact folder ID. This grants access to the account's Drive files. Keep the OAuth app in Testing and restrict it to approved test accounts; do not publish this scope for general users without reviewing Google's verification and restricted-scope requirements.
 - The callback reads Google account identity and Drive quota, then discards the short-lived access token.
 - The long-lived refresh token is encrypted with AES-256-GCM before it is stored in Neon. The encryption key is separate from the database.
 - API responses and logs must never expose access tokens, refresh tokens, client secrets, or encryption keys.
 - Each KOMAROVA_CORE user may connect multiple distinct Google accounts while signed in. Each Google identity is globally unique and cannot be linked to a second KOMAROVA_CORE user. No automatic cross-family sharing is granted.
-- File contents and write scopes are deliberately out of scope for this first authorization milestone. They require a separately reviewed incremental authorization and file-operation implementation.
+- `CORE_STORAGE_BACKEND=google-drive` selects Google Drive as a temporary storage adapter. `GOOGLE_DRIVE_ARCHIVE_FOLDER_ID` must contain the exact ID of the private `KOMAROVA_CORE` folder. Do not put OAuth credentials in frontend code.
 - Disconnect revokes the Google token and removes the local account link.
 
 ## API endpoints
 
 All endpoints except the OAuth callback require a valid KOMAROVA_CORE bearer session:
 
-- `GET /api/v1/integrations/google-drive/connect` returns the Google authorization URL.
+- `GET /api/v1/integrations/google-drive/connect` returns the Google authorization URL with the archive file-access scope.
+- `GET /api/v1/archive/storage/health` verifies that the signed-in account can access the configured folder.
+- `POST /api/v1/archive/items` streams an original file to the configured Drive folder and records its Drive File ID, SHA-256, size, MIME type, and archive identifiers in the database.
 - `GET /api/v1/integrations/google-drive/callback` receives Google's authorization response.
 - `GET /api/v1/integrations/google-drive/status` reports all linked accounts and their quotas.
 - `POST /api/v1/integrations/google-drive/accounts/{drive_account_id}/refresh-quota` refreshes one selected account quota.
