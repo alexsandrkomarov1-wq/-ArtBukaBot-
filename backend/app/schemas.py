@@ -129,6 +129,8 @@ class ArchiveLinkRead(BaseModel):
 
 class ArchiveItemRead(BaseModel):
     archive_item_id: str
+    material_id: str
+    original_material_id: str | None
     item_type: Literal["photo", "video"]
     title: str | None
     record_status: Literal["quarantined", "available", "infected"]
