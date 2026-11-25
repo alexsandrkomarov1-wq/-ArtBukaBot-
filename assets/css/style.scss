@@ -467,3 +467,24 @@ a { color:var(--green); }
  .ai-media-motion-reveal { clip-path:inset(0 50% 0 0); }
  .ai-media-motion-line { left:50%; }
 }
+
+/* Archive section navigation cards */
+.archive-card-link { color:inherit; text-decoration:none; transition:border-color .18s ease,transform .18s ease,background .18s ease; }
+.archive-card-link:hover,.archive-card-link:focus-visible { border-color:var(--accent); background:#f2eee5; transform:translateY(-2px); }
+.archive-card-link:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.archive-card-link .card-state { margin-top:auto; }
+.events-status { margin:24px 0; padding:22px 24px; border:1px solid #d8c7a8; background:#f1eadc; }
+.events-status-label { color:#8b6844; font-size:9px; font-weight:850; letter-spacing:.14em; }
+.events-status h2 { margin:9px 0; font-family:Georgia,serif; font-size:clamp(23px,3vw,32px); font-weight:500; }
+.events-status p,.events-empty p { max-width:850px; color:var(--muted); font-size:12px; line-height:1.8; }
+.events-empty { display:grid; grid-template-columns:88px minmax(0,1fr); gap:22px; align-items:center; margin:24px 0; padding:28px; border:1px dashed var(--line); background:var(--card); }
+.events-empty-mark { display:grid; width:76px; height:76px; place-items:center; border:1px solid var(--line); border-radius:50%; color:var(--accent); font-family:Georgia,serif; font-size:43px; }
+.events-empty h2 { margin:7px 0; font-family:Georgia,serif; font-size:27px; font-weight:500; }
+.events-structure { margin:32px 0; padding:25px; border:1px solid var(--line); background:var(--card); }
+.events-structure h2 { margin:0 0 18px; font-family:Georgia,serif; font-size:25px; font-weight:500; }
+.events-structure ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; padding:0; list-style:none; }
+.events-structure li { display:grid; gap:5px; padding:13px 0; border-top:1px solid var(--line); }
+.events-structure li strong { color:var(--green); font-size:11px; }
+.events-structure li span { color:var(--muted); font-size:11px; line-height:1.65; }
+.events-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:28px 0 55px; }
+@media(max-width:620px){.events-empty{grid-template-columns:1fr;padding:20px}.events-structure ul{grid-template-columns:1fr}.events-actions{align-items:stretch;flex-direction:column}}
