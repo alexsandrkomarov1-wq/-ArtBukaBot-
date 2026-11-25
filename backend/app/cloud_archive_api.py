@@ -316,7 +316,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             select(ArchiveItem, StoredBlob)
             .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
             .where(ArchiveItem.archive_item_id == archive_item_id,
-                   ArchiveItem.record_status == "quarantined")
+                   ArchiveItem.record_status.in_(["quarantined", "available", "infected"]))
         ).first()
         if row is None:
             raise HTTPException(status_code=404, detail="Archive item not found")
