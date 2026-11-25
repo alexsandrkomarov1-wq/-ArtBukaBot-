@@ -1,4 +1,4 @@
-name: GitHub Pages build
+name: GitHub Pages build and deploy
 
 on:
   push:
@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,9 +27,39 @@ jobs:
         with:
           source: ./
           destination: ./_site
-      - name: Check media viewer JavaScript syntax
-        run: node --check assets/js/family-portraits.js && node --check assets/js/media-library.js && node --check assets/js/site-guide.js && node --check assets/js/places-gallery.js && node --check assets/js/family-board-map.js && node --check assets/js/ai-media-enhancer.js
-      - name: Compile AI media worker syntax\n        run: python3 -m py_compile backend/app/ai_media_worker.py\n      - name: Check media viewer interface contract
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/js/family-portraits.js
+          node --check assets/js/media-library.js
+          node --check assets/js/site-guide.js
+          node --check assets/js/places-gallery.js
+          node --check assets/js/family-board-map.js
+          node --check assets/js/ai-media-enhancer.js
+      - name: Compile AI media worker syntax
+        run: python3 -m py_compile backend/app/ai_media_worker.py
+      - name: Check media viewer interface contract
         run: python3 scripts/check_media_viewer.py
       - name: Check generated pages and local links
-        run: python3 scripts/check_pages_links.py _site
+        run: python3 scripts/check_pages_links.py ./_site
+      - name: Upload Pages artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/core-backend-foundation'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
