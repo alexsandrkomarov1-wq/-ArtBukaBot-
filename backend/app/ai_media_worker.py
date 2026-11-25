@@ -1,6 +1,9 @@
 "Fail-closed AI media worker primitives. The original is never edited."
 from __future__ import annotations
-import hashlib, os, shutil, subprocess, tempfile
+import hashlib, json, os, shutil, subprocess, tempfile
+import numpy as np
+from PIL import Image, ImageEnhance, ImageOps
+from .media_processing import _enhance_rgb
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +21,8 @@ class WorkerResult:
     source_size: int
     output_size: int
     engine: str
+    output_width: int = 0
+    output_height: int = 0
 
 def sha256_file(path: str | Path) -> str:
     digest = hashlib.sha256()
@@ -58,9 +63,31 @@ def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: in
     scan_or_fail(source)
     output.parent.mkdir(parents=True, exist_ok=True)
     original_hash = sha256_file(source)
-    _enhance_image(source, output, scale, timeout=300)
+    with tempfile.TemporaryDirectory(prefix="core-ai-photo-") as temp_name:
+        prepared = Path(temp_name) / "prepared.png"
+        try:
+            with Image.open(source) as original:
+                ImageOps.exif_transpose(original).convert("RGB").save(prepared, format="PNG")
+        except (OSError, ValueError) as exc:
+            raise ValueError("Pillow could not decode the source photo for AI processing") from exc
+        ai_output = Path(temp_name) / "realesrgan-output.png"
+        _enhance_image(prepared, ai_output, scale, timeout=300)
+        with Image.open(ai_output) as opened:
+            opened.load()
+            ai_rgb = np.asarray(ImageOps.exif_transpose(opened).convert("RGB"))
+        # OpenCV + scikit-image refine local contrast, noise and edge detail
+        # after neural upscaling. Pillow applies a restrained brightness/color finish.
+        refined = Image.fromarray(_enhance_rgb(ai_rgb), mode="RGB")
+        refined = ImageEnhance.Brightness(refined).enhance(1.04)
+        refined = ImageEnhance.Color(refined).enhance(1.04)
+        refined = ImageEnhance.Contrast(refined).enhance(1.03)
+        refined.save(output, format="PNG")
+    with Image.open(output) as enhanced:
+        enhanced.load()
+        width, height = enhanced.size
     return WorkerResult(str(output), "image/png", original_hash, sha256_file(output),
-        source.stat().st_size, output.stat().st_size, "Real-ESRGAN")
+        source.stat().st_size, output.stat().st_size,
+        f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image", width, height)
 
 def restore_video(source_path: str | Path, output_path: str | Path, *, scale: int = 2) -> WorkerResult:
     source, output = Path(source_path).resolve(strict=True), Path(output_path).resolve()
@@ -95,5 +122,12 @@ def restore_video(source_path: str | Path, output_path: str | Path, *, scale: in
             "-shortest", "-movflags", "+faststart", str(output)], 900)
     if not output.is_file() or output.stat().st_size == 0:
         raise RuntimeError("FFmpeg did not produce a restored video")
+    dimensions = _run([ffprobe, "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height", "-of", "json", str(output)], 30)
+    try:
+        video_stream = json.loads(dimensions.stdout)["streams"][0]
+        width, height = int(video_stream["width"]), int(video_stream["height"])
+    except (ValueError, KeyError, IndexError, TypeError) as exc:
+        raise RuntimeError("Could not verify enhanced video dimensions") from exc
     return WorkerResult(str(output), "video/mp4", original_hash, sha256_file(output),
-        source.stat().st_size, output.stat().st_size, "Real-ESRGAN+FFmpeg")
+        source.stat().st_size, output.stat().st_size, f"Real-ESRGAN x{scale} + FFmpeg", width, height)

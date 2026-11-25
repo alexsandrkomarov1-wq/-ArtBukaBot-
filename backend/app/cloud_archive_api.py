@@ -19,7 +19,7 @@ from . import archive_api as legacy_archive_api
 from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Material, Person, StoredBlob, User, new_id
 from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
 from .storage import PrivateMediaStorage
-from .media_processing import normalize_photo, normalize_video, sha256_file
+from .ai_media_worker import restore_photo, restore_video, sha256_file
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 CHUNK_SIZE = 1024 * 1024
@@ -331,7 +331,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 work = Path(temp_name)
                 source_path = work / "original" / _safe_filename(original_blob.original_filename)
                 source_path.parent.mkdir(parents=True, exist_ok=True)
-                output_suffix = ".webp" if original_item.item_type == "photo" else ".mp4"
+                output_suffix = ".png" if original_item.item_type == "photo" else ".mp4"
                 output_path = work / "derivative" / ("enhanced" + output_suffix)
                 digest = hashlib.sha256()
                 total = 0
@@ -346,10 +346,10 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
 
                 try:
                     if original_item.item_type == "photo":
-                        result = normalize_photo(source_path, output_path, scanner_state="clean")
+                        result = restore_photo(source_path, output_path, scale=4)
                     else:
-                        result = normalize_video(source_path, output_path, scanner_state="clean")
-                except (ValueError, RuntimeError, OSError) as exc:
+                        result = restore_video(source_path, output_path, scale=2)
+                except (ValueError, RuntimeError, OSError, subprocess.SubprocessError) as exc:
                     raise HTTPException(status_code=422, detail=f"Media processing failed: {exc}") from exc
                 if result.source_sha256 != original_blob.sha256 or sha256_file(source_path) != original_blob.sha256:
                     raise HTTPException(status_code=502, detail="Original changed during processing; derivative was rejected")
@@ -371,12 +371,12 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                     raise HTTPException(status_code=409, detail="Identical derivative content is already registered")
 
                 object_key = f"derivatives/{result.output_sha256[:2]}/{result.output_sha256}"
-                storage.put_file(object_key, output_path, result.output_format)
+                storage.put_file(object_key, output_path, result.output_mime)
                 stored = True
 
                 derivative_blob = StoredBlob(
                     blob_id=new_id("BL"), sha256=result.output_sha256,
-                    size_bytes=result.output_size, detected_mime_type=result.output_format,
+                    size_bytes=result.output_size, detected_mime_type=result.output_mime,
                     original_filename=Path(original_blob.original_filename).stem + "-enhanced" + output_suffix,
                     storage_provider=storage.provider, storage_object_key=object_key,
                     storage_state="verified",

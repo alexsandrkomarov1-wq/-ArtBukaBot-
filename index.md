@@ -57,14 +57,14 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Выберите оригинал: фотография автоматически получает локальную улучшенную копию. При подключении частного backend включаются ClamAV, серверная обработка фото и видео и постоянная архивная регистрация. Исходник не изменяется.</p>
+      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Оригинал остаётся неизменным. После подключения частного backend ClamAV проверит файл, а AI worker на базе Real-ESRGAN создаст отдельную копию с восстановлением деталей и увеличением разрешения до 4×.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
 
   <div class="ai-media-workspace" data-ai-media-lab>
     <div class="ai-media-workspace-heading">
-      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · ЛОКАЛЬНАЯ ОБРАБОТКА</span><h3>Работа с вашим материалом</h3></div>
+      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · AI SUPER-RESOLUTION</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
@@ -72,7 +72,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
         <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор файла · проверка и автоматическая обработка · до 100 МБ</small>
+        <small class="ai-media-action-note">Выбор файла · проверка формата · AI-обработка после подключения worker · до 100 МБ</small>
       </button>
       <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
@@ -100,13 +100,43 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <small class="ai-media-copy-note">Результат создаётся как отдельный файл. Исходник не изменяется.</small>
       </figure>
     </div>
-    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Выберите изображение. Обработка выполняется локально в браузере, без отправки файла на сервер.</p>
+    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Выберите фотографию. После проверки частный AI worker создаст улучшенную копию.</p>
+    <div class="ai-media-atmosphere" data-media-atmosphere>
+      <div class="ai-media-nature-scene" data-nature-scene="forest" aria-hidden="true">
+        <span class="nature-sun"></span><span class="nature-mountains"></span><span class="nature-hills"></span>
+        <span class="nature-water"></span><span class="nature-trees"></span><span class="nature-fireflies"></span>
+      </div>
+      <div class="ai-media-atmosphere-content">
+        <div><span class="ai-media-kicker">ЖИВАЯ АТМОСФЕРА · ПРИРОДА И ЗВУК</span><h3>Пусть архив оживает</h3><p data-atmosphere-status>Выберите настроение или произнесите команду. Музыка создаётся на устройстве, без платных музыкальных сервисов.</p></div>
+        <div class="ai-media-atmosphere-controls">
+          <div class="nature-scenes" aria-label="Смена природной сцены">
+            <button type="button" data-scene-choice="forest" aria-pressed="true">Лес</button>
+            <button type="button" data-scene-choice="lake" aria-pressed="false">Озеро</button>
+            <button type="button" data-scene-choice="mountain" aria-pressed="false">Горы</button>
+            <button type="button" data-scene-choice="sunset" aria-pressed="false">Закат</button>
+          </div>
+          <div class="music-moods" aria-label="Музыкальное настроение">
+            <button type="button" data-mood-choice="romance" aria-pressed="true">Романтика</button>
+            <button type="button" data-mood-choice="calm" aria-pressed="false">Спокойствие</button>
+            <button type="button" data-mood-choice="focus" aria-pressed="false">Фокус</button>
+            <button type="button" data-mood-choice="nature" aria-pressed="false">Природная мелодия</button>
+          </div>
+          <div class="assistant-controls">
+            <button type="button" class="ai-media-sound-toggle" data-sound-toggle>▶ Включить музыку</button>
+            <button type="button" data-voice-assistant>🎙 Голосовой помощник</button>
+          </div>
+          <span class="ai-media-assistant-hint">Команды: «включи романтику», «покажи лес», «включи спокойствие», «выключи музыку»</span>
+        </div>
+      </div>
+    </div>
+    <a class="ai-media-external" href="https://ezenhancer.ai/ru/" target="_blank" rel="noopener noreferrer">Открыть EzEnhancer для внешнего AI-улучшения <span aria-hidden="true">↗</span></a>
+    <small class="ai-media-copy-note">Это отдельный сервис: фотографию потребуется загрузить туда вручную. Автоматическая передача файлов в EzEnhancer не подключена.</small>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
   <div class="ai-media-tools">
     <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Серверный worker: Pillow подготавливает изображение; OpenCV корректирует контраст и шум; scikit-image восстанавливает детали. Пока backend не подключён, сайт создаёт локальную коррекционную копию в браузере.</p></article>
-    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>FFmpeg и OpenCV: коррекция кадров, шумоподавление, резкость, сохранение аудиодорожки и проверка готового MP4. Обработка выполняется в частном worker после подключения backend.</p></article>
+    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>Real-ESRGAN увеличивает разрешение кадров в 2×, FFmpeg собирает видео и сохраняет исходную аудиодорожку. Готовый MP4 проверяется до регистрации отдельного MATERIAL-ID.</p></article>
     <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Каждый оригинал и результат получают отдельный MATERIAL-ID. Производная запись хранит ссылку на исходный MATERIAL-ID, контрольные суммы и сведения о применённом конвейере.</p></article>
   </div>
 
@@ -159,5 +189,6 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}"></script>
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}"></script>

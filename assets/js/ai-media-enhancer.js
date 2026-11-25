@@ -111,74 +111,6 @@
     reset.disabled = false;
   }
 
-  function makeCanvasCopy(file, token) {
-    return new Promise((resolve, reject) => {
-      const image = new Image();
-      const imageUrl = URL.createObjectURL(file);
-      image.onload = () => {
-        URL.revokeObjectURL(imageUrl);
-        try {
-          if (token !== generation) return reject(new Error("Выбран другой файл."));
-          const width = image.naturalWidth;
-          const height = image.naturalHeight;
-          if (!width || !height || width * height > MAX_PIXELS) {
-            throw new Error("Изображение превышает безопасный предел 30 мегапикселей.");
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const context = canvas.getContext("2d", { willReadFrequently: true });
-          if (!context) throw new Error("Canvas 2D недоступен.");
-          context.drawImage(image, 0, 0);
-
-          const frame = context.getImageData(0, 0, width, height);
-          const pixels = frame.data;
-          for (let i = 0; i < pixels.length; i += 4) {
-            const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
-            const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-            const saturation = 1.045;
-            const contrast = 1.055;
-            pixels[i] = Math.max(0, Math.min(255, (luminance + (r - luminance) * saturation - 128) * contrast + 128));
-            pixels[i + 1] = Math.max(0, Math.min(255, (luminance + (g - luminance) * saturation - 128) * contrast + 128));
-            pixels[i + 2] = Math.max(0, Math.min(255, (luminance + (b - luminance) * saturation - 128) * contrast + 128));
-          }
-          context.putImageData(frame, 0, 0);
-
-          // Restrained unsharp mask; it does not synthesize missing detail.
-          const source = context.getImageData(0, 0, width, height).data;
-          const sharpened = context.createImageData(width, height);
-          const target = sharpened.data;
-          target.set(source);
-          for (let y = 1; y < height - 1; y++) {
-            for (let x = 1; x < width - 1; x++) {
-              const p = (y * width + x) * 4;
-              for (let channel = 0; channel < 3; channel++) {
-                const neighbours = source[p - 4 + channel] + source[p + 4 + channel] +
-                  source[p - width * 4 + channel] + source[p + width * 4 + channel];
-                target[p + channel] = Math.max(0, Math.min(255, source[p + channel] * 1.28 - neighbours * 0.07));
-              }
-            }
-          }
-          context.putImageData(sharpened, 0, 0);
-          const requestedMime = file.type === "image/png" ? "image/png" : "image/webp";
-          canvas.toBlob(blob => {
-            if (!blob) return reject(new Error("Не удалось создать файл результата."));
-            const extension = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
-            const name = file.name.replace(/\.[^.]+$/, "") + "-enhanced." + extension;
-            resolve(new File([blob], name, { type: blob.type || requestedMime, lastModified: Date.now() }));
-          }, requestedMime, 0.94);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      image.onerror = () => {
-        URL.revokeObjectURL(imageUrl);
-        reject(new Error("Pillow-подобная подготовка в браузере: файл не удалось декодировать."));
-      };
-      image.src = imageUrl;
-    });
-  }
-
   async function runPrivateWorker(file, token) {
     const config = window.KOMAROVA_CORE_API;
     if (!config || !config.baseUrl || !config.accessToken) return null;
@@ -200,7 +132,7 @@
     const scan = await scanResponse.json();
     if (scan.scan_status !== "clean") throw new Error("Оригинал не прошёл антивирусную проверку.");
 
-    setStage("Обработка проверенного оригинала", "Pillow · OpenCV · scikit-image / FFmpeg · OpenCV");
+    setStage("Обработка проверенного оригинала", "Real-ESRGAN NCNN Vulkan x4 · видео x2");
     status.textContent = "Оригинал проверен и сохранён. Запущена автоматическая обработка отдельной копии.";
     const enhancedResponse = await fetch(base + "/api/v1/archive/items/" + encodeURIComponent(original.archive_item_id) + "/enhance", {
       method: "POST", headers, cache: "no-store"
@@ -214,7 +146,7 @@
     });
     if (!contentResponse.ok) throw new Error("Не удалось получить проверенную копию: HTTP " + contentResponse.status);
     const blob = await contentResponse.blob();
-    const result = new File([blob], file.name.replace(/\.[^.]+$/, "") + "-enhanced" + (file.type.startsWith("video/") ? ".mp4" : ".webp"), {
+    const result = new File([blob], file.name.replace(/\.[^.]+$/, "") + "-enhanced" + (file.type.startsWith("video/") ? ".mp4" : ".png"), {
       type: blob.type || (file.type.startsWith("video/") ? "video/mp4" : "image/webp"),
       lastModified: Date.now()
     });
@@ -257,24 +189,21 @@
         return;
       }
       if (file.type.startsWith("video/")) {
-        setStage("Видеообработчик подготовлен", "FFmpeg + OpenCV · требуется подключение частного backend worker");
-        status.textContent = "Оригинал видео открыт и проверен по типу и размеру. Автоматическая обработка FFmpeg + OpenCV подготовлена в backend, но публичный сайт пока не подключён к серверу. Фиктивный результат не создаётся.";
-        mode.textContent = "ВИДЕО · ОЖИДАЕТ BACKEND";
+        setStage("Ожидается AI video worker", "Real-ESRGAN x2 · FFmpeg · сохранение аудио");
+        resultEmpty.textContent = "AI-обработка видео появится после подключения частного worker. Исходник не изменён, фиктивный ролик не создаётся.";
+        resultEmpty.hidden = false;
+        status.textContent = "Оригинал видео выбран. Локально проверены формат, размер и SHA-256; антивирусная проверка ClamAV не запускалась. Для улучшения требуется частный backend с Real-ESRGAN, FFmpeg и моделью.";
+        mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
         return;
       }
-      setStage("Автоматическая обработка фотографии", "Коррекция цвета, контраста, шумов и резкости");
-      status.textContent = "Создаётся отдельная локальная копия. Оригинал остаётся нетронутым.";
-      const enhanced = await makeCanvasCopy(file, token);
-      if (token !== generation) return;
+      setStage("Ожидается AI worker", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
+      mode.textContent = "AI WORKER НЕ ПОДКЛЮЧЁН";
+      resultEmpty.textContent = "Настоящее AI-улучшение появится после подключения частного worker. Сейчас здесь не показывается поддельная копия.";
+      resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-      const bitmap = await createImageBitmap(enhanced);
-      const originalBitmap = await createImageBitmap(file);
-      const dimensionsValid = bitmap.width === originalBitmap.width && bitmap.height === originalBitmap.height;
-      bitmap.close();
-      originalBitmap.close();
-      if (!dimensionsValid) throw new Error("Проверка размеров результата не пройдена.");
-      await displayResult(enhanced, token, null);
+      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался, поскольку публичный сайт не подключён к частному backend. Для AI-улучшения требуется Real-ESRGAN worker и файлы модели. Внешний EzEnhancer доступен отдельно по ссылке ниже.";
+      exportButton.disabled = true;
     } catch (error) {
       if (token !== generation) return;
       setStage("Обработка остановлена", "Оригинал сохранён без изменений");

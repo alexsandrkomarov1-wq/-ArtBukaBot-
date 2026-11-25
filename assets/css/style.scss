@@ -790,3 +790,62 @@ body {
 .ai-media-stage{cursor:default;}
 .ai-media-live-preview[hidden]{display:none!important;}
 .ai-media-stage .ai-media-action-note{color:#d4d9d2;}
+
+
+/* AI media: honest neural processing state and a living nature / sound stage. */
+.ai-media-external{
+  display:inline-flex;align-items:center;gap:9px;margin:12px 0 4px;padding:10px 14px;
+  border:1px solid rgba(117,211,222,.42);border-radius:12px;color:#b9f2f2;
+  background:rgba(25,75,83,.2);font-size:12px;font-weight:650;text-decoration:none;
+}
+.ai-media-external:hover{background:rgba(25,110,116,.3);border-color:rgba(150,240,235,.7)}
+.ai-media-atmosphere{
+  position:relative;isolation:isolate;overflow:hidden;min-height:290px;margin:26px 0 18px;
+  border:1px solid rgba(153,207,225,.25);border-radius:24px;background:#102b39;
+  box-shadow:0 24px 70px rgba(4,15,29,.25);
+}
+.ai-media-nature-scene{position:absolute;inset:0;overflow:hidden;transition:filter 2s ease,background 2s ease;
+  background:linear-gradient(180deg,#244b68 0%,#7c9eaa 45%,#c3aa83 100%);}
+.ai-media-nature-scene .nature-sun{position:absolute;width:88px;height:88px;top:13%;right:17%;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff8d9,#f3d28d 60%,rgba(244,205,133,.1) 100%);
+  box-shadow:0 0 70px 22px rgba(255,223,157,.22);animation:nature-sun-drift 24s ease-in-out infinite alternate;}
+.ai-media-nature-scene .nature-mountains{position:absolute;inset:26% -5% 18%;background:linear-gradient(145deg,#8fa6a2,#526f72);
+  clip-path:polygon(0 78%,18% 25%,30% 58%,49% 0,69% 58%,83% 24%,100% 78%,100% 100%,0 100%);opacity:.86;}
+.ai-media-nature-scene .nature-hills{position:absolute;inset:54% -5% 0;background:linear-gradient(180deg,#496f5d,#173e3b);
+  clip-path:polygon(0 26%,17% 8%,37% 31%,54% 4%,74% 26%,91% 0,100% 17%,100% 100%,0 100%);}
+.ai-media-nature-scene .nature-water{position:absolute;left:0;right:0;bottom:0;height:28%;opacity:.8;
+  background:repeating-linear-gradient(174deg,rgba(214,229,211,.22) 0 2px,transparent 2px 17px),
+  linear-gradient(180deg,rgba(83,142,143,.7),rgba(18,63,70,.95));}
+.ai-media-nature-scene .nature-trees{position:absolute;left:0;right:0;bottom:13%;height:44%;
+  background:linear-gradient(135deg,transparent 0 45%,#102f31 46% 49%,transparent 50%) 2% 100%/52px 100% repeat-x,
+  linear-gradient(45deg,transparent 0 45%,#183d38 46% 50%,transparent 51%) 0 100%/67px 100% repeat-x;opacity:.82;}
+.ai-media-nature-scene .nature-fireflies{position:absolute;inset:0;opacity:.65;
+  background:radial-gradient(circle at 12% 38%,#ffe9a3 0 1px,transparent 3px),
+  radial-gradient(circle at 31% 52%,#e7f8c4 0 1px,transparent 3px),
+  radial-gradient(circle at 74% 40%,#ffe9a3 0 1px,transparent 3px),
+  radial-gradient(circle at 88% 64%,#e7f8c4 0 1px,transparent 3px);
+  animation:nature-firefly-float 9s ease-in-out infinite alternate;}
+.ai-media-nature-scene[data-nature-scene="lake"]{background:linear-gradient(180deg,#548aa7 0%,#d0c9a5 55%,#547e83 100%)}
+.ai-media-nature-scene[data-nature-scene="lake"] .nature-hills{background:linear-gradient(180deg,#6f8c76,#234e4c)}
+.ai-media-nature-scene[data-nature-scene="lake"] .nature-water{height:42%;background:repeating-linear-gradient(177deg,rgba(241,241,214,.28) 0 2px,transparent 2px 19px),linear-gradient(#6ba2a7,#1c5b69)}
+.ai-media-nature-scene[data-nature-scene="mountain"]{background:linear-gradient(180deg,#385c82 0%,#b6c7c5 54%,#627e7a 100%)}
+.ai-media-nature-scene[data-nature-scene="mountain"] .nature-mountains{background:linear-gradient(145deg,#e1e6dc,#617d86);inset:15% -5% 17%}
+.ai-media-nature-scene[data-nature-scene="mountain"] .nature-hills{background:linear-gradient(#526e68,#193a3c)}
+.ai-media-nature-scene[data-nature-scene="sunset"]{background:linear-gradient(180deg,#392c59 0%,#b56d70 48%,#f1b77e 100%)}
+.ai-media-nature-scene[data-nature-scene="sunset"] .nature-sun{background:radial-gradient(circle at 35% 35%,#fff0c1,#f1a36e 65%,rgba(239,146,105,.12));box-shadow:0 0 80px 28px rgba(255,173,119,.3)}
+.ai-media-nature-scene[data-nature-scene="sunset"] .nature-mountains{background:linear-gradient(145deg,#8a6874,#493c5c)}
+.ai-media-nature-scene[data-nature-scene="sunset"] .nature-hills{background:linear-gradient(#66516b,#272e49)}
+.ai-media-atmosphere-content{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.9fr);gap:24px;align-items:end;min-height:290px;padding:26px;
+  background:linear-gradient(90deg,rgba(5,21,33,.62),rgba(5,21,33,.12) 75%);}
+.ai-media-atmosphere-content h3{margin:10px 0;color:#fff;font-size:clamp(24px,3vw,36px)}
+.ai-media-atmosphere-content p{max-width:490px;color:#edf4ee;font-size:13px;line-height:1.7}
+.ai-media-atmosphere-controls{padding:15px;border:1px solid rgba(255,255,255,.2);border-radius:18px;background:rgba(7,23,36,.58);backdrop-filter:blur(14px)}
+.nature-scenes,.music-moods,.assistant-controls{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.nature-scenes button,.music-moods button,.assistant-controls button{padding:8px 11px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(255,255,255,.09);color:#f5f7f4;font-size:11px;cursor:pointer}
+.nature-scenes button[aria-pressed="true"],.music-moods button[aria-pressed="true"]{background:rgba(151,220,196,.25);border-color:#a6e8d0;color:#fff}
+.assistant-controls .ai-media-sound-toggle{background:rgba(117,212,199,.22);border-color:rgba(166,232,208,.7)}
+.ai-media-assistant-hint{display:block;color:#d6e6e4;font-size:10px;line-height:1.5}
+@keyframes nature-sun-drift{from{transform:translate(-9px,4px)}to{transform:translate(18px,-10px)}}
+@keyframes nature-firefly-float{from{transform:translateY(4px);opacity:.35}to{transform:translateY(-9px);opacity:.8}}
+@media(max-width:760px){.ai-media-atmosphere-content{grid-template-columns:1fr;gap:12px;padding:18px}.ai-media-atmosphere-content{min-height:420px}.ai-media-atmosphere-controls{padding:12px}.ai-media-nature-scene .nature-sun{width:64px;height:64px}}
+@media(prefers-reduced-motion:reduce){.ai-media-nature-scene .nature-sun,.ai-media-nature-scene .nature-fireflies{animation:none}}
