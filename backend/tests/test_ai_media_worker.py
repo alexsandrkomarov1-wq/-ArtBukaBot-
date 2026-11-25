@@ -29,7 +29,7 @@ def test_realesrgan_creates_four_times_png_without_modifying_original(tmp_path, 
     assert output.exists()
     assert result.output_mime == "image/png"
     assert result.output_width == 96 and result.output_height == 64
-    assert result.engine == "Real-ESRGAN NCNN Vulkan x4"
+    assert result.engine == "Real-ESRGAN NCNN Vulkan x4 + OpenCV + scikit-image"
     assert result.source_sha256 != result.output_sha256
     assert source.read_bytes() == original
     assert calls[0][calls[0].index("-s") + 1] == "4"
