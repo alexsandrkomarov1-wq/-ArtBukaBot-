@@ -3,30 +3,36 @@
 ## Implemented worker primitives
 
 - backend/app/ai_media_worker.py provides fail-closed ClamAV scanning,
-  Real-ESRGAN NCNN image inference, frame-by-frame video inference through
-  FFmpeg, SHA-256 calculation for source and output, input size/duration limits,
-  and strict source/output path inequality.
-- The worker never writes to the original path.
-- Missing ClamAV, Real-ESRGAN, FFmpeg, or FFprobe is a hard error. There is no
-  browser-filter fallback or pretend successful result.
-- The public AI Media UI no longer contains Unsplash demo portraits, a fake
-  before/after comparison, CSS scanner animation, Canvas filters, or a
-  downloadable file labelled as enhanced.
+  Real-ESRGAN NCNN Vulkan neural super-resolution for photos (default 4×),
+  frame-by-frame Real-ESRGAN inference for video (default 2×), FFmpeg muxing,
+  SHA-256 calculation, dimension verification, and strict source/output path inequality.
+- The authenticated archive enhancement route invokes this AI worker only
+  after the original has passed ClamAV and its stored checksum is verified.
+- The worker never writes to the original path. The derivative is scanned,
+  checksum-verified, stored separately and registered with a new MATERIAL-ID
+  linked to the original.
+- Missing ClamAV, Real-ESRGAN executable/model weights, FFmpeg, or FFprobe is
+  a hard error. There is no browser-filter fallback or pretend AI result.
+- The public UI has a dedicated nature atmosphere, original generated ambient
+  music and Russian voice commands. The music is synthesized locally; it is
+  not a commercial radio stream.
 
-## Not yet connected / release blockers
+## Deployment requirements still outstanding
 
-This module is a worker primitive, not a deployed processing service. It is
-not called by an HTTP route yet. No server endpoint, malware-scanner daemon,
-Real-ESRGAN executable/model weights, private production storage, or deployed
-backend is currently configured.
+The authenticated API route and MATERIAL-ID workflow are implemented, but
+the public GitHub Pages site still has no deployed private backend URL or
+authenticated session configuration. Therefore public visitors cannot yet
+invoke the server-side Real-ESRGAN worker from the page.
 
-Before enabling processing, implement the authenticated API workflow that:
-1. stores and hashes the original in private quarantine;
-2. runs ClamAV and records a verified clean result;
-3. invokes this worker only after the clean scan;
-4. stores the derivative as a separate object and verifies its hash;
-5. creates a distinct MATERIAL-ID and an explicit derivative-of relation;
-6. exposes derivative content/export only after all checks pass.
+Before live processing, provision a private worker host and install:
+1. ClamAV / clamdscan;
+2. Real-ESRGAN NCNN Vulkan executable and model weights;
+3. FFmpeg and FFprobe;
+4. private storage and the database;
+5. HTTPS API deployment and the site's authenticated API configuration.
+
+Do not substitute the browser's contrast filter for a missing neural model.
+If the worker or model is missing, fail closed and preserve the original.
 
 The current ArchiveItem/StoredBlob model uses archive/blob identifiers and
 quarantine states; it does not yet provide the required MATERIAL-ID lineage
@@ -40,3 +46,5 @@ files, FFmpeg and FFprobe on a private worker host. Optional binary paths and
 model name are configured through CORE_CLAMDSCAN_BINARY,
 CORE_REALESRGAN_BINARY, CORE_REALESRGAN_MODEL, CORE_FFMPEG_BINARY,
 and CORE_FFPROBE_BINARY. No credentials or model weights are committed.
+The browser fallback is intentionally disabled: no neural output is shown
+unless the private API returns a verified derivative.
