@@ -781,3 +781,8 @@ body {
   .hero-copy .eyebrow,.hero-copy h1,.hero-copy .hero-lead,.hero-copy .hero-actions { animation:none; }
   .archive-card,.family-portrait-card,.status-card,.ai-media-tools article { transition:none; }
 }
+
+
+.ai-media-result-select{display:block;width:100%;margin-top:9px;text-align:center}
+.ai-media-copy-note{display:block;margin-top:7px;color:#667166;font-size:10px;line-height:1.5}
+.ai-media-file-input[data-ai-result-input]{display:none}
