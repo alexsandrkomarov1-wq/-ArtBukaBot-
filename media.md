@@ -19,7 +19,7 @@ description: Локальный просмотр фотографий и вид�
   <div id="cloud-auth">
     <form id="cloud-login-form" class="cloud-auth-form">
       <label>Логин<input id="cloud-username" name="username" autocomplete="username" required minlength="3"></label>
-      <label>Пароль<input id="cloud-password" name="password" type="password" autocomplete="current-password" required></label>
+      <label>Пароль<input id="cloud-password" name="password" type="password" autocomplete="off" required></label>
       <button type="submit" class="media-open-button">Войти в семейный кабинет</button>
     </form>
     <details class="cloud-bootstrap">
@@ -27,7 +27,7 @@ description: Локальный просмотр фотографий и вид�
       <form id="cloud-bootstrap-form" class="cloud-auth-form">
         <label>Одноразовый код настройки<input id="cloud-bootstrap-token" type="password" autocomplete="off" required></label>
         <label>Новый логин владельца<input id="cloud-owner-username" autocomplete="username" required minlength="3"></label>
-        <label>Пароль владельца (не менее 12 символов)<input id="cloud-owner-password" type="password" autocomplete="new-password" required minlength="12"></label>
+        <label>Пароль владельца (не менее 12 символов)<input id="cloud-owner-password" type="password" autocomplete="off" required minlength="12"></label>
         <button type="submit" class="media-button">Создать учётную запись владельца</button>
       </form>
     </details>
