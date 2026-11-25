@@ -34,11 +34,6 @@ Before live processing, provision a private worker host and install:
 Do not substitute the browser's contrast filter for a missing neural model.
 If the worker or model is missing, fail closed and preserve the original.
 
-The current ArchiveItem/StoredBlob model uses archive/blob identifiers and
-quarantine states; it does not yet provide the required MATERIAL-ID lineage
-model. Do not treat ArchiveItem IDs as MATERIAL-IDs or mark files available
-until the schema and scanner workflow are implemented.
-
 ## Worker runtime requirements
 
 Install and configure ClamAV (clamdscan), realesrgan-ncnn-vulkan with model
