@@ -45,7 +45,7 @@
       $("[data-user-label]").textContent="Вход выполнен как "+user.username+". Токен хранится только в памяти страницы.";
       form.elements.password.value="";
       await loadPeople();
-    }catch(error){workspace.classList.add("registry-hidden");message(error.message,"error");}
+    }catch(error){form.elements.password.value="";workspace.classList.add("registry-hidden");message(error.message,"error");}
     finally{button.disabled=false;}
   });
   $("[data-person-form]").addEventListener("submit",async event=>{
