@@ -17,7 +17,7 @@ import tarfile
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
-from urllib.parse import urlparse
+from sqlalchemy.engine import make_url
 
 from sqlalchemy import create_engine
 
@@ -45,7 +45,7 @@ def files_manifest(root: Path, prefix: str) -> list[dict]:
             raise RuntimeError(f"Backup refuses symbolic links: {path}")
         if path.is_file():
             rows.append({
-                "path": f"{prefix}/{path.relative_to(root).as_posix()}",
+                "path": (f"{prefix}/" if prefix else "") + path.relative_to(root).as_posix(),
                 "size": path.stat().st_size,
                 "sha256": sha256(path),
             })
@@ -60,22 +60,23 @@ def create_bundle(destination: Path, database_url: str, media_root: Path) -> Pat
     if media_root == destination or media_root in destination.parents:
         raise ValueError("Backup destination must not be inside the private media root")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    parsed = urlparse(database_url)
-    if parsed.scheme not in {"sqlite", "sqlite+pysqlite"}:
+    parsed = make_url(database_url)
+    if parsed.get_backend_name() != "sqlite":
         raise RuntimeError("Full backup currently supports SQLite only; PostgreSQL needs pg_dump integration")
-    db_name = parsed.path
-    if db_name in {"", "/:memory:"}:
+    db_name = parsed.database
+    if not db_name or db_name == ":memory:":
         raise RuntimeError("A file-backed SQLite DATABASE_URL is required for backups")
-    db_path = Path(db_name)
-    if not db_path.is_absolute():
-        db_path = Path.cwd() / db_path
-    db_path = db_path.resolve()
+    db_path = Path(db_name).expanduser().resolve()
     if db_path == destination or db_path in destination.parents:
         raise ValueError("Backup destination must not be inside the database directory")
 
     with tempfile.TemporaryDirectory(prefix="komarova-backup-") as temp_name:
         work = Path(temp_name)
-        db_copy = backup_database(create_engine(database_url), work / "database.sqlite3")
+        engine = create_engine(database_url)
+        try:
+            db_copy = backup_database(engine, work / "database.sqlite3")
+        finally:
+            engine.dispose()
         media_copy = work / "media"
         media_copy.mkdir()
         if media_root.exists():
