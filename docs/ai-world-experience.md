@@ -90,3 +90,17 @@ Use capability detection and runtime performance feedback rather than device-nam
 - Do not modify `main`.
 - Do not delete or rewrite existing branches, backup refs, migrations, or production data.
 - Extend the current application in place; do not create a disconnected showcase application.
+
+## Homepage world interface
+
+The homepage is the primary entry point to the AI world. The 3D scene is a navigational hub, not a decorative hero. Its eight visible portals lead to the real generations, events, geography, media/documents, AI MEDIA, assistant, private account, and project-status sections. The same destinations remain available through the conventional site navigation.
+
+Portal links remain usable when WebGL or the external Three.js module is unavailable. The renderer reports its actual state; a failed renderer must never disable navigation. The homepage does not label backend operations as online unless a real authenticated API request confirms that state.
+
+## Three-pass release verification
+
+1. **Source and contract pass:** inspect route targets, DOM IDs, script bindings, accessibility labels, fallback behavior, and project privacy boundaries.
+2. **Build and automated pass:** run JavaScript syntax checks, the AI-world portal contract check, Jekyll generation, and the generated local-link/anchor checker.
+3. **Published runtime pass:** inspect the deployed homepage and versioned JavaScript/CSS assets, verify all portal destinations resolve, and confirm the published commit matches the tested branch head.
+
+A green build alone is not proof that a live backend is deployed or that every protected operation is available. Report those states separately.
