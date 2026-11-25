@@ -24,6 +24,8 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit("AI media lab contract failed: " + message)
 
 require('id="ai-media-enhancer"' in home and 'data-ai-media-lab' in home, "AI media workspace is missing")
+require("ezenhancer.ai" not in home.lower(), "AI MEDIA must not redirect users to an external enhancer")
+require("ai-media-internal-engine" in home and "ВНУТРЕННИЙ AI-КОНВЕЙЕР KOMAROVA_CORE" in home, "internal AI processing notice is missing")
 require('data-ai-connect-form' in home and 'data-ai-api-url' in home, "private backend connection form is missing")
 password = re.search(r'<input[^>]*data-ai-password[^>]*>', home, re.I)
 require(password is not None and 'type="password"' in password.group(0), "AI media password must be masked")
