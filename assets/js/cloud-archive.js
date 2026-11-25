@@ -105,14 +105,6 @@
         view.title = "Оригинал нельзя открыть до антивирусной проверки";
       }
       actions.append(view);
-      if (sessionRole === "owner" || sessionRole === "moderator") {
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "media-button";
-        remove.textContent = "Удалить";
-        remove.addEventListener("click", () => removeItem(item));
-        actions.append(remove);
-      }
       row.append(info, actions);
       list.append(row);
     }
@@ -153,16 +145,6 @@
       }
       setStatus("Файл получен из приватного uploads и открыт в просмотрщике.");
     } catch (error) { setStatus("Не удалось открыть файл: " + error.message, true); }
-  }
-  async function removeItem(item) {
-    if (!window.confirm("Удалить файл из закрытого облачного архива? Операция удалит объект из uploads.")) return;
-    try {
-      await request("/api/v1/archive/items/" + encodeURIComponent(item.archive_item_id), { method: "DELETE" });
-      if (!$("cloud-preview").hidden && $("cloud-preview-name").textContent === (item.title || item.original_filename)) {
-        $("cloud-preview").hidden = true;
-      }
-      await loadArchive();
-    } catch (error) { setStatus("Удаление не выполнено: " + error.message, true); }
   }
   $("cloud-login-form").addEventListener("submit", async event => {
     event.preventDefault();
