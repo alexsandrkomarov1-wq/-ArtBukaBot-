@@ -467,3 +467,25 @@ a { color:var(--green); }
  .ai-media-motion-reveal { clip-path:inset(0 50% 0 0); }
  .ai-media-motion-line { left:50%; }
 }
+
+/* AI MEDIA ENHANCER — browser-local upload diagnostics. */
+.ai-media-upload-check { margin-top:18px; padding:22px; border:1px solid rgba(212,177,138,.35); background:#182526; }
+.ai-media-upload-kicker { color:#d4b18a; font-size:9px; font-weight:800; letter-spacing:.14em; }
+.ai-media-upload-copy h3 { margin:9px 0; color:#f4f0e7; font-family:Georgia,serif; font-size:25px; font-weight:400; }
+.ai-media-upload-copy p,.ai-media-upload-note { max-width:760px; color:#bdc7bf; font-size:11px; line-height:1.75; }
+.ai-media-upload-button { display:inline-flex; min-height:42px; align-items:center; justify-content:center; margin-top:10px; padding:11px 16px; border:1px solid #d4b18a; background:#d4b18a; color:#202f31; font-size:11px; font-weight:800; cursor:pointer; }
+.ai-media-upload-button:hover { background:#f4f0e7; border-color:#f4f0e7; }
+.ai-media-upload-input { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+.ai-media-upload-input:focus-visible + .ai-media-upload-note { outline:2px solid #d4b18a; outline-offset:4px; }
+.ai-media-upload-note { margin:10px 0 0; color:#9eada4; font-size:10px; }
+.ai-media-check-status { min-height:22px; margin:14px 0 0; color:#d8d2c5; font-size:11px; line-height:1.7; overflow-wrap:anywhere; }
+.ai-media-check-status[data-state="working"] { color:#d4b18a; }
+.ai-media-check-status[data-state="ok"] { color:#a8c9a5; }
+.ai-media-check-status[data-state="error"] { color:#efaa9c; }
+.ai-media-check-result[hidden] { display:none; }
+.ai-media-check-result { margin-top:14px; padding:16px; border:1px solid rgba(212,177,138,.22); background:rgba(255,255,255,.025); }
+.ai-media-check-details { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.ai-media-check-details h4 { margin:0 0 9px; color:#d4b18a; font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
+.ai-media-check-details ul { margin:0; padding-left:18px; }
+.ai-media-check-details li { margin:6px 0; color:#d0d8d0; font-size:11px; line-height:1.65; overflow-wrap:anywhere; }
+@media(max-width:700px) { .ai-media-upload-check { padding:17px; } .ai-media-check-details { grid-template-columns:1fr; gap:14px; } }
