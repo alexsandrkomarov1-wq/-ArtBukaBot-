@@ -1,7 +1,9 @@
 "Fail-closed AI media worker primitives. The original is never edited."
 from __future__ import annotations
 import hashlib, json, os, shutil, subprocess, tempfile
-from PIL import Image, ImageOps
+import numpy as np
+from PIL import Image, ImageEnhance, ImageOps
+from .media_processing import _enhance_rgb
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -68,12 +70,24 @@ def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: in
                 ImageOps.exif_transpose(original).convert("RGB").save(prepared, format="PNG")
         except (OSError, ValueError) as exc:
             raise ValueError("Pillow could not decode the source photo for AI processing") from exc
-        _enhance_image(prepared, output, scale, timeout=300)
+        ai_output = Path(temp_name) / "realesrgan-output.png"
+        _enhance_image(prepared, ai_output, scale, timeout=300)
+        with Image.open(ai_output) as opened:
+            opened.load()
+            ai_rgb = np.asarray(ImageOps.exif_transpose(opened).convert("RGB"))
+        # OpenCV + scikit-image refine local contrast, noise and edge detail
+        # after neural upscaling. Pillow applies a restrained brightness/color finish.
+        refined = Image.fromarray(_enhance_rgb(ai_rgb), mode="RGB")
+        refined = ImageEnhance.Brightness(refined).enhance(1.04)
+        refined = ImageEnhance.Color(refined).enhance(1.04)
+        refined = ImageEnhance.Contrast(refined).enhance(1.03)
+        refined.save(output, format="PNG")
     with Image.open(output) as enhanced:
         enhanced.load()
         width, height = enhanced.size
     return WorkerResult(str(output), "image/png", original_hash, sha256_file(output),
-        source.stat().st_size, output.stat().st_size, f"Real-ESRGAN NCNN Vulkan x{scale}", width, height)
+        source.stat().st_size, output.stat().st_size,
+        f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image", width, height)
 
 def restore_video(source_path: str | Path, output_path: str | Path, *, scale: int = 2) -> WorkerResult:
     source, output = Path(source_path).resolve(strict=True), Path(output_path).resolve()
