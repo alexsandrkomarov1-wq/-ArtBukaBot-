@@ -99,7 +99,7 @@
     }
 
     info.textContent = file.name + " · " + formatBytes(file.size) + " · " + (file.type || "тип не определён");
-    view.disabled = false;
+    view.disabled = !file.type.startsWith("image/");
     reset.disabled = false;
   }
 
@@ -125,8 +125,13 @@
   function enhanceImage(file) {
     return new Promise((resolve, reject) => {
       const image = new Image();
+      const imageUrl = URL.createObjectURL(file);
       image.onload = () => {
+        URL.revokeObjectURL(imageUrl);
         try {
+          if (image.naturalWidth * image.naturalHeight > 30000000) {
+            throw new Error("Изображение превышает безопасный лимит 30 мегапикселей для обработки в браузере.");
+          }
           const canvas = document.createElement("canvas");
           canvas.width = image.naturalWidth;
           canvas.height = image.naturalHeight;
@@ -182,8 +187,11 @@
           reject(error);
         }
       };
-      image.onerror = () => reject(new Error("Не удалось декодировать изображение."));
-      image.src = URL.createObjectURL(file);
+      image.onerror = () => {
+        URL.revokeObjectURL(imageUrl);
+        reject(new Error("Не удалось декодировать изображение."));
+      };
+      image.src = imageUrl;
     });
   }
 
