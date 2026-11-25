@@ -251,6 +251,6 @@ def test_full_legacy_identity_graph_survives_identifier_width_migration(tmp_path
             version = connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            assert version == "0005_private_media_intake"
+            assert version == "0006_material_registry"
     finally:
         engine.dispose()
