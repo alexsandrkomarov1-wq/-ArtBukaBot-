@@ -916,3 +916,7 @@ body {
 .ai-media-connect [data-ai-connect-submit]{grid-column:1/-1;min-height:54px;align-items:center;justify-content:center;text-align:center}
 .ai-media-connect [data-ai-backend-status]{grid-column:1/-1;margin:0}
 @media(max-width:700px){.ai-media-connect{grid-template-columns:1fr;padding:12px}.ai-media-connect-heading{flex-direction:column}.ai-media-connect [data-ai-connect-submit],.ai-media-connect [data-ai-backend-status]{grid-column:1}}
+
+.ai-media-internal-engine{display:grid;gap:7px;margin:18px 0;padding:16px 18px;border:1px solid rgba(120,205,185,.32);background:rgba(5,24,25,.58);color:#e8f4ed}
+.ai-media-internal-engine strong{font:800 10px Consolas,monospace;letter-spacing:.13em;color:#9fe0cb}
+.ai-media-internal-engine span{font-size:12px;line-height:1.65;color:#c8d9d2}
