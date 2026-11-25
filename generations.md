@@ -40,6 +40,6 @@ description: Семейное дерево KOMAROVA_CORE на основе за�
     <p class="registry-muted">Связи записываются на сервер. Одна и та же связь не должна дублироваться; двунаправленность при необходимости задаётся отдельной записью.</p>
   </div>
 </section>
-<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-1">
-<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-1" defer></script>
-<script src="{{ '/assets/js/generations.js' | relative_url }}?v=20261125-1" defer></script>
+<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-private-api-errors-2">
+<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
+<script src="{{ '/assets/js/generations.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
