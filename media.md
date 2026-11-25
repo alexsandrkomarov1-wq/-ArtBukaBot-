@@ -117,5 +117,5 @@ description: Локальный просмотр фотографий и вид�
   <p>Не выбирайте файлы на чужом устройстве. До подключения закрытого кабинета медиатека не является семейным облачным архивом и не передаёт содержимое файлов на KOMAROVA_CORE.</p>
 </section>
 <script>window.KOMAROVA_API_BASE = "https://komarova-core-api.onrender.com";</script>
-<script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=1" defer></script>
+<script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=20261125-catalogs-2" defer></script>
 <script src="{{ '/assets/js/media-library.js' | relative_url }}?v=20261125-catalogs-1" defer></script>
