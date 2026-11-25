@@ -68,7 +68,7 @@ def test_google_drive_connect_returns_offline_read_only_authorization_url(tmp_pa
     assert parsed.netloc == "accounts.google.com"
     assert query["access_type"] == ["offline"]
     assert query["prompt"] == ["consent"]
-    assert query["scope"] == ["https://www.googleapis.com/auth/drive.metadata.readonly"]
+    assert query["scope"] == ["https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive"]
     assert query["redirect_uri"] == ["https://api.example.test/api/v1/integrations/google-drive/callback"]
     assert len(query["state"][0]) >= 32
 
@@ -115,7 +115,7 @@ def test_google_drive_callback_stores_encrypted_refresh_token_and_quota(tmp_path
         return FakeResponse(200, {
             "access_token": "temporary-access-token",
             "refresh_token": "long-lived-refresh-token",
-            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
+            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive",
         })
 
     def fake_get(url, **kwargs):
@@ -153,7 +153,7 @@ def test_google_drive_callback_stores_encrypted_refresh_token_and_quota(tmp_path
     status = client.get("/api/v1/integrations/google-drive/status", headers=auth(token))
     assert status.status_code == 200
     assert status.json()["accounts"][0]["email_address"] == "owner@example.test"
-    assert status.json()["accounts"][0]["access"] == "metadata_read_only"
+    assert status.json()["accounts"][0]["access"] == "drive_read_write"
 
     from backend.app.database import build_engine
     from backend.app.models import GoogleDriveAccount
@@ -186,7 +186,7 @@ def test_one_owner_can_connect_two_independent_google_accounts(tmp_path, monkeyp
         code = data["code"]
         return FakeResponse(200, {
             "access_token": f"access-{code}", "refresh_token": f"refresh-{code}",
-            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
+            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive",
         })
 
     def fake_get(url, **kwargs):
@@ -253,7 +253,7 @@ def test_google_identity_cannot_be_linked_to_another_core_user(tmp_path, monkeyp
         code = kwargs["data"]["code"]
         return FakeResponse(200, {
             "access_token": f"access-{code}", "refresh_token": f"refresh-{code}",
-            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly",
+            "scope": "https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive",
         })
 
     def fake_get(url, **kwargs):
