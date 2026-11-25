@@ -32,24 +32,24 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <span class="gallery-status">ПУБЛИЧНАЯ ГАЛЕРЕЯ · ПОДГОТОВЛЕНА</span>
   </div>
   <div class="family-portrait-grid" aria-label="Места для семейных портретов">
-    <article class="family-portrait-card">
-      <div class="portrait-frame" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">01</span></div>
-      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    <article class="family-portrait-card" data-portrait-card>
+      <div class="portrait-frame"><span class="portrait-silhouette"></span><img class="portrait-preview" alt="Предварительный просмотр портрета 1" hidden><span class="portrait-index">01</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА 01</span><strong>Место для фотографии</strong><span class="portrait-state" data-portrait-state aria-live="polite">ФОТО ПОКА НЕ ДОБАВЛЕНО</span><label class="portrait-select-button">Выбрать фотографию<input class="portrait-upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Выбрать фотографию для портрета 1"></label><button class="portrait-clear-button" type="button" data-portrait-clear hidden>Убрать предварительный просмотр</button></div>
     </article>
-    <article class="family-portrait-card">
-      <div class="portrait-frame portrait-frame-alt" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">02</span></div>
-      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    <article class="family-portrait-card" data-portrait-card>
+      <div class="portrait-frame portrait-frame-alt"><span class="portrait-silhouette"></span><img class="portrait-preview" alt="Предварительный просмотр портрета 2" hidden><span class="portrait-index">02</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА 02</span><strong>Место для фотографии</strong><span class="portrait-state" data-portrait-state aria-live="polite">ФОТО ПОКА НЕ ДОБАВЛЕНО</span><label class="portrait-select-button">Выбрать фотографию<input class="portrait-upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Выбрать фотографию для портрета 2"></label><button class="portrait-clear-button" type="button" data-portrait-clear hidden>Убрать предварительный просмотр</button></div>
     </article>
-    <article class="family-portrait-card">
-      <div class="portrait-frame portrait-frame-warm" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">03</span></div>
-      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    <article class="family-portrait-card" data-portrait-card>
+      <div class="portrait-frame portrait-frame-warm"><span class="portrait-silhouette"></span><img class="portrait-preview" alt="Предварительный просмотр портрета 3" hidden><span class="portrait-index">03</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА 03</span><strong>Место для фотографии</strong><span class="portrait-state" data-portrait-state aria-live="polite">ФОТО ПОКА НЕ ДОБАВЛЕНО</span><label class="portrait-select-button">Выбрать фотографию<input class="portrait-upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Выбрать фотографию для портрета 3"></label><button class="portrait-clear-button" type="button" data-portrait-clear hidden>Убрать предварительный просмотр</button></div>
     </article>
-    <article class="family-portrait-card">
-      <div class="portrait-frame portrait-frame-dark" aria-hidden="true"><span class="portrait-silhouette"></span><span class="portrait-index">04</span></div>
-      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА</span><strong>Место для фотографии</strong><span class="portrait-state">ФОТО ПОКА НЕ ДОБАВЛЕНО</span></div>
+    <article class="family-portrait-card" data-portrait-card>
+      <div class="portrait-frame portrait-frame-dark"><span class="portrait-silhouette"></span><img class="portrait-preview" alt="Предварительный просмотр портрета 4" hidden><span class="portrait-index">04</span></div>
+      <div class="portrait-meta"><span class="portrait-label">ПОРТРЕТ УЧАСТНИКА 04</span><strong>Место для фотографии</strong><span class="portrait-state" data-portrait-state aria-live="polite">ФОТО ПОКА НЕ ДОБАВЛЕНО</span><label class="portrait-select-button">Выбрать фотографию<input class="portrait-upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Выбрать фотографию для портрета 4"></label><button class="portrait-clear-button" type="button" data-portrait-clear hidden>Убрать предварительный просмотр</button></div>
     </article>
   </div>
-  <p class="family-portraits-note">Фотографии и имена не подставляются автоматически. Загрузка, выбор главного портрета, замена и отзыв разрешения будут доступны в закрытом кабинете после подключения защищённого хранилища и авторизации.</p>
+  <p class="family-portraits-note" id="family-portraits-status" role="status" aria-live="polite">Выбор фотографии показывает её только в этом браузере. Файл не отправляется в интернет и не сохраняется в архиве. Для постоянного хранения требуется подключённый закрытый сервер.</p>
 </section>
 
 <section class="ai-media-lab" id="ai-media-enhancer" aria-labelledby="ai-media-title">
