@@ -17,6 +17,7 @@ from . import archive_api as legacy_archive_api
 from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Person, StoredBlob, User, new_id
 from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
 from .storage import PrivateMediaStorage
+from . import google_drive_storage
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 CHUNK_SIZE = 1024 * 1024
@@ -79,16 +80,20 @@ def _item_payload(item: ArchiveItem, blob: StoredBlob) -> dict:
 
 def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter:
     router = APIRouter(prefix="/api/v1/archive", tags=["private-archive"])
-    storage = PrivateMediaStorage(storage_root)
+    storage_backend = os.getenv("CORE_STORAGE_BACKEND", "local-private").strip().lower()
+    use_google_drive = storage_backend == "google-drive"
+    storage = None if use_google_drive else PrivateMediaStorage(storage_root)
+    storage_provider = "google-drive" if use_google_drive else storage.provider
     intake_root = Path(os.getenv("CORE_MEDIA_ROOT", str(storage_root))).expanduser().resolve()
     intake_root.mkdir(parents=True, exist_ok=True)
 
     @router.get("/storage/health")
     def storage_health(
-        _: User = Depends(require_roles("owner", "moderator", "family_member")),
-    ):
+        db: Session = Depends(get_db),
+        actor: User = Depends(require_roles("owner", "moderator", "family_member")),
+    ): 
         """Report the configured storage backend; never expose bucket names or secrets."""
-        result = storage.health_check()
+        result = google_drive_storage.health_check(db, actor.user_id) if use_google_drive else storage.health_check()
         if result["status"] != "ok":
             raise HTTPException(status_code=503, detail="Configured media storage is unavailable")
         return result
@@ -147,13 +152,16 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                     "archive_item_id": existing_item.archive_item_id if existing_item else None,
                 })
             object_key = f"quarantine/{sha256[:2]}/{sha256}"
-            storage.put_file(object_key, temp_path, mime_type)
+            if use_google_drive:
+                object_key = google_drive_storage.upload_file(db, actor.user_id, temp_path, filename, mime_type, size)
+            else:
+                storage.put_file(object_key, temp_path, mime_type)
             stored = True
 
             blob = StoredBlob(
                 blob_id=new_id("BL"), sha256=sha256, size_bytes=size,
                 detected_mime_type=mime_type, original_filename=filename,
-                storage_provider=storage.provider, storage_object_key=object_key,
+                storage_provider=storage_provider, storage_object_key=object_key,
                 storage_state="quarantined",
             )
             db.add(blob)
@@ -178,7 +186,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 details=json.dumps({
                     "blob_id": blob.blob_id, "sha256": sha256,
                     "size_bytes": size, "item_type": item_type,
-                    "storage_provider": storage.provider,
+                    "storage_provider": storage_provider,
                     "person_id": linked_person.person_id if linked_person else None,
                 }, ensure_ascii=False),
             ))
@@ -204,7 +212,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 temp_path.unlink()
             if stored and not committed and object_key:
                 try:
-                    storage.delete(object_key)
+                    google_drive_storage.delete_file(db, actor.user_id, object_key) if use_google_drive else storage.delete(object_key)
                 except Exception:
                     pass
             await file.close()
@@ -262,7 +270,9 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 detail="Media is quarantined and cannot be viewed before malware scanning and verification",
             )
         try:
-            chunks, length, stored_type = storage.open_stream(blob.storage_object_key)
+            chunks, length, stored_type = (google_drive_storage.download_file(db, actor.user_id, blob.storage_object_key)
+                                           if blob.storage_provider == "google-drive"
+                                           else storage.open_stream(blob.storage_object_key))
         except Exception:
             raise HTTPException(status_code=404, detail="Stored media object is unavailable")
         filename = quote(blob.original_filename, safe="")
@@ -344,7 +354,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         ))
         db.commit()
         try:
-            storage.delete(blob.storage_object_key)
+            google_drive_storage.delete_file(db, actor.user_id, blob.storage_object_key) if blob.storage_provider == "google-drive" else storage.delete(blob.storage_object_key)
         except Exception:
             item.record_status = "delete_failed"
             blob.storage_state = "delete_failed"
