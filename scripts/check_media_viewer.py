@@ -19,7 +19,9 @@ assert "URL.revokeObjectURL" in script
 assert "video.load()" in script
 assert "requestFullscreen()" in script
 assert "setInterval" in script
-assert "не отправляет их на сервер" in page
+assert "Локальный просмотр не отправляет файлы на сервер" in page
+assert 'for="media-file-input"' in page
+assert 'id="cloud-archive"' in page
 assert "не загружены на сервер" in script
 assert "/media/" in layout and "Медиатека" in layout
 print("Media viewer contract checks passed.")
