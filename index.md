@@ -91,10 +91,31 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <p class="ai-media-motion-note"><strong>Сканирование и постепенное проявление результата.</strong> Это демонстрационная CSS-анимация интерфейса, а не настоящее видео и не результат обработки нейросетью.</p>
   </div>
 
-  <div class="ai-media-actions" aria-label="Предусмотренные действия модуля">
-    <div><span>01 / UPLOAD</span><strong>При загрузке</strong><p>Автоматически проверить файл и предложить улучшение.</p></div>
-    <div><span>02 / VIEW</span><strong>При просмотре</strong><p>Запустить ИИ-обработку выбранной фотографии или видеозаписи.</p></div>
-    <div><span>03 / EXPORT</span><strong>При выгрузке</strong><p>Подготовить улучшенную копию для скачивания или публикации.</p></div>
+  <div class="ai-media-workspace" data-ai-media-lab>
+    <div class="ai-media-workspace-heading">
+      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · ЛОКАЛЬНЫЙ РЕЖИМ</span><h3>Работа с вашим материалом</h3></div>
+      <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
+    </div>
+    <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
+    <div class="ai-media-controls">
+      <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload><span>01 / UPLOAD</span><strong>Выбрать фото или видео</strong><small>JPG, PNG, WEBP, GIF, MP4 и другие форматы браузера · до 100 МБ</small></button>
+      <button class="ai-media-button" type="button" data-ai-view disabled><span>02 / VIEW</span><strong>Просмотреть и подготовить копию</strong><small>Проверка файла и локальная демонстрационная коррекция фото</small></button>
+      <button class="ai-media-button" type="button" data-ai-export disabled><span>03 / EXPORT</span><strong>Скачать копию</strong><small>Оригинал не изменяется и не перезаписывается</small></button>
+    </div>
+    <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Нажмите «Выбрать фото или видео».</div>
+    <div class="ai-media-live-preview">
+      <figure><figcaption>ИСХОДНЫЙ ФАЙЛ · ОРИГИНАЛ</figcaption><div class="ai-media-live-frame">
+        <img data-ai-original-preview alt="Предпросмотр выбранного оригинала" hidden>
+        <video data-ai-video-preview controls playsinline hidden></video>
+        <span data-ai-original-empty>Здесь появится выбранная фотография или видео</span>
+      </div></figure>
+      <figure><figcaption>РЕЗУЛЬТАТ · КОПИЯ</figcaption><div class="ai-media-live-frame">
+        <img data-ai-result-preview alt="Предпросмотр локальной демонстрационной копии" hidden>
+        <span data-ai-result-empty>Результат появится после подготовки копии</span>
+      </div></figure>
+    </div>
+    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Локальный режим готов. Выбранный файл останется в этом браузере и пока не отправляется в Google Drive.</p>
+    <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
   <div class="ai-media-tools">
@@ -103,8 +124,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <article><span>ARCHIVE PROTECTION</span><h3>Защита архива</h3><p>Оригинал не перезаписывается. Каждая улучшенная версия получает собственный MATERIAL-ID и историю обработки.</p></article>
   </div>
 
-  <div class="ai-media-principle"><strong>Оригинал сохраняем. Качество улучшаем на копиях. Историю изменений не теряем.</strong><span>ПРЕДПРОСМОТР ИНТЕРФЕЙСА · ИИ-ПРОВАЙДЕР НЕ ПОДКЛЮЧЁН</span></div>
-  <p class="ai-media-footnote">Демонстрационные изображения используются только для показа интерфейса. Правая фотография и анимация имитируют визуальное сравнение с помощью CSS-фильтров; фактическая ИИ-обработка пока не реализована.</p>
+  <div class="ai-media-principle"><strong>Оригинал сохраняем. Качество улучшаем на копиях. Историю изменений не теряем.</strong><span>ЛОКАЛЬНЫЙ ПРЕДПРОСМОТР · ИИ-ПРОВАЙДЕР И ПОСТОЯННОЕ ХРАНЕНИЕ НЕ ПОДКЛЮЧЕНЫ</span></div>
+  <p class="ai-media-footnote">Демонстрационные изображения и анимация показывают оформление интерфейса. Локальная коррекция в рабочей области не является ИИ-восстановлением. Выбранный файл не отправляется на сервер и не сохраняется в архиве. Подключение ИИ-провайдера, Google Drive и выдача постоянных MATERIAL-ID будут отдельными серверными этапами.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
@@ -150,3 +171,5 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 </section>
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
+
+<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}"></script>
