@@ -72,7 +72,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
         <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор с компьютера · обработка в браузере · до 100 МБ</small>
+        <small class="ai-media-action-note">Выбор файла · проверка безопасности · автоматическая обработка · до 100 МБ</small>
       </button>
       <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
