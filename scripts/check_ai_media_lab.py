@@ -31,7 +31,7 @@ require("accessToken = payload.access_token" in ai_js and "sessionStorage" not i
 require("passwordInput.value = \"\"" in ai_js, "password must be cleared after connection")
 require("MAX_BYTES = 100 * 1024 * 1024" in ai_js and "MAX_PIXELS = 30000000" in ai_js, "local file safety limits are missing")
 require("Проверка SHA-256" in ai_js and "sourceHashBefore !== sourceHashAfter" in ai_js, "original integrity check is missing")
-require("ClamAV не запускался" in ai_js and "поддельной копии" in ai_js, "disconnected worker must be reported honestly")
+require("ClamAV не запускался" in ai_js and "поддельная копия" in ai_js, "disconnected worker must be reported honestly")
 for route in ('@router.post("/items/{archive_item_id}/scan")', '@router.post("/items/{archive_item_id}/enhance")', '@router.get("/items/{archive_item_id}/content")'):
     require(route in api, "backend route missing: " + route)
 require('Depends(require_roles("owner", "moderator"))' in api, "scan/enhancement privilege checks are missing")
@@ -45,4 +45,4 @@ require("generations:" in guide and "events:" in guide and "family:" in guide, "
 require("node --check assets/js/media-atmosphere.js" in workflow, "atmosphere JavaScript syntax is not checked")
 require("node --check assets/js/cloud-archive.js" in workflow, "archive JavaScript syntax is not checked")
 require("python3 scripts/check_ai_media_lab.py" in workflow, "AI media contract checker is not in CI")
-print("AI media lab contract passed (22 checks).")
+print("AI media lab contract passed.")
