@@ -57,7 +57,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Оригинал проходит проверку безопасности, затем автоматически создаётся отдельная улучшенная копия. Исходник не изменяется и сохраняется отдельно.</p>
+      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Выберите оригинал: фотография автоматически получает локальную улучшенную копию. При подключении частного backend включаются ClamAV, серверная обработка фото и видео и постоянная архивная регистрация. Исходник не изменяется.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
@@ -72,7 +72,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
         <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор файла · проверка безопасности · автоматическая обработка · до 100 МБ</small>
+        <small class="ai-media-action-note">Выбор файла · проверка и автоматическая обработка · до 100 МБ</small>
       </button>
       <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
@@ -105,7 +105,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
 
   <div class="ai-media-tools">
-    <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Pillow подготавливает изображение; OpenCV корректирует локальный контраст и шум; scikit-image выполняет мягкое восстановление деталей. Без платного API и без генеративной подмены.</p></article>
+    <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Серверный worker: Pillow подготавливает изображение; OpenCV корректирует контраст и шум; scikit-image восстанавливает детали. Пока backend не подключён, сайт создаёт локальную коррекционную копию в браузере.</p></article>
     <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>FFmpeg и OpenCV: коррекция кадров, шумоподавление, резкость, сохранение аудиодорожки и проверка готового MP4. Обработка выполняется в частном worker после подключения backend.</p></article>
     <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Каждый оригинал и результат получают отдельный MATERIAL-ID. Производная запись хранит ссылку на исходный MATERIAL-ID, контрольные суммы и сведения о применённом конвейере.</p></article>
   </div>
