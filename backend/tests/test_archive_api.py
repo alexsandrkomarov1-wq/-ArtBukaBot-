@@ -387,7 +387,11 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
     )
     with make_client(tmp_path) as client:
         headers = auth(owner_token(client))
-        original_bytes = jpeg_fixture()
+        from io import BytesIO
+        from PIL import Image
+        image_buffer = BytesIO()
+        Image.new("RGB", (32, 24), (92, 120, 145)).save(image_buffer, format="JPEG")
+        original_bytes = image_buffer.getvalue()
         uploaded = client.post(
             "/api/v1/archive/items", headers=headers,
             files={"file": ("family.jpg", original_bytes, "image/jpeg")},
