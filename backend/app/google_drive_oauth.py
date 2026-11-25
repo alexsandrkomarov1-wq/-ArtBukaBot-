@@ -324,7 +324,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
                 "drive_account_id": account.drive_account_id,
                 "email_address": account.email_address,
                 "display_name": account.display_name,
-                "access": "metadata_read_only",
+                "access": "drive_read_write",
                 "quota_limit_bytes": account.quota_limit_bytes,
                 "quota_usage_bytes": account.quota_usage_bytes,
                 "quota_usage_in_drive_bytes": account.quota_usage_in_drive_bytes,
