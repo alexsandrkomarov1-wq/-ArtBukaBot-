@@ -1,7 +1,7 @@
 "Fail-closed AI media worker primitives. The original is never edited."
 from __future__ import annotations
 import hashlib, json, os, shutil, subprocess, tempfile
-from PIL import Image
+from PIL import Image, ImageOps
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -61,7 +61,14 @@ def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: in
     scan_or_fail(source)
     output.parent.mkdir(parents=True, exist_ok=True)
     original_hash = sha256_file(source)
-    _enhance_image(source, output, scale, timeout=300)
+    with tempfile.TemporaryDirectory(prefix="core-ai-photo-") as temp_name:
+        prepared = Path(temp_name) / "prepared.png"
+        try:
+            with Image.open(source) as original:
+                ImageOps.exif_transpose(original).convert("RGB").save(prepared, format="PNG")
+        except (OSError, ValueError) as exc:
+            raise ValueError("Pillow could not decode the source photo for AI processing") from exc
+        _enhance_image(prepared, output, scale, timeout=300)
     with Image.open(output) as enhanced:
         enhanced.load()
         width, height = enhanced.size
