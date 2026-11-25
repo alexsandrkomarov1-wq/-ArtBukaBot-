@@ -18,7 +18,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <div class="world-hud">
         <span class="world-hud-kicker">KOMAROVA_CORE / AI WORLD</span>
         <strong>ЦЕНТРАЛЬНОЕ ЯДРО</strong>
-        <span class="world-render-status" data-world-render-status role="status" aria-live="polite">Подготовка 3D-сцены…</span>
+        <span class="world-render-status" data-world-render-status role="status" aria-live="polite">Проверка графического режима…</span>
       </div>
       <nav class="world-portals" id="world-portals" aria-label="Активные порталы проектов">
         <a class="world-portal" href="{{ '/generations/' | relative_url }}"><span class="world-portal-index">01 / PEOPLE</span><strong>Поколения</strong><small>Люди · PERSON-ID</small></a>
@@ -204,5 +204,5 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}"></script>
 
-<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-stack-1"></script>
+<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
