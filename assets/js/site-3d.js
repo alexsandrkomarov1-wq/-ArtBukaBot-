@@ -9,10 +9,14 @@
   const lowPower = window.matchMedia("(max-width: 700px)").matches ||
     (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
     (navigator.connection && navigator.connection.saveData);
-  const canvas = document.createElement("canvas");
-  canvas.className = "site-3d-canvas";
-  canvas.setAttribute("aria-label", "Трёхмерный интерактивный мир KOMAROVA_CORE с центральным ядром и порталами проектов");
-  canvas.setAttribute("role", "img");
+  const createCanvas = () => {
+    const element = document.createElement("canvas");
+    element.className = "site-3d-canvas";
+    element.setAttribute("aria-label", "Трёхмерный интерактивный мир KOMAROVA_CORE с центральным ядром и порталами проектов");
+    element.setAttribute("role", "img");
+    return element;
+  };
+  let canvas = createCanvas();
   host.prepend(canvas);
 
   const setRenderStatus = (label) => {
@@ -26,22 +30,60 @@
     setRenderStatus("3D-графика недоступна · порталы и разделы остаются активны");
   };
 
-  import("https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js").then((THREE) => {
-    let renderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        alpha: true,
-        antialias: !lowPower,
-        powerPreference: "low-power",
-        failIfMajorPerformanceCaveat: false
-      });
-    } catch (error) {
-      fallback();
-      return;
+  const threeUrl = "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js";
+  const threeWebGPUUrl = "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js";
+  const canAttemptWebGPU = Boolean(window.isSecureContext && navigator.gpu && !lowPower);
+  const webgpuModule = canAttemptWebGPU
+    ? import(threeWebGPUUrl).catch(() => null)
+    : Promise.resolve(null);
+
+  Promise.all([import(threeUrl), webgpuModule]).then(async ([THREE, THREEGPU]) => {
+    let renderer = null;
+    let graphicsMode = "webgl2";
+
+    if (THREEGPU && THREEGPU.WebGPURenderer && canAttemptWebGPU) {
+      try {
+        renderer = new THREEGPU.WebGPURenderer({
+          canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance"
+        });
+        await renderer.init();
+        graphicsMode = "webgpu";
+      } catch (error) {
+        if (renderer) {
+          try { renderer.dispose(); } catch (disposeError) { /* release best-effort */ }
+        }
+        renderer = null;
+        const replacementCanvas = createCanvas();
+        canvas.replaceWith(replacementCanvas);
+        canvas = replacementCanvas;
+      }
     }
 
-    setRenderStatus("3D-сцена запущена · WebGL");
+    if (!renderer) {
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: !lowPower,
+          powerPreference: lowPower ? "low-power" : "high-performance",
+          failIfMajorPerformanceCaveat: false
+        });
+        graphicsMode = lowPower ? "lite-3d" : "webgl2";
+      } catch (error) {
+        fallback();
+        return;
+      }
+    }
+
+    const renderLabels = {
+      webgpu: "3D запущено · WebGPU",
+      webgl2: "3D запущено · WebGL2",
+      "lite-3d": "Облегчённая 3D-сцена · WebGL2"
+    };
+    setRenderStatus(renderLabels[graphicsMode]);
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.45));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
