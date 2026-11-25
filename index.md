@@ -166,3 +166,5 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}"></script>
+
+<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}"></script>
