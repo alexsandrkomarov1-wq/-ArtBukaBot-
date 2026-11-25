@@ -210,7 +210,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261125-private-connect-1"></script>
-<script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}"></script>
+<script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261125-manual-scene-1"></script>
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
