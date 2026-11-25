@@ -1,0 +1,23 @@
+.registry-shell{display:grid;gap:1.25rem;margin:2rem 0}
+.registry-panel{border:1px solid rgba(125,170,190,.28);border-radius:18px;padding:1.25rem;background:rgba(12,28,43,.72);color:#eaf3f7}
+.registry-panel h2,.registry-panel h3{margin-top:0}
+.registry-muted{color:#a9becb;font-size:.94rem}
+.registry-connect{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;align-items:end}
+.registry-panel label{display:grid;gap:.35rem;font-size:.9rem;color:#c6d8e2}
+.registry-panel input,.registry-panel select,.registry-panel textarea{width:100%;box-sizing:border-box;border:1px solid #496273;border-radius:9px;padding:.72rem;background:#0b1b29;color:#f3f8fa;font:inherit}
+.registry-panel textarea{min-height:90px;resize:vertical}
+.registry-button{border:1px solid #76c7d5;border-radius:9px;padding:.72rem 1rem;background:#153c4b;color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.registry-button:disabled{opacity:.55;cursor:wait}
+.registry-status{padding:.75rem 1rem;border-radius:10px;background:rgba(99,155,180,.12);color:#cce4ee}
+.registry-status[data-kind="error"]{background:rgba(176,75,75,.16);color:#ffd1ca}
+.registry-status[data-kind="success"]{background:rgba(65,150,115,.15);color:#c8f3dc}
+.registry-toolbar{display:flex;gap:.7rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.registry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.9rem}
+.registry-card{border:1px solid rgba(125,170,190,.24);border-radius:13px;padding:1rem;background:rgba(7,19,30,.65);min-width:0}
+.registry-id{display:block;overflow-wrap:anywhere;color:#86c8d8;font: .78rem ui-monospace,monospace;margin:.35rem 0}
+.registry-tag{display:inline-block;border:1px solid #547486;border-radius:999px;padding:.18rem .55rem;font-size:.75rem;color:#c7e3ed}
+.registry-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;align-items:end}
+.registry-form .wide{grid-column:1/-1}
+.registry-empty{padding:1.2rem;border:1px dashed #557080;border-radius:12px;color:#b7cbd5}
+.registry-hidden{display:none!important}
+@media(max-width:600px){.registry-panel{padding:1rem}.registry-connect,.registry-form{grid-template-columns:1fr}.registry-form .wide{grid-column:auto}}
