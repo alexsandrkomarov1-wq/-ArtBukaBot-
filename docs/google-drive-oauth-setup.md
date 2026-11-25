@@ -1,6 +1,6 @@
 # Google Drive OAuth setup
 
-This integration authorizes the signed-in family account and supports temporary private archive storage in the configured Google Drive folder. Original files are uploaded into that folder and remain quarantined in the KOMAROVA_CORE registry until a verified malware-scanning workflow releases them.
+This integration authorizes the signed-in family account and supports temporary private archive storage in the configured Google Drive folder. Original files are uploaded into that folder and remain quarantined in the KOMAROVA_CORE registry until a verified malware-scanning workflow releases them. The current frontend still needs its authenticated API upload integration, and the backend must be deployed before the public GitHub Pages site can use this path.
 
 ## Google Cloud setup
 
@@ -25,6 +25,7 @@ Set these values in the backend host's private environment/secrets manager. Neve
 - `GOOGLE_OAUTH_CLIENT_ID`: OAuth client ID.
 - `GOOGLE_OAUTH_CLIENT_SECRET`: OAuth client secret.
 - `GOOGLE_DRIVE_REDIRECT_URI`: exact HTTPS callback URI configured above.
+- `GOOGLE_DRIVE_ARCHIVE_FOLDER_ID`: `1Pt_GPvj6s8G5Rj6ejQ2e0xjBgmKYwjfk` (the existing private `KOMAROVA_CORE` folder).
 - `CORE_OAUTH_ENCRYPTION_KEY`: URL-safe base64 encoding of exactly 32 random bytes. Generate with:
 
   `python -c "import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip('='))"`
