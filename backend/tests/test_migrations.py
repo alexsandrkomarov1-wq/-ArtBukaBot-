@@ -144,7 +144,7 @@ def test_legacy_48_bit_person_id_survives_identifier_width_migration(tmp_path):
             version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert row.person_id == "P-1234567890AB"
         assert row.display_name == "Legacy person"
-        assert version == "0005_private_media_intake"
+        assert version == "0006_material_registry"
     finally:
         engine.dispose()
 
