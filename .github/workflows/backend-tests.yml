@@ -28,6 +28,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
       - name: Check JavaScript syntax
-        run: node --check assets/js/site-guide.js && node --check assets/js/media-library.js && node --check assets/js/places-gallery.js && if [ -f assets/js/cloud-archive.js ]; then node --check assets/js/cloud-archive.js; fi
+        run: node --check assets/js/ai-media-enhancer.js && node --check assets/js/site-guide.js && node --check assets/js/media-library.js && node --check assets/js/places-gallery.js && if [ -f assets/js/cloud-archive.js ]; then node --check assets/js/cloud-archive.js; fi
       - name: Run backend tests
         run: pytest -q
