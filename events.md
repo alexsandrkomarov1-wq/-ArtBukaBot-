@@ -42,6 +42,6 @@ description: Серверный реестр событий KOMAROVA_CORE с п�
     </div>
   </div>
 </section>
-<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-1">
-<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-1" defer></script>
-<script src="{{ '/assets/js/events-registry.js' | relative_url }}?v=20261125-1" defer></script>
+<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-private-api-errors-2">
+<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
+<script src="{{ '/assets/js/events-registry.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
