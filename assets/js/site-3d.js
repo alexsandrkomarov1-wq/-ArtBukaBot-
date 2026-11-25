@@ -41,7 +41,7 @@
       return;
     }
 
-    setRenderStatus("3D-сцена запущена · аппаратное ускорение WebGL");
+    setRenderStatus("3D-сцена запущена · WebGL");
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.45));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
