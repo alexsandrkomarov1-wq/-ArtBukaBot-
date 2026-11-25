@@ -13,6 +13,11 @@ guide = (root / "assets/js/site-guide.js").read_text(encoding="utf-8")
 api = (root / "backend/app/cloud_archive_api.py").read_text(encoding="utf-8")
 worker = (root / "backend/app/ai_media_worker.py").read_text(encoding="utf-8")
 workflow = (root / ".github/workflows/pages-build.yml").read_text(encoding="utf-8")
+registry_client = (root / "assets/js/registry-client.js").read_text(encoding="utf-8")
+family_board = (root / "family-board.md").read_text(encoding="utf-8")
+family_map = (root / "assets/js/family-board-map.js").read_text(encoding="utf-8")
+generations = (root / "generations.md").read_text(encoding="utf-8")
+events = (root / "events.md").read_text(encoding="utf-8")
 
 def require(condition: bool, message: str) -> None:
     if not condition:
@@ -42,7 +47,14 @@ require("sessionStorage" not in archive_js, "private archive access token must n
 require("Частный backend пока недоступен" in archive_js and "friendlyError" in archive_js, "archive offline state must be clear")
 require("sceneManuallySelected" in atmosphere, "manual nature scene selection must not be overridden by the auto-cycle")
 require("generations:" in guide and "events:" in guide and "family:" in guide, "contextual navigation tabs are incomplete")
+require("Частный backend не отвечает" in registry_client, "registry pages must explain API connection failures")
+require('data-fb-tab="board"' in family_board and 'data-fb-tab="map"' in family_board and 'id="fb-map-panel"' in family_board, "family board tabs are missing")
+require('button.addEventListener("click"' in family_map and "fb-map-panel" in family_map, "family board tab interaction is missing")
+for page_name, page in (("home", home), ("media", media), ("generations", generations), ("events", events)):
+    for tag in re.findall(r"<input[^>]*type=[\\\"']password[\\\"'][^>]*>", page, re.I):
+        require("value=" not in tag.lower(), page_name + " password input must be empty by default")
+        require('autocomplete="off"' in tag.lower(), page_name + " password input must not request browser autofill")
 require("node --check assets/js/media-atmosphere.js" in workflow, "atmosphere JavaScript syntax is not checked")
 require("node --check assets/js/cloud-archive.js" in workflow, "archive JavaScript syntax is not checked")
 require("python3 scripts/check_ai_media_lab.py" in workflow, "AI media contract checker is not in CI")
-print("AI media lab contract passed.")
+print("AI media lab and navigation contract passed.")
