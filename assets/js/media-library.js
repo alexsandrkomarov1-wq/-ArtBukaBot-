@@ -11,6 +11,9 @@
     stage: byId("media-stage"),
     image: byId("media-image"),
     video: byId("media-video"),
+    audio: byId("media-audio"),
+    document: byId("media-document"),
+    documentOpen: byId("media-document-open"),
     name: byId("media-current-name"),
     meta: byId("media-current-meta"),
     download: byId("media-download"),
@@ -44,14 +47,20 @@
   const kindOf = (file) => {
     if (file.type.startsWith("image/")) return "image";
     if (file.type.startsWith("video/")) return "video";
+    if (file.type.startsWith("audio/")) return "audio";
     const ext = file.name.split(".").pop().toLowerCase();
     if (/^(jpg|jpeg|png|gif|webp|bmp|avif|heic|heif|tif|tiff)$/.test(ext)) return "image";
     if (/^(mp4|m4v|webm|ogv|mov|mkv|avi|mpeg|mpg|3gp)$/.test(ext)) return "video";
+    if (/^(mp3|wav|ogg|oga|opus|m4a|aac|flac|wma)$/.test(ext)) return "audio";
+    if (/^(pdf|txt|rtf|doc|docx|odt|xls|xlsx|ods|ppt|pptx|odp)$/.test(ext)) return "document";
     return null;
   };
 
   ui.image.addEventListener("error", () => {
     ui.status.textContent = "Браузер не смог декодировать это изображение. Возможно, формат HEIC/HEIF не поддерживается. Оригинал не изменён; совместимая копия потребует закрытого обработчика архива.";
+  });
+  ui.audio.addEventListener("error", () => {
+    ui.status.textContent = "Браузер не смог воспроизвести аудиофайл или не поддерживает его кодек. Оригинал не изменён.";
   });
   ui.video.addEventListener("error", () => {
     const code = ui.video.error ? ui.video.error.code : 0;
@@ -92,13 +101,13 @@
       button.setAttribute("aria-pressed", index === current ? "true" : "false");
       const preview = document.createElement("span");
       preview.className = "media-item-preview";
-      preview.textContent = item.kind === "video" ? "▶" : "▧";
+      preview.textContent = item.kind === "video" ? "▶" : item.kind === "audio" ? "♫" : item.kind === "document" ? "▤" : "▧";
       const info = document.createElement("span");
       info.className = "media-item-info";
       const name = document.createElement("strong");
       name.textContent = item.file.name;
       const meta = document.createElement("small");
-      meta.textContent = (item.kind === "video" ? "Видео" : "Фото") + " · " + formatSize(item.file.size);
+      meta.textContent = ({ image: "Фото", video: "Видео", audio: "Аудио", document: "Документ" }[item.kind]) + " · " + formatSize(item.file.size);
       info.append(name, meta);
       button.append(preview, info);
       button.addEventListener("click", () => show(index));
@@ -128,18 +137,39 @@
     ui.stage.hidden = false;
     ui.image.hidden = item.kind !== "image";
     ui.video.hidden = item.kind !== "video";
+    ui.audio.hidden = item.kind !== "audio";
+    ui.document.hidden = item.kind !== "document";
     ui.video.pause();
+    ui.audio.pause();
     ui.image.removeAttribute("src");
     ui.video.removeAttribute("src");
+    ui.audio.removeAttribute("src");
     if (item.kind === "image") {
       ui.image.src = item.url;
       ui.image.alt = item.file.name;
-    } else {
+    } else if (item.kind === "video") {
       ui.video.src = item.url;
       ui.video.load();
+    } else if (item.kind === "audio") {
+      ui.audio.src = item.url;
+      ui.audio.load();
+    } else {
+      ui.documentOpen.href = item.url;
+      ui.documentOpen.textContent = "Открыть " + item.file.name;
+      const isPdf = item.file.type === "application/pdf" || item.file.name.toLowerCase().endsWith(".pdf");
+      if (isPdf) {
+        const frame = document.createElement("iframe");
+        frame.title = "Предпросмотр PDF: " + item.file.name;
+        frame.src = item.url;
+        frame.className = "media-document-frame";
+        ui.document.querySelector("iframe")?.remove();
+        ui.document.insertBefore(frame, ui.documentOpen);
+      } else {
+        ui.document.querySelector("iframe")?.remove();
+      }
     }
     ui.name.textContent = item.file.name;
-    ui.meta.textContent = (item.kind === "video" ? "Видео" : "Фото") + " · " + formatSize(item.file.size) + " · " + item.file.type;
+    ui.meta.textContent = ({ image: "Фото", video: "Видео", audio: "Аудио", document: "Документ" }[item.kind]) + " · " + formatSize(item.file.size) + " · " + (item.file.type || "тип не определён");
     ui.download.href = item.url;
     ui.download.download = item.file.name;
     ui.counter.textContent = (current + 1) + " / " + visible.length;
