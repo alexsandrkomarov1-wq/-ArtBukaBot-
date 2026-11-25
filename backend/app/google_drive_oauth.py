@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from .models import AuditEvent, GoogleDriveAccount, GoogleOAuthState, User, new_id, utc_now
 
+DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive"
 DRIVE_METADATA_SCOPE = "https://www.googleapis.com/auth/drive.metadata.readonly"
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -112,6 +113,39 @@ def _google_about(access_token: str) -> dict:
     return payload
 
 
+
+
+def google_drive_access_token(db: Session, user_id: str) -> tuple[str, GoogleDriveAccount]:
+    """Refresh a short-lived token for the signed-in user's linked archive account."""
+    _, client_secret, _ = _oauth_config()
+    account = db.scalar(select(GoogleDriveAccount).where(
+        GoogleDriveAccount.user_id == user_id,
+        GoogleDriveAccount.revoked_at.is_(None),
+    ).order_by(GoogleDriveAccount.created_at, GoogleDriveAccount.drive_account_id))
+    if account is None:
+        raise HTTPException(status_code=409, detail="Connect a Google Drive account before using the family archive")
+    scopes = set((account.granted_scopes or "").split())
+    if DRIVE_WRITE_SCOPE not in scopes:
+        raise HTTPException(status_code=409, detail="Reconnect Google Drive and grant archive file access")
+    refresh_token = decrypt_refresh_token(account.refresh_token_ciphertext, user_id, account.drive_account_id)
+    try:
+        response = httpx.post(GOOGLE_TOKEN_URL, data={
+            "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip(),
+            "client_secret": client_secret,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        }, timeout=20.0)
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail="Google Drive access token refresh failed") from exc
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail="Google Drive authorization expired; reconnect the account")
+    payload = response.json()
+    access_token = payload.get("access_token") if isinstance(payload, dict) else None
+    if not access_token:
+        raise HTTPException(status_code=502, detail="Google did not return a Drive access token")
+    return access_token, account
+
+
 def build_google_drive_router(get_db, require_current_user) -> APIRouter:
     router = APIRouter(prefix="/api/v1/integrations/google-drive", tags=["google-drive"])
 
@@ -135,7 +169,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
-            "scope": DRIVE_METADATA_SCOPE,
+            "scope": f"{DRIVE_METADATA_SCOPE} {DRIVE_WRITE_SCOPE}",
             "access_type": "offline",
             "prompt": "consent",
             "include_granted_scopes": "true",
@@ -144,7 +178,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
         return {
             "authorization_url": f"{GOOGLE_AUTH_URL}?{urlencode(params)}",
             "redirect_uri": redirect_uri,
-            "requested_access": "read-only Drive account identity and storage quota",
+            "requested_access": "Google Drive metadata and file read/write access for the configured archive folder", 
             "expires_in_seconds": 600,
         }
 
@@ -208,8 +242,8 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
                 status_code=502,
                 detail="Google did not return offline credentials; reconnect and grant consent",
             )
-        if DRIVE_METADATA_SCOPE not in granted_scopes:
-            raise HTTPException(status_code=403, detail="Google did not grant the required read-only Drive scope")
+        if DRIVE_METADATA_SCOPE not in granted_scopes or DRIVE_WRITE_SCOPE not in granted_scopes:
+            raise HTTPException(status_code=403, detail="Google did not grant the required Drive archive read/write scopes")
 
         about = _google_about(access_token)
         google_user = about.get("user") or {}
@@ -255,7 +289,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             entity_type="google_drive_account",
             entity_id=account.drive_account_id,
             actor_id=user_id,
-            details=json.dumps({"email_address": email, "scope": DRIVE_METADATA_SCOPE}, ensure_ascii=False),
+            details=json.dumps({"email_address": email, "scope": " ".join(sorted(granted_scopes))}, ensure_ascii=False),
         ))
         try:
             db.commit()
@@ -268,12 +302,12 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             "drive_account_id": account.drive_account_id,
             "email_address": email,
             "display_name": google_user.get("displayName"),
-            "access": "metadata_read_only",
+            "access": "drive_read_write",
             "quota_limit_bytes": account.quota_limit_bytes,
             "quota_usage_bytes": account.quota_usage_bytes,
             "quota_usage_in_drive_bytes": account.quota_usage_in_drive_bytes,
             "quota_usage_in_trash_bytes": account.quota_usage_in_trash_bytes,
-            "message": "Google Drive account linked. File contents have not been accessed.",
+            "message": "Google Drive account linked with archive file access.",
         }
 
     @router.get("/status")
