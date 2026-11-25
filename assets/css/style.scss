@@ -714,3 +714,35 @@ body {
   cursor:pointer;
 }
 .ai-media-refresh:disabled { opacity:.5; cursor:wait; }
+
+
+/* AI media workspace: keep each action label on its own clear line. */
+.ai-media-controls > .ai-media-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  justify-items: start;
+  gap: 9px;
+  min-width: 0;
+}
+.ai-media-controls .ai-media-step,
+.ai-media-controls .ai-media-action-title,
+.ai-media-controls .ai-media-action-note {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ai-media-controls .ai-media-step {
+  margin: 0 0 2px;
+  line-height: 1.5;
+}
+.ai-media-controls .ai-media-action-title {
+  margin: 0;
+  line-height: 1.35;
+}
+.ai-media-controls .ai-media-action-note {
+  margin: 0;
+  line-height: 1.55;
+}
