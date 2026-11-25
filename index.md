@@ -3,24 +3,37 @@ layout: default
 title: Главная
 description: Цифровой семейный архив KOMAROVA_CORE. История, память и материалы для открытого доступа.
 ---
-<section class="hero hero-archive" aria-labelledby="home-title">
+<section class="hero hero-archive ai-world-home" aria-labelledby="home-title">
   <div class="hero-copy">
-    <p class="eyebrow"><span class="eyebrow-line"></span> ЦИФРОВОЙ СЕМЕЙНЫЙ АРХИВ</p>
-    <h1 id="home-title">История,<br>которую <em>сохраняют.</em></h1>
-    <p class="hero-lead">KOMAROVA_CORE объединяет семейную память, людей, события, места и документы в единую систему. Чтобы важное не терялось между поколениями.</p>
+    <p class="eyebrow"><span class="eyebrow-line"></span> ИНТЕРАКТИВНЫЙ МИР ИИ · KOMAROVA_CORE</p>
+    <h1 id="home-title">Войдите в <em>цифровой мир.</em></h1>
+    <p class="hero-lead">Единое пространство людей, поколений, событий, географии и семейных материалов. Выбирайте портал в 3D-мире или пользуйтесь обычной навигацией.</p>
     <div class="hero-actions">
-      <a class="primary-link" href="{{ '/about/' | relative_url }}">О проекте <span aria-hidden="true">↗</span></a>
-      <a class="text-link" href="#archive-directions">Исследовать направления <span aria-hidden="true">↓</span></a>
-      <a class="text-link" href="https://archive.org/" target="_blank" rel="noopener noreferrer">Internet Archive <span aria-hidden="true">↗</span></a>
+      <a class="primary-link" href="#world-portals">Открыть проекты <span aria-hidden="true">↓</span></a>
+      <a class="text-link" href="{{ '/status/' | relative_url }}">Проверить состояние системы ↗</a>
     </div>
   </div>
-  <div class="hero-art" aria-label="Графическая композиция семейного архива">
-    <div class="archive-stamp"><span>СЕМЕЙНЫЙ</span><strong>АРХИВ</strong><span>ИСТОРИЯ · ПАМЯТЬ · СВЯЗЬ</span></div>
-    <div class="archive-index"><span>КОЛЛЕКЦИЯ</span><strong>01</strong><span>KOMAROVA_CORE</span></div>
-    <div class="archive-orbit orbit-one"></div><div class="archive-orbit orbit-two"></div>
-    <span class="archive-year">MEMORIA<br>FAMILIAE</span>
+  <div class="hero-art" aria-label="Интерактивный трёхмерный мир KOMAROVA_CORE">
+    <div class="world-interface">
+      <div class="world-hud">
+        <span class="world-hud-kicker">KOMAROVA_CORE / AI WORLD</span>
+        <strong>ЦЕНТРАЛЬНОЕ ЯДРО</strong>
+        <span class="world-render-status" data-world-render-status role="status" aria-live="polite">Подготовка 3D-сцены…</span>
+      </div>
+      <nav class="world-portals" id="world-portals" aria-label="Активные порталы проектов">
+        <a class="world-portal" href="{{ '/generations/' | relative_url }}"><span class="world-portal-index">01 / PEOPLE</span><strong>Поколения</strong><small>Люди · PERSON-ID</small></a>
+        <a class="world-portal" href="{{ '/events/' | relative_url }}"><span class="world-portal-index">02 / TIME</span><strong>События</strong><small>Хронология · EVENT-ID</small></a>
+        <a class="world-portal" href="{{ '/family-board/#fb-map-panel' | relative_url }}"><span class="world-portal-index">03 / PLACES</span><strong>География</strong><small>Карта · посещения</small></a>
+        <a class="world-portal" href="{{ '/media/' | relative_url }}"><span class="world-portal-index">04 / ARCHIVE</span><strong>Документы и медиа</strong><small>Фотографии · видео · файлы</small></a>
+        <a class="world-portal" href="#ai-media-enhancer"><span class="world-portal-index">05 / AI MEDIA</span><strong>Восстановление</strong><small>Оригинал · производная копия</small></a>
+        <button class="world-portal world-portal-button" type="button" data-world-open-guide><span class="world-portal-index">06 / AI GUIDE</span><strong>ИИ-помощник</strong><small>Подсказки и навигация</small></button>
+        <a class="world-portal" href="{{ '/account/' | relative_url }}"><span class="world-portal-index">07 / PRIVATE</span><strong>Личный кабинет</strong><small>Защищённый доступ</small></a>
+        <a class="world-portal" href="{{ '/status/' | relative_url }}"><span class="world-portal-index">08 / SYSTEM</span><strong>Состояние проекта</strong><small>Проверки · готовность</small></a>
+      </nav>
+      <div class="world-footer"><span>МЫШЬ · КЛАВИАТУРА · TOUCH</span><span>ПОРТАЛЫ ОТКРЫВАЮТ РЕАЛЬНЫЕ РАЗДЕЛЫ</span></div>
+    </div>
   </div>
-  <div class="hero-foot"><span>СОХРАНЯЯ ПРОШЛОЕ</span><span class="hero-foot-rule"></span><span>СОЗДАЁМ СВЯЗЬ С БУДУЩИМ</span></div>
+  <div class="hero-foot"><span>ЕДИНОЕ СЕМЕЙНОЕ ЯДРО</span><span class="hero-foot-rule"></span><span>ОДИН МИР · СВЯЗАННЫЕ ПРОЕКТЫ</span></div>
 </section>
 <section class="family-portraits" aria-labelledby="family-portraits-title">
   <div class="family-portraits-heading">
@@ -149,7 +162,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   <p>Каждый материал в будущем будет связан с людьми, датами, событиями, местами и источниками. Так отдельные документы складываются в общую картину.</p>
 </section>
 <section class="archive-grid" aria-label="Направления семейного архива">
-  <article class="archive-card archive-card-feature"><span class="card-kicker">01 / ПОКОЛЕНИЯ</span><div class="card-symbol symbol-tree" aria-hidden="true"><span></span><span></span><span></span><i></i></div><h3>История семьи</h3><p>Поколения, биографии, родственные связи и семейная хроника.</p><span class="card-state">ОБЗОР ПРОЕКТА</span></article>
+  <a class="archive-card archive-card-link archive-card-feature" href="{{ '/generations/' | relative_url }}"><span class="card-kicker">01 / ПОКОЛЕНИЯ</span><div class="card-symbol symbol-tree" aria-hidden="true"><span></span><span></span><span></span><i></i></div><h3>История семьи</h3><p>Поколения, биографии, родственные связи и семейная хроника.</p><span class="card-state">ОТКРЫТЬ РЕЕСТР ↗</span></a>
   <a class="archive-card archive-card-link" href="{{ '/events/' | relative_url }}"><span class="card-kicker">02 / ВРЕМЯ</span><div class="card-symbol symbol-time" aria-hidden="true"><span></span><span></span><i></i></div><h3>События и хронология</h3><p>Значимые даты, встречи, семейные события и исторический контекст.</p><span class="card-state">ОТКРЫТЬ ХРОНОЛОГИЮ ↗</span></a>
   <a class="archive-card archive-card-link" href="{{ '/family-board/#fb-map-panel' | relative_url }}"><span class="card-kicker">03 / ГЕОГРАФИЯ</span><div class="card-symbol symbol-place" aria-hidden="true"><span></span><i></i></div><h3>Места и путешествия</h3><p>Города, маршруты, дома и места, связанные с семейной историей.</p><span class="card-state">ОТКРЫТЬ КАРТУ ↗</span></a>
   <a class="archive-card archive-card-link" href="{{ '/media/' | relative_url }}"><span class="card-kicker">04 / МЕДИАТЕКА</span><div class="card-symbol symbol-media" aria-hidden="true"><span></span><span></span><i></i></div><h3>Фотографии и документы</h3><p>Оригиналы, описания, источники и проверенные цифровые копии.</p><span class="card-state">ОТКРЫТЬ МЕДИАТЕКУ ↗</span></a>
