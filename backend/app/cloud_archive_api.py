@@ -252,7 +252,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     @router.get("/items/{archive_item_id}/content")
     def view_archive_item(
         archive_item_id: str, db: Session = Depends(get_db),
-        _: User = Depends(require_roles("owner", "moderator", "family_member")),
+        actor: User = Depends(require_roles("owner", "moderator", "family_member")),
     ):
         row = db.execute(
             select(ArchiveItem, StoredBlob)
