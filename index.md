@@ -62,33 +62,21 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
 
-  <div class="ai-media-before-after" aria-label="Демонстрация фотографии до и после улучшения">
-    <figure class="ai-media-photo">
-      <div class="ai-media-photo-frame ai-media-original">
-        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=85" alt="Демонстрационная семейная фотография до восстановления" loading="lazy">
-        <span class="ai-media-tag">ДО</span>
-      </div>
-      <figcaption><strong>Оригинал</strong><span>Неизменяемый исходный файл</span></figcaption>
-    </figure>
-    <figure class="ai-media-photo">
-      <div class="ai-media-photo-frame ai-media-enhanced">
-        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=85" alt="Демонстрационная визуальная коррекция семейной фотографии" loading="lazy">
-        <span class="ai-media-tag ai-media-tag-after">ПОСЛЕ · ДЕМО</span>
-      </div>
-      <figcaption><strong>Улучшенная копия</strong><span>Пример отображения результата</span></figcaption>
-    </figure>
-  </div>
-
-  <div class="ai-media-motion" aria-label="Зацикленная анимация сканирования и восстановления изображения">
-    <div class="ai-media-motion-head"><span>КАК ПРОИСХОДИТ ВОССТАНОВЛЕНИЕ</span><span class="ai-media-loop"><i></i> АНИМАЦИЯ · 9 СЕКУНД</span></div>
-    <div class="ai-media-motion-stage">
-      <img class="ai-media-motion-base" src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="" loading="lazy">
-      <div class="ai-media-motion-reveal"><img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="" loading="lazy"></div>
+  <div class="ai-media-motion" data-ai-motion aria-label="Сканирующий проход по выбранной фотографии">
+    <div class="ai-media-motion-head"><span>LIVE SCANNER · СКАНИРОВАНИЕ ИЗОБРАЖЕНИЯ</span><span class="ai-media-loop"><i></i><span data-ai-scan-state>ОЖИДАЕТ ФОТОГРАФИЮ</span></span></div>
+    <div class="ai-media-motion-stage" data-ai-scan-stage>
+      <img class="ai-media-motion-base" data-ai-scan-image src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="Демонстрационная фотография для показа движения сканера" loading="lazy">
+      <div class="ai-media-scan-grid" aria-hidden="true"></div>
       <span class="ai-media-motion-line" aria-hidden="true"></span>
       <span class="ai-media-motion-label ai-media-motion-left">ИСХОДНИК</span>
-      <span class="ai-media-motion-label ai-media-motion-right">УЛУЧШЕННАЯ КОПИЯ</span>
+      <span class="ai-media-motion-label ai-media-motion-right">СКАНИРУЮЩИЙ ПРОХОД</span>
+      <span class="ai-media-scan-corner ai-media-scan-corner-tl" aria-hidden="true"></span>
+      <span class="ai-media-scan-corner ai-media-scan-corner-tr" aria-hidden="true"></span>
+      <span class="ai-media-scan-corner ai-media-scan-corner-bl" aria-hidden="true"></span>
+      <span class="ai-media-scan-corner ai-media-scan-corner-br" aria-hidden="true"></span>
     </div>
-    <p class="ai-media-motion-note"><strong>Сканирование и постепенное проявление результата.</strong> Это демонстрационная CSS-анимация интерфейса, а не настоящее видео и не результат обработки нейросетью.</p>
+    <div class="ai-media-scan-progress" role="presentation"><span data-ai-scan-progress></span></div>
+    <p class="ai-media-motion-note"><strong>Сканирующая линия физически проходит по выбранному изображению.</strong><span data-ai-scan-note>Это визуальная анимация сканера. Она не изменяет фотографию и не выдаёт себя за AI-восстановление.</span></p>
   </div>
 
   <div class="ai-media-workspace" data-ai-media-lab>
@@ -99,8 +87,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls">
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload><span>01 / UPLOAD</span><strong>Выбрать фото или видео</strong><small>JPG, PNG, WEBP, GIF, MP4 и другие форматы браузера · до 100 МБ</small></button>
-      <button class="ai-media-button" type="button" data-ai-view disabled><span>02 / VIEW</span><strong>Просмотреть и подготовить копию</strong><small>Проверка файла и локальная демонстрационная коррекция фото</small></button>
-      <button class="ai-media-button" type="button" data-ai-export disabled><span>03 / EXPORT</span><strong>Скачать копию</strong><small>Оригинал не изменяется и не перезаписывается</small></button>
+      <button class="ai-media-button" type="button" data-ai-view disabled><span>02 / VIEW</span><strong>Запустить сканирующий проход</strong><small>Движение сканера по выбранной фотографии; AI-восстановление пока не подключено</small></button>
+      <button class="ai-media-button" type="button" data-ai-export disabled><span>03 / EXPORT</span><strong>Экспорт пока недоступен</strong><small>Нет результата реальной AI-обработки для скачивания</small></button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Нажмите «Выбрать фото или видео».</div>
     <div class="ai-media-live-preview">
@@ -109,12 +97,12 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <video data-ai-video-preview controls playsinline hidden></video>
         <span data-ai-original-empty>Здесь появится выбранная фотография или видео</span>
       </div></figure>
-      <figure><figcaption>РЕЗУЛЬТАТ · КОПИЯ</figcaption><div class="ai-media-live-frame">
+      <figure><figcaption>ПОСЛЕ · РЕАЛЬНЫЙ AI-РЕЗУЛЬТАТ</figcaption><div class="ai-media-live-frame">
         <img data-ai-result-preview alt="Предпросмотр локальной демонстрационной копии" hidden>
-        <span data-ai-result-empty>Результат появится после подготовки копии</span>
+        <span data-ai-result-empty>Здесь появится обработанная копия после подключения и запуска AI-модели. Сейчас результат не создаётся.</span>
       </div></figure>
     </div>
-    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Локальный режим готов. Выбранный файл останется в этом браузере и пока не отправляется в Google Drive.</p>
+    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Локальный режим готов. Оригинал остаётся без изменений. Сканер показывает только визуальный проход, AI-модель и постоянное хранилище не подключены.</p>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
@@ -124,8 +112,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <article><span>ARCHIVE PROTECTION</span><h3>Защита архива</h3><p>Оригинал не перезаписывается. Каждая улучшенная версия получает собственный MATERIAL-ID и историю обработки.</p></article>
   </div>
 
-  <div class="ai-media-principle"><strong>Оригинал сохраняем. Качество улучшаем на копиях. Историю изменений не теряем.</strong><span>ЛОКАЛЬНЫЙ ПРЕДПРОСМОТР · ИИ-ПРОВАЙДЕР И ПОСТОЯННОЕ ХРАНЕНИЕ НЕ ПОДКЛЮЧЕНЫ</span></div>
-  <p class="ai-media-footnote">Демонстрационные изображения и анимация показывают оформление интерфейса. Локальная коррекция в рабочей области не является ИИ-восстановлением. Выбранный файл не отправляется на сервер и не сохраняется в архиве. Подключение ИИ-провайдера, Google Drive и выдача постоянных MATERIAL-ID будут отдельными серверными этапами.</p>
+  <div class="ai-media-principle"><strong>Оригинал сохраняем. Качество улучшаем на копиях. Историю изменений не теряем.</strong><span>ОРИГИНАЛ НЕИЗМЕНЯЕМ · AI-МОДЕЛЬ ПОКА НЕ ПОДКЛЮЧЕНА</span></div>
+  <p class="ai-media-footnote">Сканирующий проход является анимацией интерфейса, а не вычислением нейросети. Сейчас сайт не выполняет AI-восстановление, не создаёт улучшенную копию и не присваивает MATERIAL-ID. Оригинал не изменяется и остаётся только в текущем браузере. Подключение модели, серверного хранения и регистрации производной копии требует отдельного backend-этапа.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
