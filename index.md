@@ -103,9 +103,14 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <span data-ai-original-empty>Здесь появится выбранная фотография или видео</span>
       </div></figure>
       <figure><figcaption>РЕЗУЛЬТАТ · ОТДЕЛЬНАЯ КОПИЯ</figcaption><div class="ai-media-live-frame">
-        <img data-ai-result-preview alt="Подтверждённый результат обработки" hidden>
-        <span data-ai-result-empty>Результата пока нет. Он появится после запуска реальной модели и проверки копии.</span>
-      </div></figure>
+        <img data-ai-result-preview alt="Предпросмотр отдельной копии" hidden>
+        <video data-ai-result-video controls playsinline hidden></video>
+        <span data-ai-result-empty>Результата пока нет. После настоящей обработки и серверной проверки здесь появится отдельная копия.</span>
+      </div>
+      <input class="ai-media-file-input" data-ai-result-input type="file" accept="image/*,video/*">
+      <button class="ai-media-reset ai-media-result-select" type="button" data-ai-result-select disabled>Выбрать готовую копию для сравнения</button>
+      <small class="ai-media-copy-note">Ручной предпросмотр не является AI-обработкой и не подтверждает регистрацию в архиве.</small>
+      </figure>
     </div>
     <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Исходный файл остаётся в этом браузере. Серверная обработка ещё не запущена.</p>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
