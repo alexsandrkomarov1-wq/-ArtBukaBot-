@@ -121,6 +121,7 @@
     view.disabled = true;
     reset.disabled = true;
     exportButton.disabled = true;
+    resultSelect.disabled = true;
     mode.textContent = "ОЖИДАЕТ ФАЙЛ";
     info.textContent = "Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.";
     status.textContent = "Исходный файл остаётся в этом браузере. Серверная обработка ещё не запущена.";
