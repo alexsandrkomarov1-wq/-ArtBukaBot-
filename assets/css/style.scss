@@ -128,6 +128,12 @@ a { color:var(--green); }
 .portrait-frame-alt { background:linear-gradient(150deg,#e2e5dd,#cbd2c7); }
 .portrait-frame-warm { background:linear-gradient(150deg,#eadfd5,#d8c6b5); }
 .portrait-frame-dark { background:linear-gradient(150deg,#d9ded9,#bfc9c1); }
+.portrait-preview { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.portrait-select-button { display:inline-flex; width:max-content; max-width:100%; align-items:center; justify-content:center; min-height:34px; padding:8px 11px; border:1px solid var(--green); background:var(--green); color:#fff; font-size:10px; font-weight:750; cursor:pointer; }
+.portrait-select-button:hover { background:#28483e; }
+.portrait-upload-input { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; clip-path:inset(50%); }
+.portrait-select-button:focus-within { outline:2px solid var(--accent); outline-offset:3px; }
+.portrait-clear-button { justify-self:start; padding:5px 0; border:0; background:transparent; color:var(--muted); font:inherit; font-size:9px; text-decoration:underline; cursor:pointer; }
 .portrait-silhouette { position:relative; display:block; width:86px; height:130px; opacity:.38; }
 .portrait-silhouette:before { position:absolute; top:4px; left:27px; width:34px; height:42px; border:1px solid var(--green); border-radius:50%; content:""; }
 .portrait-silhouette:after { position:absolute; bottom:2px; left:5px; width:76px; height:68px; border:1px solid var(--green); border-radius:48% 48% 5px 5px; content:""; }
