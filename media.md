@@ -7,7 +7,7 @@ description: Локальный просмотр фотографий и вид�
 <section class="media-heading">
   <p class="eyebrow">KOMAROVA_CORE · MEDIA</p>
   <h1>Семейная <em>медиатека.</em></h1>
-  <p class="media-lead">Google Drive рассматривается только как временный вариант подключения. Ответ по письму ожидается 27 ноября 2026 года. До подтверждения договорённостей это не считается постоянным хранилищем. Сейчас доступны локальный просмотр файлов и закрытый архив KOMAROVA_CORE через API; содержимое временного Google Drive здесь не отображается. Локальный просмотр не отправляет файлы на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
+  <p class="media-lead">Google Drive рассматривается только как временный вариант подключения. Ответ по письму ожидается 27 ноября 2026 года. До подтверждения договорённостей это не считается постоянным хранилищем. Сейчас доступен локальный просмотр файлов. Закрытый архив станет доступен после публикации и подключения частного API; содержимое временного Google Drive здесь не отображается. Локальный просмотр не отправляет файлы на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
   <div class="media-entry-actions">
     <label class="media-open-button" for="media-file-input">Открыть фото и видео на устройстве</label>
     <a class="media-button" href="#cloud-archive">Перейти к закрытому архиву</a>
@@ -117,5 +117,5 @@ description: Локальный просмотр фотографий и вид�
   <p>Не выбирайте файлы на чужом устройстве. До подключения закрытого кабинета медиатека не является семейным облачным архивом и не передаёт содержимое файлов на KOMAROVA_CORE.</p>
 </section>
 <script>window.KOMAROVA_API_BASE = "https://komarova-core-api.onrender.com";</script>
-<script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=20261125-catalogs-2" defer></script>
+<script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=20261125-memory-session-1" defer></script>
 <script src="{{ '/assets/js/media-library.js' | relative_url }}?v=20261125-catalogs-1" defer></script>
