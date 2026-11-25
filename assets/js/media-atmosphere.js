@@ -30,9 +30,11 @@
   let musicTimer = null;
   let sceneTimer = null;
   let recognition = null;
+  let sceneManuallySelected = false;
 
-  function setScene(name) {
+  function setScene(name, manual = true) {
     if (!scenes.includes(name)) return;
+    if (manual) sceneManuallySelected = true;
     currentScene = name;
     scene.dataset.natureScene = name;
     sceneButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.sceneChoice === name)));
@@ -208,7 +210,7 @@
   sceneTimer = window.setInterval(() => {
     if (document.hidden) return;
     const next = (scenes.indexOf(currentScene) + 1) % scenes.length;
-    setScene(scenes[next]);
+    if (!sceneManuallySelected) setScene(scenes[next], false);
   }, 18000);
 
   window.addEventListener("pagehide", () => {
