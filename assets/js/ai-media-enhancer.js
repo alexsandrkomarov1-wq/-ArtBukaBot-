@@ -86,8 +86,8 @@
     originalEmpty.hidden = false;
     preview.hidden = true;
     reset.disabled = true;
-    mode.textContent = "ОЖИДАЕТ ФАЙЛ";
-    setStage("Автоматическое улучшение", "Запускается сразу после проверки выбранного оригинала");
+    mode.textContent = accessToken ? "API ПОДКЛЮЧЁН · ОЖИДАЕТ ФАЙЛ" : "AI WORKER НЕ ПОДКЛЮЧЁН";
+    setStage("Ожидается AI worker", "ClamAV и Real-ESRGAN запускаются после подключения частного backend");
     info.textContent = "Файл ещё не выбран. Выберите фотографию или видео.";
     status.textContent = "Оригинал не изменяется. После выбора выполняются локальные проверки; ClamAV и AI-обработка требуют входа в частный backend.";
   }
@@ -104,7 +104,7 @@
     if (file.type.startsWith("image/")) {
       originalImage.src = sourceUrl;
       originalImage.hidden = false;
-      mode.textContent = "ОРИГИНАЛ ПРОВЕРЯЕТСЯ";
+      mode.textContent = accessToken ? "ОРИГИНАЛ ОТПРАВЛЯЕТСЯ В КАРАНТИН" : "ЛОКАЛЬНАЯ ПРОВЕРКА ОРИГИНАЛА";
     } else {
       originalVideo.src = sourceUrl;
       originalVideo.hidden = false;
@@ -287,6 +287,8 @@
         return;
       }
       if (file.type.startsWith("video/")) {
+        const sourceHashAfter = await sha256(file);
+        if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
         setStage("Ожидается AI video worker", "Real-ESRGAN x2 · FFmpeg · сохранение аудио");
         resultEmpty.textContent = "AI-обработка видео появится после подключения частного worker. Исходник не изменён, фиктивный ролик не создаётся.";
         resultEmpty.hidden = false;
@@ -344,6 +346,8 @@
   reset.addEventListener("click", clearWorkspace);
   exportButton.disabled = true;
   preview.hidden = true;
+  mode.textContent = "AI WORKER НЕ ПОДКЛЮЧЁН";
+  setStage("Ожидается AI worker", "Подключите частный backend для ClamAV и Real-ESRGAN x4");
   window.addEventListener("pagehide", () => {
     releaseUrl(sourceUrl);
     releaseUrl(resultUrl);
