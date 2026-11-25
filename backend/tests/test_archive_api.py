@@ -316,6 +316,7 @@ def test_quarantined_media_is_released_only_after_clean_clamav_scan(tmp_path, mo
 
     def fake_realesrgan(source_path, output_path, *, scale):
         from PIL import Image
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         Image.new("RGB", (64, 48), (180, 205, 225)).save(output_path, format="PNG")
         return SimpleNamespace(
             output_path=str(output_path), output_mime="image/png",
