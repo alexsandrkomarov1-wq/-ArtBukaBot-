@@ -118,14 +118,15 @@ def _google_about(access_token: str) -> dict:
 def google_drive_access_token(db: Session, user_id: str) -> tuple[str, GoogleDriveAccount]:
     """Refresh a short-lived token for the signed-in user's linked archive account."""
     _, client_secret, _ = _oauth_config()
-    account = db.scalar(select(GoogleDriveAccount).where(
+    accounts = db.scalars(select(GoogleDriveAccount).where(
         GoogleDriveAccount.user_id == user_id,
         GoogleDriveAccount.revoked_at.is_(None),
-    ).order_by(GoogleDriveAccount.created_at, GoogleDriveAccount.drive_account_id))
-    if account is None:
+    ).order_by(GoogleDriveAccount.created_at, GoogleDriveAccount.drive_account_id)).all()
+    if not accounts:
         raise HTTPException(status_code=409, detail="Connect a Google Drive account before using the family archive")
-    scopes = set((account.granted_scopes or "").split())
-    if DRIVE_WRITE_SCOPE not in scopes:
+    account = next((candidate for candidate in accounts
+                    if DRIVE_WRITE_SCOPE in set((candidate.granted_scopes or "").split())), None)
+    if account is None:
         raise HTTPException(status_code=409, detail="Reconnect Google Drive and grant archive file access")
     refresh_token = decrypt_refresh_token(account.refresh_token_ciphertext, user_id, account.drive_account_id)
     try:
