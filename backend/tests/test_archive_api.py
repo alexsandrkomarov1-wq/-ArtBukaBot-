@@ -324,7 +324,7 @@ def test_quarantined_media_is_released_only_after_clean_clamav_scan(tmp_path, mo
             output_sha256=cloud_api.sha256_file(output_path),
             source_size=Path(source_path).stat().st_size,
             output_size=Path(output_path).stat().st_size,
-            engine=f"Real-ESRGAN NCNN Vulkan x{scale}",
+            engine=f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image",
             output_width=64, output_height=48,
         )
 
@@ -446,7 +446,7 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
         assert derivative["original_material_id"] == original_material_id
         assert derivative["record_status"] == "available"
         assert derivative["storage_state"] == "verified"
-        assert derivative["engine"] == "Real-ESRGAN NCNN Vulkan x4"
+        assert derivative["engine"] == "Real-ESRGAN NCNN Vulkan x4 + OpenCV + scikit-image"
 
         original_content = client.get(f"/api/v1/archive/items/{original_id}/content", headers=headers)
         derivative_content = client.get(
