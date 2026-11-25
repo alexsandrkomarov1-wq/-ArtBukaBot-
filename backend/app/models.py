@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime, timezone
 import secrets
-from sqlalchemy import DateTime, ForeignKey, String, Text, BigInteger, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, String, Text, BigInteger, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from .database import Base
 
@@ -135,6 +135,7 @@ class EventRecord(Base):
 
 class PlaceRecord(Base):
     __tablename__ = "places"
+    __table_args__ = (CheckConstraint("(latitude IS NULL AND longitude IS NULL) OR (latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180)", name="ck_places_coordinates"),)
     place_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("PL"))
     name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
