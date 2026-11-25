@@ -29,6 +29,11 @@ jobs:
           destination: ./_site
       - name: Check JavaScript syntax
         run: |
+          node --check assets/js/site-3d.js
+          node --check assets/js/ai-world-navigation.js
+          node --check assets/js/registry-client.js
+          node --check assets/js/generations.js
+          node --check assets/js/events-registry.js
           node --check assets/js/family-portraits.js
           node --check assets/js/media-library.js
           node --check assets/js/site-guide.js
@@ -38,6 +43,8 @@ jobs:
           node --check neon/functions/aistatus/index.mjs
       - name: Compile AI media worker syntax
         run: python3 -m py_compile backend/app/ai_media_worker.py
+      - name: Check AI world portal contract
+        run: python3 scripts/check_ai_world.py
       - name: Check media viewer interface contract
         run: python3 scripts/check_media_viewer.py
       - name: Check generated pages and local links
