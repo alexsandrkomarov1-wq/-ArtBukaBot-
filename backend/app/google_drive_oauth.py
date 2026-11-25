@@ -18,7 +18,6 @@ from sqlalchemy.orm import Session
 from .models import AuditEvent, GoogleDriveAccount, GoogleOAuthState, User, new_id, utc_now
 
 DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive"
-DRIVE_METADATA_SCOPE = "https://www.googleapis.com/auth/drive.metadata.readonly"
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_REVOKE_URL = "https://oauth2.googleapis.com/revoke"
@@ -170,7 +169,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
-            "scope": f"{DRIVE_METADATA_SCOPE} {DRIVE_WRITE_SCOPE}",
+            "scope": DRIVE_WRITE_SCOPE,
             "access_type": "offline",
             "prompt": "consent",
             "include_granted_scopes": "true",
@@ -243,7 +242,7 @@ def build_google_drive_router(get_db, require_current_user) -> APIRouter:
                 status_code=502,
                 detail="Google did not return offline credentials; reconnect and grant consent",
             )
-        if DRIVE_METADATA_SCOPE not in granted_scopes or DRIVE_WRITE_SCOPE not in granted_scopes:
+        if DRIVE_WRITE_SCOPE not in granted_scopes:
             raise HTTPException(status_code=403, detail="Google did not grant the required Drive archive read/write scopes")
 
         about = _google_about(access_token)
