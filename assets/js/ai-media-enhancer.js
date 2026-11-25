@@ -108,7 +108,7 @@
     } else {
       originalVideo.src = sourceUrl;
       originalVideo.hidden = false;
-      mode.textContent = "ОРИГИНАЛ ПРОВЕРЯЕТСЯ";
+      mode.textContent = accessToken ? "ОРИГИНАЛ ОТПРАВЛЯЕТСЯ В КАРАНТИН" : "ЛОКАЛЬНАЯ ПРОВЕРКА ОРИГИНАЛА";
     }
     info.textContent = file.name + " · " + formatBytes(file.size) + " · " + (file.type || "тип не определён");
     reset.disabled = false;
