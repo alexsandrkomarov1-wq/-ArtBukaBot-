@@ -204,5 +204,5 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}"></script>
 
-<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=e56d286"></script>
+<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-aiworld-1"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
