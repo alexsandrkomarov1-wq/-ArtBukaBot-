@@ -110,6 +110,9 @@
       }
       if (!recommendations.length) recommendations.push("Явных проблем по базовым показателям не обнаружено. Можно оставить оригинал без изменений или выполнить экспертную проверку.");
       recommendations.push("Колоризацию, удаление царапин и генеративное восстановление выполнять только по отдельному выбору.");
+    } catch (_) {
+      facts.push("Размер изображения подтверждён по файлу, но браузер не смог декодировать пиксели.");
+      recommendations.push("Для этого формата нужна серверная конвертация и проверка. Визуальная оценка качества не выполнена.");
     } finally {
       if (bitmap) bitmap.close();
     }
@@ -175,7 +178,14 @@
       const facts = ["Тип: " + (kindByExtension === "photo" ? "фотография" : "видеозапись"), "Формат: ." + extension, "Размер файла: " + formatSize(file.size), "Сигнатура файла соответствует поддерживаемому типу."];
       const recommendations = [];
       if (kindByExtension === "photo") await inspectImage(file, recommendations, facts);
-      else await inspectVideo(file, recommendations, facts);
+      else {
+        try {
+          await inspectVideo(file, recommendations, facts);
+        } catch (error) {
+          facts.push("Формат и сигнатура файла проверены; браузер не смог прочитать видеометаданные.");
+          recommendations.push("Для анализа разрешения, кадров, стабилизации и аудиосинхронизации нужен серверный медиапроцессор.");
+        }
+      }
       if (run !== generation) return;
       renderResult(file, kindByExtension, facts, recommendations);
     } catch (error) {
