@@ -161,6 +161,10 @@
   }
 
   function listen() {
+    try {
+      audio();
+      void audioContext.resume();
+    } catch (_) {}
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       status.textContent = "Голосовое управление недоступно в этом браузере. Используйте кнопки настроения.";
