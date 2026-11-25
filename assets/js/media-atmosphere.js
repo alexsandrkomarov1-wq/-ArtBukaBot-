@@ -184,7 +184,13 @@
       voiceButton.disabled = false;
       voiceButton.textContent = "🎙 Голосовой помощник";
     };
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (error) {
+      voiceButton.disabled = false;
+      voiceButton.textContent = "🎙 Голосовой помощник";
+      status.textContent = "Не удалось запустить микрофон: " + error.message;
+    }
   }
 
   sceneButtons.forEach(button => button.addEventListener("click", () => setScene(button.dataset.sceneChoice)));
