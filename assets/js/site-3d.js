@@ -303,6 +303,11 @@
       const replacementCanvas = createCanvas();
       canvas.replaceWith(replacementCanvas);
       canvas = replacementCanvas;
+      canvas.addEventListener("webglcontextlost", (event) => {
+        event.preventDefault();
+        if (renderer) renderer.setAnimationLoop(null);
+        fallback();
+      }, { once: true });
       try {
         const replacementRenderer = new THREE.WebGLRenderer({
           canvas,
