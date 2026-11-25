@@ -18,10 +18,10 @@ description: Проверяемое состояние модулей KOMAROVA_C
 </div>
 <section class="status-list" aria-label="Статус модулей">
 <article class="status-card">
-  <div class="status-card-heading"><span class="status-pill status-red">КРАСНЫЙ</span><span class="status-index">01</span></div>
+  <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">01</span></div>
   <h2>Единое файловое хранилище</h2>
-  <p>Фото, видео, документы и аудио. Отдельного хранилища оригиналов, загрузки и выдачи файлов пока нет.</p>
-  <p class="status-evidence">Подтверждение: в текущем дереве backend нет модуля object/file storage.</p>
+  <p>В development backend есть приватный storage-слой, приём фото и видео, карантин, SHA-256, отдельные MATERIAL-ID и потоковая выдача проверенных файлов. Поддерживаются локальный приватный provider и S3-совместимый интерфейс.</p>
+  <p class="status-evidence">Частный backend и постоянное хранилище ещё не развёрнуты. Публичная витрина не получает доступ к семейным файлам.</p>
 </article>
 <article class="status-card">
   <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">02</span></div>
@@ -103,17 +103,17 @@ description: Проверяемое состояние модулей KOMAROVA_C
 <article class="status-card">
   <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">09</span></div>
   <h2>Закрытый приём фото и видео</h2>
-  <p>В development backend добавлен аутентифицированный API приёма фотографий и видео в локальную закрытую карантинную область. Реестр сохраняет ARCHIVE-ID, MIME по сигнатуре, размер, SHA-256 и связь с существующим PERSON-ID. Дубликаты по точному SHA-256 не создают вторую запись.</p>
-  <p>Материалы остаются в карантине. Антивирусная проверка, безопасная обработка/превью, скачивание, облачное хранилище, закрытый браузерный кабинет и production-развёртывание не реализованы. API не подключён к публичному GitHub Pages.</p>
-  <p class="status-evidence">Проверено: commit 71621ae672e48da0f483209c8cec3ede2d3f5ed4; backend tests run 45256506119 (50 passed), Pages build run 45256506241 и deployment run 45256505002: success; публичные /status/, /media/ и главная отвечают HTTP 200. Сам backend не развёрнут как частный сервис.</p>
+  <p>В development backend реализованы защищённые маршруты приёма файлов в карантин, проверка ClamAV, выдача только проверенных материалов, потоковое получение содержимого и создание отдельной производной копии. Реестр сохраняет ARCHIVE-ID, MATERIAL-ID, MIME по сигнатуре, размер, SHA-256 и связь с PERSON-ID. Дубликаты по точному SHA-256 не создают вторую запись.</p>
+  <p>Маршруты и код worker существуют, но их работа зависит от установленного ClamAV, Real-ESRGAN NCNN Vulkan, файлов модели и частного storage. Частный backend не развёрнут и не подключён к публичному GitHub Pages. Поэтому живой AI MEDIA сейчас выполняет локальный предпросмотр и SHA-256, но не серверное сканирование или улучшение.</p>
+  <p class="status-evidence">Подтверждение реализации: backend/app/cloud_archive_api.py, backend/app/ai_media_worker.py и тесты backend. Production-запуск и обработка реального семейного файла не подтверждены.</p>
 </article>
 
 
 <article class="status-card">
   <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">10</span></div>
   <h2>Ориентация и адаптация медиа</h2>
-  <p>Добавлены development-утилиты: EXIF-aware WebP derivative через Pillow и видео-нормализация через FFmpeg/FFprobe с автоматическим применением метаданных поворота. Оригиналы не изменяются; обработка требует подтверждённого чистого результата антивирусной проверки.</p>
-  <p>Проверено на commit 0ae629fa6fa7cd04db25886f9c55a24cdfe13cc0: backend tests run 45261437713 (62 passed), Pages build 45261437541 и deployment 45261437190: success. Live /media/ и /status/ отвечают HTTP 200. Утилиты пока не подключены к загрузке и фоновой очереди. Нет антивирусного сканера, реестра производных файлов и защищённой выдачи превью. Реальные фото/ролики на устройстве ещё не проверялись.</p>
+  <p>EXIF-aware подготовка изображений и видео-конвейер FFmpeg/FFprobe используются в development worker. AI-фото обрабатывается Real-ESRGAN x4, видео x2; производная версия сканируется и получает отдельный MATERIAL-ID со ссылкой на оригинал. Исходник не перезаписывается.</p>
+  <p>Это серверная реализация в репозитории, а не доступная функция публичного сайта: частный worker, ClamAV и модели не развёрнуты. Локальный предпросмотр в браузере не считается AI-обработкой.</p>
 </article>
 <article class="status-card">
   <div class="status-card-heading"><span class="status-pill status-green">РАБОТАЕТ</span><span class="status-index">11</span></div>
@@ -129,3 +129,11 @@ description: Проверяемое состояние модулей KOMAROVA_C
   <p>Neon AI Gateway включён на рабочей ветке <code>production</code>; на ветке существует credential с правом <code>ai_gateway:invoke</code>. Подключение проверено через Neon Function: запрос каталога <code>/v1/models</code> вернул HTTP 200.</p>
   <p>На момент проверки все доступные модели возвращают <code>enabled: false</code> и <code>paid_plan_required</code>. На бесплатном тарифе Neon для вызова моделей нужны платёжная карта и предоплаченные AI-кредиты. Ни одного inference-запроса и обработки семейного файла не выполнялось. Развёртывание прикладного обработчика, авторизация сайта и медиаархив остаются отдельными этапами.</p>
 </article>
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">13</span></div>
+  <h2>AI MEDIA ENHANCER · интерфейс и worker</h2>
+  <p>На главной работают выбор фото/видео, локальный предпросмотр оригинала, проверка типа и размера, SHA-256, переключение природных сцен, музыкальные режимы, голосовые команды и экспорт только реального результата. Добавлено ручное подключение частного API с пустым полем пароля; токен хранится только в памяти страницы.</p>
+  <p>ClamAV и Real-ESRGAN x4/x2 доступны в коде development backend, но на опубликованном сайте пока не запускаются: частный API/worker не развёрнут. Кнопка экспорта остаётся выключенной, пока сервер не вернёт настоящую проверенную копию.</p>
+  <p class="status-evidence">Проверки: scripts/check_ai_media_lab.py, JavaScript syntax, backend tests и GitHub Pages build/deploy. Статус жёлтый до реального развёртывания и runtime-теста ClamAV/Real-ESRGAN.</p>
+</article>
+
