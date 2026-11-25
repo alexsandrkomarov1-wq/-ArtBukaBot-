@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime, timezone
 import secrets
-from sqlalchemy import DateTime, ForeignKey, String, Text, BigInteger, UniqueConstraint, CheckConstraint
+from sqlalchemy import DateTime, ForeignKey, String, Text, BigInteger, UniqueConstraint, CheckConstraint, Float
 from sqlalchemy.orm import Mapped, mapped_column
 from .database import Base
 
@@ -139,8 +139,8 @@ class PlaceRecord(Base):
     place_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("PL"))
     name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    latitude: Mapped[float | None] = mapped_column(nullable=True)
-    longitude: Mapped[float | None] = mapped_column(nullable=True)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
