@@ -97,6 +97,21 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div><span>03 / EXPORT</span><strong>При выгрузке</strong><p>Подготовить улучшенную копию для скачивания или публикации.</p></div>
   </div>
 
+  <div class="ai-media-upload-check" aria-labelledby="ai-media-upload-title">
+    <div class="ai-media-upload-copy">
+      <span class="ai-media-upload-kicker">01 / UPLOAD · ПРОВЕРКА ФАЙЛА</span>
+      <h3 id="ai-media-upload-title">Проверить фотографию или видео</h3>
+      <p>Выберите один файл. Система автоматически проверит формат, целостность сигнатуры и доступные технические показатели, затем предложит подходящие действия.</p>
+    </div>
+    <label class="ai-media-upload-button" for="ai-media-file">Выбрать файл для проверки</label>
+    <input id="ai-media-file" class="ai-media-upload-input" type="file" accept=".jpg,.jpeg,.png,.gif,.webp,.tif,.tiff,.bmp,.heic,.heif,.mp4,.m4v,.mov,.avi,.mkv,.webm,.3gp,image/*,video/*" aria-describedby="ai-media-upload-note">
+    <p id="ai-media-upload-note" class="ai-media-upload-note">Проверка выполняется локально в браузере. Файл не отправляется на сервер и не сохраняется в Google Drive или архиве.</p>
+    <p id="ai-media-check-status" class="ai-media-check-status" role="status" aria-live="polite">Файл ещё не выбран.</p>
+    <div id="ai-media-check-result" class="ai-media-check-result" hidden>
+      <div id="ai-media-check-details" class="ai-media-check-details"></div>
+    </div>
+  </div>
+
   <div class="ai-media-tools">
     <article><span>PHOTO RESTORATION</span><h3>Фотографии</h3><p>Повышение разрешения до 2K/4K, устранение размытия и шума, восстановление царапин, коррекция цвета и колоризация по запросу.</p></article>
     <article><span>VIDEO ENHANCEMENT</span><h3>Видео</h3><p>Повышение разрешения, стабилизация, уменьшение шума и артефактов, коррекция цвета, очистка звука и проверка синхронизации.</p></article>
