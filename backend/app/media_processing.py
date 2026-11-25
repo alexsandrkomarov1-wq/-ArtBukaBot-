@@ -140,7 +140,7 @@ def _probe_video(path: Path) -> dict:
     ffprobe = shutil.which("ffprobe")
     if not ffprobe:
         raise RuntimeError("FFprobe is required for video validation")
-    result = _run([ffprobe, "-v", "error", "-show_streams", "-show_format", "-of", "json", str(path)], 30)
+    result = _run([ffprobe, "-v", "error", "-show_streams", "-show_format", "-of", "json", str(path)], timeout=30)
     try:
         payload = json.loads(result.stdout)
         stream = next(s for s in payload["streams"] if s.get("codec_type") == "video")
@@ -220,7 +220,7 @@ def normalize_video(source_path: str | Path, output_path: str | Path, *, scanner
             "-vf", "hqdn3d=1.2:1.2:4:4,eq=contrast=1.04:saturation=1.04,unsharp=5:5:0.35:3:3:0.0",
             "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p",
             "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(temporary),
-        ], 900)
+        ], timeout=900)
 
         # OpenCV adds a separate frame-level local contrast, denoise and sharpening pass.
         try:
@@ -232,7 +232,7 @@ def normalize_video(source_path: str | Path, output_path: str | Path, *, scanner
                     "-c:v", "libx264", "-preset", "medium", "-crf", "19",
                     "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
                     "-movflags", "+faststart", str(muxed),
-                ], 900)
+                ], timeout=900)
                 muxed.replace(temporary)
         finally:
             opencv_pass.unlink(missing_ok=True)
