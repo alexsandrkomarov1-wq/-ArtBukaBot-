@@ -131,10 +131,10 @@ class ArchiveItemRead(BaseModel):
     archive_item_id: str
     item_type: Literal["photo", "video"]
     title: str | None
-    record_status: Literal["quarantined"]
+    record_status: Literal["quarantined", "available", "infected"]
     original_filename: str
     detected_mime_type: str
     size_bytes: int
     sha256: str
-    storage_state: Literal["quarantined"]
+    storage_state: Literal["quarantined", "verified", "infected"]
     created_at: datetime

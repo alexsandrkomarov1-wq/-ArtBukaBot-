@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 from urllib.parse import quote
@@ -67,12 +69,12 @@ def _item_payload(item: ArchiveItem, blob: StoredBlob) -> dict:
         "archive_item_id": item.archive_item_id,
         "item_type": item.item_type,
         "title": item.title,
-        "record_status": "quarantined",
+        "record_status": item.record_status,
         "original_filename": blob.original_filename,
         "detected_mime_type": blob.detected_mime_type,
         "size_bytes": blob.size_bytes,
         "sha256": blob.sha256,
-        "storage_state": "quarantined",
+        "storage_state": blob.storage_state,
         "created_at": item.created_at,
     }
 
@@ -209,6 +211,85 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                     pass
             await file.close()
 
+    @router.post("/items/{archive_item_id}/scan")
+    def scan_quarantined_item(
+        archive_item_id: str,
+        db: Session = Depends(get_db),
+        actor: User = Depends(require_roles("owner", "moderator")),
+    ):
+        """Scan the quarantined original with ClamAV; fail closed if scanner is unavailable."""
+        row = db.execute(
+            select(ArchiveItem, StoredBlob)
+            .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
+            .where(ArchiveItem.archive_item_id == archive_item_id)
+        ).first()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Archive item not found")
+        item, blob = row
+        if item.record_status != "quarantined" or blob.storage_state != "quarantined":
+            raise HTTPException(status_code=409, detail="Only quarantined media can be scanned")
+
+        scanner = shutil.which(os.getenv("CORE_CLAMDSCAN_BINARY", "clamdscan"))
+        if not scanner:
+            raise HTTPException(status_code=503, detail="ClamAV scanner is unavailable; media remains quarantined")
+
+        descriptor, temp_name = tempfile.mkstemp(prefix="core-scan-", suffix=Path(blob.original_filename).suffix, dir=intake_root)
+        temp_path = Path(temp_name)
+        digest = hashlib.sha256()
+        size = 0
+        try:
+            os.close(descriptor)
+            chunks, expected_length, _ = storage.open_stream(blob.storage_object_key)
+            with temp_path.open("wb") as output:
+                for chunk in chunks:
+                    size += len(chunk)
+                    digest.update(chunk)
+                    output.write(chunk)
+                output.flush()
+                os.fsync(output.fileno())
+            if size != expected_length or size != blob.size_bytes or digest.hexdigest() != blob.sha256:
+                raise HTTPException(status_code=502, detail="Stored media integrity check failed; item remains quarantined")
+            try:
+                result = subprocess.run(
+                    [scanner, "--no-summary", str(temp_path)],
+                    check=False, capture_output=True, text=True, timeout=180, shell=False,
+                )
+            except (OSError, subprocess.TimeoutExpired):
+                raise HTTPException(status_code=503, detail="ClamAV scan could not complete; item remains quarantined")
+
+            if result.returncode == 0:
+                item.record_status = "available"
+                blob.storage_state = "verified"
+                scan_status = "clean"
+            elif result.returncode == 1:
+                item.record_status = "infected"
+                blob.storage_state = "infected"
+                scan_status = "infected"
+            else:
+                raise HTTPException(status_code=503, detail="ClamAV scan failed; item remains quarantined")
+
+            db.add(AuditEvent(
+                event_type="archive.malware_scan_completed",
+                entity_type="archive_item",
+                entity_id=item.archive_item_id,
+                actor_id=actor.user_id,
+                details=json.dumps({
+                    "blob_id": blob.blob_id,
+                    "sha256": blob.sha256,
+                    "scanner": "ClamAV",
+                    "scan_status": scan_status,
+                }, ensure_ascii=False),
+            ))
+            db.commit()
+            return {
+                "archive_item_id": item.archive_item_id,
+                "scan_status": scan_status,
+                "record_status": item.record_status,
+                "storage_state": blob.storage_state,
+            }
+        finally:
+            temp_path.unlink(missing_ok=True)
+
     @router.get("/items", response_model=list[ArchiveItemRead])
     def list_archive_items(
         limit: int = 50, offset: int = 0,
@@ -220,7 +301,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         rows = db.execute(
             select(ArchiveItem, StoredBlob)
             .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
-            .where(ArchiveItem.record_status == "quarantined")
+            .where(ArchiveItem.record_status.in_(["quarantined", "available", "infected"]))
             .order_by(ArchiveItem.created_at.desc(), ArchiveItem.archive_item_id)
             .limit(limit).offset(offset)
         ).all()
@@ -235,7 +316,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             select(ArchiveItem, StoredBlob)
             .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
             .where(ArchiveItem.archive_item_id == archive_item_id,
-                   ArchiveItem.record_status == "quarantined")
+                   ArchiveItem.record_status.in_(["quarantined", "available", "infected"]))
         ).first()
         if row is None:
             raise HTTPException(status_code=404, detail="Archive item not found")
