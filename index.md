@@ -82,11 +82,11 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     </div>
     <form class="ai-media-connect" data-ai-connect-form>
       <div class="ai-media-connect-heading"><strong>ПОДКЛЮЧЕНИЕ ЧАСТНОГО BACKEND</strong><span>HTTPS · пароль не сохраняется</span></div>
-      <label>Адрес API<input data-ai-api-url type="url" value="https://komarova-core-api.onrender.com" autocomplete="url" required></label>
+      <label>Адрес API<input data-ai-api-url type="url" placeholder="https://адрес-частного-api" autocomplete="url" required></label>
       <label>Логин<input data-ai-username type="text" autocomplete="username" required></label>
       <label>Пароль<input data-ai-password type="password" autocomplete="off" required></label>
       <button type="submit" class="ai-media-button ai-media-button-primary" data-ai-connect-submit>Подключить частный worker</button>
-      <p class="ai-media-live-status" data-ai-backend-status role="status" aria-live="polite">Backend пока не подключён. Поле пароля пустое: введите его вручную. Без успешного входа файл не отправляется на сервер.</p>
+      <p class="ai-media-live-status" data-ai-backend-status role="status" aria-live="polite">Частный backend пока не развёрнут. Адрес API указывается после публикации сервиса. Поле пароля пустое: ввод вручную. Без успешного входа файл не отправляется на сервер.</p>
     </form>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
