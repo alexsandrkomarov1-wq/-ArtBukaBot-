@@ -13,6 +13,9 @@
   const status = $("cloud-archive-status");
   const connection = $("cloud-connection-state");
   const headers = () => token ? { Authorization: "Bearer " + token } : {};
+  const friendlyError = error => error instanceof TypeError
+    ? "частный backend недоступен; проверьте адрес API, HTTPS и CORS"
+    : (error && error.message ? error.message : "запрос не выполнен");
   const setStatus = (message, error = false) => {
     status.textContent = message;
     status.dataset.state = error ? "error" : "ok";
@@ -143,7 +146,7 @@
         $("cloud-preview-image").alt = item.original_filename;
       }
       setStatus("Файл получен из приватного uploads и открыт в просмотрщике.");
-    } catch (error) { setStatus("Не удалось открыть файл: " + error.message, true); }
+    } catch (error) { setStatus("Не удалось открыть файл: " + friendlyError(error), true); }
   }
   $("cloud-login-form").addEventListener("submit", async event => {
     event.preventDefault();
@@ -203,7 +206,7 @@
       $("cloud-upload-form").reset();
       await loadArchive();
       setStatus("Загрузка завершена. Материал сохранён в карантине; просмотр станет доступен после проверки.");
-    } catch (error) { setStatus("Загрузка не выполнена: " + error.message, true); }
+    } catch (error) { setStatus("Загрузка не выполнена: " + friendlyError(error), true); }
   });
   $("cloud-logout").addEventListener("click", async () => {
     try { await request("/api/v1/auth/logout", { method: "POST" }); } catch (_) {}
