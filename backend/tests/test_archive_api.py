@@ -405,6 +405,7 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
 
     def fake_realesrgan(source_path, output_path, *, scale):
         from PIL import Image
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         Image.new("RGB", (64, 48), (180, 205, 225)).save(output_path, format="PNG")
         return SimpleNamespace(
             output_path=str(output_path), output_mime="image/png",
@@ -412,7 +413,7 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
             output_sha256=cloud_api.sha256_file(output_path),
             source_size=Path(source_path).stat().st_size,
             output_size=Path(output_path).stat().st_size,
-            engine=f"Real-ESRGAN NCNN Vulkan x{scale}",
+            engine=f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image",
             output_width=64, output_height=48,
         )
 
