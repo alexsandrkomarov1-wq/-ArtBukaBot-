@@ -51,6 +51,62 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
   <p class="family-portraits-note">Фотографии и имена не подставляются автоматически. Загрузка, выбор главного портрета, замена и отзыв разрешения будут доступны в закрытом кабинете после подключения защищённого хранилища и авторизации.</p>
 </section>
+
+<section class="ai-media-lab" id="ai-media-enhancer" aria-labelledby="ai-media-title">
+  <div class="ai-media-heading">
+    <div>
+      <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
+      <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
+      <p class="ai-media-lead">ИИ-лаборатория для восстановления старых фотографий и видеозаписей. Проверяем качество, улучшаем копии и сохраняем семейные оригиналы без изменений.</p>
+    </div>
+    <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
+  </div>
+
+  <div class="ai-media-before-after" aria-label="Демонстрация фотографии до и после улучшения">
+    <figure class="ai-media-photo">
+      <div class="ai-media-photo-frame ai-media-original">
+        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=85" alt="Демонстрационная семейная фотография до восстановления" loading="lazy">
+        <span class="ai-media-tag">ДО</span>
+      </div>
+      <figcaption><strong>Оригинал</strong><span>Неизменяемый исходный файл</span></figcaption>
+    </figure>
+    <figure class="ai-media-photo">
+      <div class="ai-media-photo-frame ai-media-enhanced">
+        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=85" alt="Демонстрационная визуальная коррекция семейной фотографии" loading="lazy">
+        <span class="ai-media-tag ai-media-tag-after">ПОСЛЕ · ДЕМО</span>
+      </div>
+      <figcaption><strong>Улучшенная копия</strong><span>Пример отображения результата</span></figcaption>
+    </figure>
+  </div>
+
+  <div class="ai-media-motion" aria-label="Зацикленная анимация сканирования и восстановления изображения">
+    <div class="ai-media-motion-head"><span>КАК ПРОИСХОДИТ ВОССТАНОВЛЕНИЕ</span><span class="ai-media-loop"><i></i> АНИМАЦИЯ · 9 СЕКУНД</span></div>
+    <div class="ai-media-motion-stage">
+      <img class="ai-media-motion-base" src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="" loading="lazy">
+      <div class="ai-media-motion-reveal"><img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="" loading="lazy"></div>
+      <span class="ai-media-motion-line" aria-hidden="true"></span>
+      <span class="ai-media-motion-label ai-media-motion-left">ИСХОДНИК</span>
+      <span class="ai-media-motion-label ai-media-motion-right">УЛУЧШЕННАЯ КОПИЯ</span>
+    </div>
+    <p class="ai-media-motion-note"><strong>Сканирование и постепенное проявление результата.</strong> Это демонстрационная CSS-анимация интерфейса, а не настоящее видео и не результат обработки нейросетью.</p>
+  </div>
+
+  <div class="ai-media-actions" aria-label="Предусмотренные действия модуля">
+    <div><span>01 / UPLOAD</span><strong>При загрузке</strong><p>Автоматически проверить файл и предложить улучшение.</p></div>
+    <div><span>02 / VIEW</span><strong>При просмотре</strong><p>Запустить ИИ-обработку выбранной фотографии или видеозаписи.</p></div>
+    <div><span>03 / EXPORT</span><strong>При выгрузке</strong><p>Подготовить улучшенную копию для скачивания или публикации.</p></div>
+  </div>
+
+  <div class="ai-media-tools">
+    <article><span>PHOTO RESTORATION</span><h3>Фотографии</h3><p>Повышение разрешения до 2K/4K, устранение размытия и шума, восстановление царапин, коррекция цвета и колоризация по запросу.</p></article>
+    <article><span>VIDEO ENHANCEMENT</span><h3>Видео</h3><p>Повышение разрешения, стабилизация, уменьшение шума и артефактов, коррекция цвета, очистка звука и проверка синхронизации.</p></article>
+    <article><span>ARCHIVE PROTECTION</span><h3>Защита архива</h3><p>Оригинал не перезаписывается. Каждая улучшенная версия получает собственный MATERIAL-ID и историю обработки.</p></article>
+  </div>
+
+  <div class="ai-media-principle"><strong>Оригинал сохраняем. Качество улучшаем на копиях. Историю изменений не теряем.</strong><span>ПРЕДПРОСМОТР ИНТЕРФЕЙСА · ИИ-ПРОВАЙДЕР НЕ ПОДКЛЮЧЁН</span></div>
+  <p class="ai-media-footnote">Демонстрационные изображения используются только для показа интерфейса. Правая фотография и анимация имитируют визуальное сравнение с помощью CSS-фильтров; фактическая ИИ-обработка пока не реализована.</p>
+</section>
+
 <section class="section-intro" id="archive-directions">
   <div><p class="eyebrow">СОДЕРЖАНИЕ АРХИВА</p><h2>Не просто страницы.<br><em>Связанные истории.</em></h2></div>
   <p>Каждый материал в будущем будет связан с людьми, датами, событиями, местами и источниками. Так отдельные документы складываются в общую картину.</p>
