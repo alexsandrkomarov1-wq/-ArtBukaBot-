@@ -36,6 +36,5 @@ assert "WebGLRenderer" in SCENE
 assert "3D-графика недоступна" in SCENE
 assert "порталы и разделы остаются активны" in SCENE
 assert "site-3d.js" in HOME and "ai-world-navigation.js" in HOME
-assert "main" not in (ROOT / ".gitignore").read_text(encoding="utf-8").lower() or True
 
 print(f"AI world portal contract passed: {len(required_portals) + 1} portals/actions and {len(required_pages)} route files.")
