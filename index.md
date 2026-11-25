@@ -78,10 +78,22 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
-    <div class="ai-media-controls">
-      <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload><span>01 / UPLOAD</span><strong>Выбрать фото или видео</strong><small>Локальный выбор с устройства · до 100 МБ</small></button>
-      <button class="ai-media-button" type="button" data-ai-view disabled><span>02 / VIEW</span><strong>Проверить доступность ИИ</strong><small>Проверка сервера и выбранного файла · без отправки файла</small></button>
-      <button class="ai-media-button" type="button" data-ai-export disabled><span>03 / EXPORT</span><strong>Экспорт результата</strong><small>Откроется только после настоящей обработки и проверки копии</small></button>
+    <div class="ai-media-controls" aria-label="Этапы работы с материалом">
+      <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
+        <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
+        <strong class="ai-media-action-title">Выбрать фото или видео</strong>
+        <small class="ai-media-action-note">Локальный выбор с устройства · до 100 МБ</small>
+      </button>
+      <button class="ai-media-button" type="button" data-ai-view disabled>
+        <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
+        <strong class="ai-media-action-title">Проверить доступность ИИ</strong>
+        <small class="ai-media-action-note">Проверка сервера и выбранного файла · без отправки файла</small>
+      </button>
+      <button class="ai-media-button" type="button" data-ai-export disabled>
+        <span class="ai-media-step">03 <span aria-hidden="true">/</span> EXPORT</span>
+        <strong class="ai-media-action-title">Экспорт результата</strong>
+        <small class="ai-media-action-note">Откроется только после настоящей обработки и проверки копии</small>
+      </button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
     <div class="ai-media-live-preview">
