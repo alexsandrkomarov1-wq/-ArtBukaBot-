@@ -11,13 +11,19 @@
     (navigator.connection && navigator.connection.saveData);
   const canvas = document.createElement("canvas");
   canvas.className = "site-3d-canvas";
-  canvas.setAttribute("aria-label", "Трёхмерный зал цифрового семейного музея с центральным архивным ядром и галереей памяти");
+  canvas.setAttribute("aria-label", "Трёхмерный интерактивный мир KOMAROVA_CORE с центральным ядром и порталами проектов");
   canvas.setAttribute("role", "img");
   host.prepend(canvas);
+
+  const setRenderStatus = (label) => {
+    const status = document.querySelector("[data-world-render-status]");
+    if (status) status.textContent = label;
+  };
 
   const fallback = () => {
     canvas.hidden = true;
     host.classList.add("site-3d-fallback");
+    setRenderStatus("3D-графика недоступна · порталы и разделы остаются активны");
   };
 
   import("https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js").then((THREE) => {
@@ -35,6 +41,7 @@
       return;
     }
 
+    setRenderStatus("3D-сцена запущена · аппаратное ускорение WebGL");
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.45));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
