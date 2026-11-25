@@ -302,3 +302,75 @@ def test_upload_does_not_overwrite_an_existing_content_addressed_object(tmp_path
         assert stored_files[0].read_bytes() == b"pre-existing-object"
         assert client.get("/api/v1/archive/items", headers=auth(token)).json() == []
         assert not list((tmp_path / "private-media").rglob("*.part"))
+
+
+def test_quarantined_media_is_released_only_after_clean_clamav_scan(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    import backend.app.cloud_archive_api as cloud_api
+
+    monkeypatch.setattr(cloud_api.shutil, "which", lambda _: "/usr/bin/clamdscan")
+    monkeypatch.setattr(
+        cloud_api.subprocess, "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="OK", stderr=""),
+    )
+    with make_client(tmp_path) as client:
+        token = owner_token(client)
+        headers = auth(token)
+        uploaded = client.post(
+            "/api/v1/archive/items", headers=headers,
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        assert uploaded.status_code == 201
+        item_id = uploaded.json()["archive_item_id"]
+        assert uploaded.json()["record_status"] == "quarantined"
+        assert client.get(f"/api/v1/archive/items/{item_id}/content", headers=headers).status_code == 423
+
+        scanned = client.post(f"/api/v1/archive/items/{item_id}/scan", headers=headers)
+        assert scanned.status_code == 200, scanned.text
+        assert scanned.json()["scan_status"] == "clean"
+        assert scanned.json()["record_status"] == "available"
+        assert scanned.json()["storage_state"] == "verified"
+        content = client.get(f"/api/v1/archive/items/{item_id}/content", headers=headers)
+        assert content.status_code == 200
+        assert content.content == jpeg_fixture()
+
+
+def test_clamav_unavailable_keeps_media_in_quarantine(tmp_path, monkeypatch):
+    import backend.app.cloud_archive_api as cloud_api
+
+    monkeypatch.setattr(cloud_api.shutil, "which", lambda _: None)
+    with make_client(tmp_path) as client:
+        token = owner_token(client)
+        headers = auth(token)
+        uploaded = client.post(
+            "/api/v1/archive/items", headers=headers,
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        item_id = uploaded.json()["archive_item_id"]
+        response = client.post(f"/api/v1/archive/items/{item_id}/scan", headers=headers)
+        assert response.status_code == 503
+        assert client.get(f"/api/v1/archive/items/{item_id}/content", headers=headers).status_code == 423
+
+
+def test_clamav_detected_infected_media_is_never_released(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    import backend.app.cloud_archive_api as cloud_api
+
+    monkeypatch.setattr(cloud_api.shutil, "which", lambda _: "/usr/bin/clamdscan")
+    monkeypatch.setattr(
+        cloud_api.subprocess, "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=1, stdout="FOUND", stderr=""),
+    )
+    with make_client(tmp_path) as client:
+        token = owner_token(client)
+        headers = auth(token)
+        uploaded = client.post(
+            "/api/v1/archive/items", headers=headers,
+            files={"file": ("family.jpg", jpeg_fixture(), "image/jpeg")},
+        )
+        item_id = uploaded.json()["archive_item_id"]
+        response = client.post(f"/api/v1/archive/items/{item_id}/scan", headers=headers)
+        assert response.status_code == 200
+        assert response.json()["scan_status"] == "infected"
+        assert response.json()["record_status"] == "infected"
+        assert client.get(f"/api/v1/archive/items/{item_id}/content", headers=headers).status_code == 423
