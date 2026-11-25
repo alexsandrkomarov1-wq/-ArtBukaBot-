@@ -3,9 +3,11 @@
 ## Implemented worker primitives
 
 - backend/app/ai_media_worker.py provides fail-closed ClamAV scanning,
-  Real-ESRGAN NCNN Vulkan neural super-resolution for photos (default 4×),
-  frame-by-frame Real-ESRGAN inference for video (default 2×), FFmpeg muxing,
-  SHA-256 calculation, dimension verification, and strict source/output path inequality.
+  Pillow-safe EXIF-aware preparation, Real-ESRGAN NCNN Vulkan neural super-resolution
+  for photos (default 4×), OpenCV + scikit-image contrast/denoise/detail finishing,
+  restrained Pillow brightness/color correction, frame-by-frame Real-ESRGAN
+  inference for video (default 2×), FFmpeg muxing, SHA-256 calculation,
+  dimension verification, and strict source/output path inequality.
 - The authenticated archive enhancement route invokes this AI worker only
   after the original has passed ClamAV and its stored checksum is verified.
 - The worker never writes to the original path. The derivative is scanned,
