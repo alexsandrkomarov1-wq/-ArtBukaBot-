@@ -14,12 +14,12 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <a class="text-link" href="https://archive.org/" target="_blank" rel="noopener noreferrer">Internet Archive <span aria-hidden="true">↗</span></a>
     </div>
   </div>
-  <div class="hero-art" aria-label="Графическая композиция семейного архива">
+  <a class="hero-art hero-art-link" href="#archive-directions" aria-label="Открыть навигацию по коллекции 01: семейный архив, поколения, события, места, фотографии и документы">
     <div class="archive-stamp"><span>СЕМЕЙНЫЙ</span><strong>АРХИВ</strong><span>ИСТОРИЯ · ПАМЯТЬ · СВЯЗЬ</span></div>
-    <div class="archive-index"><span>КОЛЛЕКЦИЯ</span><strong>01</strong><span>KOMAROVA_CORE</span></div>
+    <div class="archive-index"><span>КОЛЛЕКЦИЯ</span><strong>01</strong><span>KOMAROVA_CORE</span><span class="archive-index-action">ОТКРЫТЬ СОСТАВ КОЛЛЕКЦИИ ↓</span></div>
     <div class="archive-orbit orbit-one"></div><div class="archive-orbit orbit-two"></div>
     <span class="archive-year">MEMORIA<br>FAMILIAE</span>
-  </div>
+  </a>
   <div class="hero-foot"><span>СОХРАНЯЯ ПРОШЛОЕ</span><span class="hero-foot-rule"></span><span>СОЗДАЁМ СВЯЗЬ С БУДУЩИМ</span></div>
 </section>
 <section class="family-portraits" aria-labelledby="family-portraits-title">
@@ -109,10 +109,10 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
 <section class="section-intro" id="archive-directions">
   <div><p class="eyebrow">СОДЕРЖАНИЕ АРХИВА</p><h2>Не просто страницы.<br><em>Связанные истории.</em></h2></div>
-  <p>Каждый материал в будущем будет связан с людьми, датами, событиями, местами и источниками. Так отдельные документы складываются в общую картину.</p>
+  <p><strong>Коллекция 01 — семейный архив KOMAROVA_CORE.</strong> Здесь собраны направления, из которых складывается семейная история: поколения и биографии, события и хронология, места и путешествия, фотографии и документы. Выберите раздел ниже, чтобы перейти к соответствующим материалам и инструментам. Каждый материал связывается с людьми, датами, событиями, местами и источниками.</p>
 </section>
 <section class="archive-grid" aria-label="Направления семейного архива">
-  <article class="archive-card archive-card-feature"><span class="card-kicker">01 / ПОКОЛЕНИЯ</span><div class="card-symbol symbol-tree" aria-hidden="true"><span></span><span></span><span></span><i></i></div><h3>История семьи</h3><p>Поколения, биографии, родственные связи и семейная хроника.</p><span class="card-state">ОБЗОР ПРОЕКТА</span></article>
+  <a class="archive-card archive-card-feature archive-card-link" href="{{ '/family-board/' | relative_url }}"><span class="card-kicker">01 / ПОКОЛЕНИЯ</span><div class="card-symbol symbol-tree" aria-hidden="true"><span></span><span></span><span></span><i></i></div><h3>История семьи</h3><p>Поколения, биографии, родственные связи и семейная хроника.</p><span class="card-state">ОТКРЫТЬ ИСТОРИЮ СЕМЬИ ↗</span></a>
   <a class="archive-card archive-card-link" href="{{ '/events/' | relative_url }}"><span class="card-kicker">02 / ВРЕМЯ</span><div class="card-symbol symbol-time" aria-hidden="true"><span></span><span></span><i></i></div><h3>События и хронология</h3><p>Значимые даты, встречи, семейные события и исторический контекст.</p><span class="card-state">ОТКРЫТЬ ХРОНОЛОГИЮ ↗</span></a>
   <a class="archive-card archive-card-link" href="{{ '/family-board/#fb-map-panel' | relative_url }}"><span class="card-kicker">03 / ГЕОГРАФИЯ</span><div class="card-symbol symbol-place" aria-hidden="true"><span></span><i></i></div><h3>Места и путешествия</h3><p>Города, маршруты, дома и места, связанные с семейной историей.</p><span class="card-state">ОТКРЫТЬ КАРТУ ↗</span></a>
   <a class="archive-card archive-card-link" href="{{ '/media/' | relative_url }}"><span class="card-kicker">04 / МЕДИАТЕКА</span><div class="card-symbol symbol-media" aria-hidden="true"><span></span><span></span><i></i></div><h3>Фотографии и документы</h3><p>Оригиналы, описания, источники и проверенные цифровые копии.</p><span class="card-state">ОТКРЫТЬ МЕДИАТЕКУ ↗</span></a>
