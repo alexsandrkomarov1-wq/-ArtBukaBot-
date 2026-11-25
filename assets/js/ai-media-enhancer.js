@@ -192,7 +192,7 @@
         setStage("Ожидается AI video worker", "Real-ESRGAN x2 · FFmpeg · сохранение аудио");
         resultEmpty.textContent = "AI-обработка видео появится после подключения частного worker. Исходник не изменён, фиктивный ролик не создаётся.";
         resultEmpty.hidden = false;
-        status.textContent = "Оригинал видео выбран. Для автоматического улучшения требуется частный backend с Real-ESRGAN, FFmpeg и моделью. Внешний EzEnhancer предназначен для фотографий.";
+        status.textContent = "Оригинал видео выбран. Локально проверены формат, размер и SHA-256; антивирусная проверка ClamAV не запускалась. Для улучшения требуется частный backend с Real-ESRGAN, FFmpeg и моделью.";
         mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
         return;
       }
@@ -202,7 +202,7 @@
       resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-      status.textContent = "Оригинал сохранён без изменений. Для автоматического AI-улучшения требуется подключённый частный backend с Real-ESRGAN и файлами модели. Внешний EzEnhancer доступен отдельно по ссылке ниже.";
+      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался, поскольку публичный сайт не подключён к частному backend. Для AI-улучшения требуется Real-ESRGAN worker и файлы модели. Внешний EzEnhancer доступен отдельно по ссылке ниже.";
       exportButton.disabled = true;
     } catch (error) {
       if (token !== generation) return;
