@@ -5,6 +5,7 @@
   if (!root) return;
 
   const MAX_BYTES = 100 * 1024 * 1024;
+  const STATUS_URL = "https://br-winter-thunder-bd2t0is8-aistatus.compute.c-8.us-east-2.aws.neon.tech/status";
   const input = root.querySelector("[data-ai-file-input]");
   const upload = root.querySelector("[data-ai-upload]");
   const view = root.querySelector("[data-ai-view]");
@@ -15,34 +16,78 @@
   const mode = root.querySelector("[data-ai-mode]");
   const originalImage = root.querySelector("[data-ai-original-preview]");
   const originalVideo = root.querySelector("[data-ai-video-preview]");
-  const resultImage = root.querySelector("[data-ai-result-preview]");
   const originalEmpty = root.querySelector("[data-ai-original-empty]");
   const resultEmpty = root.querySelector("[data-ai-result-empty]");
+  const gatewayState = document.querySelector("[data-ai-gateway-state]");
+  const gatewayMessage = document.querySelector("[data-ai-gateway-message]");
+  const gatewayRefresh = document.querySelector("[data-ai-gateway-refresh]");
 
   let sourceFile = null;
   let sourceUrl = null;
-  let resultUrl = null;
-  let resultBlob = null;
+  let gatewayStatus = null;
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
   }
 
-  function clearResult() {
-    releaseUrl(resultUrl);
-    resultUrl = null;
-    resultBlob = null;
-    resultImage.removeAttribute("src");
-    resultImage.hidden = true;
-    resultEmpty.hidden = false;
-    exportButton.disabled = true;
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + " Б";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " КБ";
+    return (bytes / (1024 * 1024)).toFixed(1) + " МБ";
+  }
+
+  function setGatewayState(label, message, stateClass) {
+    if (gatewayState) {
+      gatewayState.textContent = label;
+      gatewayState.dataset.state = stateClass || "unknown";
+    }
+    if (gatewayMessage) gatewayMessage.textContent = message;
+  }
+
+  async function refreshGatewayStatus() {
+    if (gatewayRefresh) gatewayRefresh.disabled = true;
+    setGatewayState("ПРОВЕРЯЕМ", "Запрашиваем состояние Neon AI Gateway. Файлы не передаются.", "checking");
+    try {
+      const response = await fetch(STATUS_URL, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+        mode: "cors"
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "Сервер статуса вернул ошибку " + response.status);
+      }
+      gatewayStatus = payload;
+      if (payload.model_access === "ready") {
+        setGatewayState("ШЛЮЗ РАБОТАЕТ · МОДЕЛИ ДОСТУПНЫ",
+          "Neon AI Gateway отвечает. Доступно моделей: " + payload.enabled_model_count + ". Серверный обработчик восстановления и архивная регистрация ещё должны пройти отдельную проверку.",
+          "ready");
+      } else if (payload.model_access === "credits_required") {
+        setGatewayState("ШЛЮЗ ПОДКЛЮЧЁН · НУЖНЫ КРЕДИТЫ",
+          "Соединение с Neon AI Gateway подтверждено. Доступных моделей: 0 из " + payload.total_model_count + ". Neon возвращает paid_plan_required: для вызова моделей нужны платёжная карта и предоплаченные AI-кредиты.",
+          "blocked");
+      } else {
+        setGatewayState("ШЛЮЗ ОТВЕЧАЕТ · ПРОВЕРКА НУЖНА",
+          "Сервер отвечает, но не удалось подтвердить доступность модели. Обработка файлов не запускается.",
+          "unknown");
+      }
+      return payload;
+    } catch (error) {
+      gatewayStatus = null;
+      setGatewayState("НЕТ ПОДТВЕРЖДЕНИЯ СОЕДИНЕНИЯ",
+        "Не удалось проверить Neon AI Gateway: " + error.message + ". Исходные файлы не отправлялись.",
+        "error");
+      return null;
+    } finally {
+      if (gatewayRefresh) gatewayRefresh.disabled = false;
+    }
   }
 
   function clearWorkspace() {
     releaseUrl(sourceUrl);
     sourceUrl = null;
     sourceFile = null;
-    clearResult();
     input.value = "";
     originalImage.removeAttribute("src");
     originalImage.hidden = true;
@@ -53,43 +98,38 @@
     originalEmpty.hidden = false;
     view.disabled = true;
     reset.disabled = true;
+    exportButton.disabled = true;
     mode.textContent = "ОЖИДАЕТ ФАЙЛ";
-    info.textContent = "Файл ещё не выбран. Нажмите «Выбрать фото или видео».";
-    status.textContent = "Локальный режим готов. Выбранный файл останется в этом браузере и пока не отправляется в Google Drive.";
-  }
-
-  function formatBytes(bytes) {
-    if (bytes < 1024) return bytes + " Б";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " КБ";
-    return (bytes / (1024 * 1024)).toFixed(1) + " МБ";
+    info.textContent = "Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.";
+    status.textContent = "Исходный файл остаётся в этом браузере. Серверная обработка ещё не запущена.";
   }
 
   function showFile(file) {
     releaseUrl(sourceUrl);
-    clearResult();
     sourceFile = file;
     sourceUrl = URL.createObjectURL(file);
     originalEmpty.hidden = true;
     originalImage.hidden = true;
     originalVideo.hidden = true;
+    exportButton.disabled = true;
 
     if (file.type.startsWith("image/")) {
       originalImage.src = sourceUrl;
       originalImage.hidden = false;
       mode.textContent = "ФОТОГРАФИЯ ВЫБРАНА";
-      status.textContent = "Фотография проверена по типу и размеру. Нажмите VIEW для просмотра и создания локальной демонстрационной копии.";
+      status.textContent = "Фотография открыта локально. Файл не отправлен на сервер. Нажмите VIEW, чтобы проверить состояние ИИ.";
     } else if (file.type.startsWith("video/")) {
       originalVideo.src = sourceUrl;
       originalVideo.hidden = false;
       mode.textContent = "ВИДЕО ВЫБРАНО";
-      status.textContent = "Видеофайл выбран и доступен для просмотра. ИИ-обработка видео и экспорт улучшенной версии пока не подключены.";
+      status.textContent = "Видео открыто в локальном проигрывателе. Файл не отправлен на сервер. Видеообработчик пока не развёрнут.";
     } else {
       clearWorkspace();
       status.textContent = "Браузер не распознал тип файла. Выберите изображение или видео.";
       return;
     }
 
-    info.textContent = file.name + " · " + formatBytes(file.size) + " · " + file.type;
+    info.textContent = file.name + " · " + formatBytes(file.size) + " · " + (file.type || "тип не определён");
     view.disabled = false;
     reset.disabled = false;
   }
@@ -114,55 +154,24 @@
 
   view.addEventListener("click", async () => {
     if (!sourceFile) return;
-    if (sourceFile.type.startsWith("video/")) {
-      status.textContent = "Видео открыто в локальном проигрывателе. Стабилизация, шумоподавление и ИИ-улучшение станут доступны после подключения видеообработчика.";
-      return;
-    }
-
-    status.textContent = "Подготавливается локальная демонстрационная копия…";
     view.disabled = true;
-    try {
-      const bitmap = await createImageBitmap(sourceFile);
-      const canvas = document.createElement("canvas");
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const context = canvas.getContext("2d");
-      if (!context) throw new Error("Canvas недоступен");
-      context.filter = "contrast(1.06) saturate(1.06) brightness(1.02)";
-      context.drawImage(bitmap, 0, 0);
-      bitmap.close();
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.94));
-      if (!blob) throw new Error("Не удалось создать копию");
-      clearResult();
-      resultBlob = blob;
-      resultUrl = URL.createObjectURL(blob);
-      resultImage.src = resultUrl;
-      resultImage.hidden = false;
-      resultEmpty.hidden = true;
-      exportButton.disabled = false;
-      status.textContent = "Готова локальная демонстрационная копия с лёгкой коррекцией контраста и цвета. Это НЕ ИИ-реставрация. Оригинал не изменён.";
-    } catch (error) {
-      status.textContent = "Не удалось подготовить копию в этом браузере: " + error.message;
-    } finally {
-      view.disabled = false;
+    status.textContent = "Проверяем серверный доступ. Фотография или видео остаются локально.";
+    const current = await refreshGatewayStatus();
+    if (!current) {
+      status.textContent = "Проверка не пройдена. Файл остался в браузере и не отправлялся.";
+    } else if (current.model_access === "credits_required") {
+      status.textContent = "Шлюз Neon подключён, но все модели заблокированы требованием paid_plan_required. Файл не отправлялся. Экспорт остаётся отключённым.";
+    } else if (current.model_access === "ready") {
+      status.textContent = "Модели доступны, но обработчик восстановления, проверка результата и регистрация отдельного MATERIAL-ID ещё не подключены. Файл не отправлялся.";
+    } else {
+      status.textContent = "Доступность модели не подтверждена. Обработка не запускалась, оригинал не затронут.";
     }
+    view.disabled = false;
   });
 
-  exportButton.addEventListener("click", () => {
-    if (!resultBlob || !sourceFile) return;
-    const link = document.createElement("a");
-    const baseName = sourceFile.name.replace(/\.[^.]+$/, "") || "media";
-    link.href = resultUrl;
-    link.download = baseName + "-local-demo-copy.jpg";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    status.textContent = "Копия скачана на устройство. Она не загружена в Google Drive и не зарегистрирована в архивном реестре.";
-  });
-
+  if (gatewayRefresh) gatewayRefresh.addEventListener("click", refreshGatewayStatus);
   reset.addEventListener("click", clearWorkspace);
-  window.addEventListener("pagehide", () => {
-    releaseUrl(sourceUrl);
-    releaseUrl(resultUrl);
-  });
+  exportButton.disabled = true;
+  refreshGatewayStatus();
+  window.addEventListener("pagehide", () => releaseUrl(sourceUrl));
 })();

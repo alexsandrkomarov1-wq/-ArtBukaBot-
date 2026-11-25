@@ -57,75 +57,56 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">ИИ-лаборатория для восстановления старых фотографий и видеозаписей. Проверяем качество, улучшаем копии и сохраняем семейные оригиналы без изменений.</p>
+      <p class="ai-media-lead">ИИ-лаборатория KOMAROVA_CORE. Neon AI Gateway уже подключён к проекту. Доступность моделей проверяется напрямую; исходные файлы не изменяются и не отправляются на обработку без подтверждённого серверного контура.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
 
-  <div class="ai-media-before-after" aria-label="Демонстрация фотографии до и после улучшения">
-    <figure class="ai-media-photo">
-      <div class="ai-media-photo-frame ai-media-original">
-        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=85" alt="Демонстрационная семейная фотография до восстановления" loading="lazy">
-        <span class="ai-media-tag">ДО</span>
-      </div>
-      <figcaption><strong>Оригинал</strong><span>Неизменяемый исходный файл</span></figcaption>
-    </figure>
-    <figure class="ai-media-photo">
-      <div class="ai-media-photo-frame ai-media-enhanced">
-        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=85" alt="Демонстрационная визуальная коррекция семейной фотографии" loading="lazy">
-        <span class="ai-media-tag ai-media-tag-after">ПОСЛЕ · ДЕМО</span>
-      </div>
-      <figcaption><strong>Улучшенная копия</strong><span>Пример отображения результата</span></figcaption>
-    </figure>
-  </div>
-
-  <div class="ai-media-motion" aria-label="Зацикленная анимация сканирования и восстановления изображения">
-    <div class="ai-media-motion-head"><span>КАК ПРОИСХОДИТ ВОССТАНОВЛЕНИЕ</span><span class="ai-media-loop"><i></i> АНИМАЦИЯ · 9 СЕКУНД</span></div>
-    <div class="ai-media-motion-stage">
-      <img class="ai-media-motion-base" src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="" loading="lazy">
-      <div class="ai-media-motion-reveal"><img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1800&q=85" alt="" loading="lazy"></div>
-      <span class="ai-media-motion-line" aria-hidden="true"></span>
-      <span class="ai-media-motion-label ai-media-motion-left">ИСХОДНИК</span>
-      <span class="ai-media-motion-label ai-media-motion-right">УЛУЧШЕННАЯ КОПИЯ</span>
+  <div class="ai-media-gateway-card" data-ai-gateway-card>
+    <div class="ai-media-gateway-head">
+      <span class="ai-media-kicker">NEON AI GATEWAY · PRODUCTION</span>
+      <span class="ai-media-gateway-state" data-ai-gateway-state>ПРОВЕРЯЕМ СОЕДИНЕНИЕ</span>
     </div>
-    <p class="ai-media-motion-note"><strong>Сканирование и постепенное проявление результата.</strong> Это демонстрационная CSS-анимация интерфейса, а не настоящее видео и не результат обработки нейросетью.</p>
+    <h3>Подключение ИИ к семейному архиву</h3>
+    <p data-ai-gateway-message role="status" aria-live="polite">Проверяем доступность сервера и моделей. Проверка не отправляет ваши фотографии или видео.</p>
+    <button class="ai-media-refresh" type="button" data-ai-gateway-refresh>Обновить статус</button>
   </div>
 
   <div class="ai-media-workspace" data-ai-media-lab>
     <div class="ai-media-workspace-heading">
-      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · ЛОКАЛЬНЫЙ РЕЖИМ</span><h3>Работа с вашим материалом</h3></div>
+      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · БЕЗОПАСНЫЙ ПРЕДПРОСМОТР</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls">
-      <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload><span>01 / UPLOAD</span><strong>Выбрать фото или видео</strong><small>JPG, PNG, WEBP, GIF, MP4 и другие форматы браузера · до 100 МБ</small></button>
-      <button class="ai-media-button" type="button" data-ai-view disabled><span>02 / VIEW</span><strong>Просмотреть и подготовить копию</strong><small>Проверка файла и локальная демонстрационная коррекция фото</small></button>
-      <button class="ai-media-button" type="button" data-ai-export disabled><span>03 / EXPORT</span><strong>Скачать копию</strong><small>Оригинал не изменяется и не перезаписывается</small></button>
+      <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload><span>01 / UPLOAD</span><strong>Выбрать фото или видео</strong><small>Локальный выбор с устройства · до 100 МБ</small></button>
+      <button class="ai-media-button" type="button" data-ai-view disabled><span>02 / VIEW</span><strong>Проверить доступность ИИ</strong><small>Проверка сервера и выбранного файла · без отправки файла</small></button>
+      <button class="ai-media-button" type="button" data-ai-export disabled><span>03 / EXPORT</span><strong>Экспорт результата</strong><small>Откроется только после настоящей обработки и проверки копии</small></button>
     </div>
-    <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Нажмите «Выбрать фото или видео».</div>
+    <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
     <div class="ai-media-live-preview">
       <figure><figcaption>ИСХОДНЫЙ ФАЙЛ · ОРИГИНАЛ</figcaption><div class="ai-media-live-frame">
         <img data-ai-original-preview alt="Предпросмотр выбранного оригинала" hidden>
         <video data-ai-video-preview controls playsinline hidden></video>
         <span data-ai-original-empty>Здесь появится выбранная фотография или видео</span>
       </div></figure>
-      <figure><figcaption>РЕЗУЛЬТАТ · КОПИЯ</figcaption><div class="ai-media-live-frame">
-        <img data-ai-result-preview alt="Предпросмотр локальной демонстрационной копии" hidden>
-        <span data-ai-result-empty>Результат появится после подготовки копии</span>
+      <figure><figcaption>РЕЗУЛЬТАТ · ОТДЕЛЬНАЯ КОПИЯ</figcaption><div class="ai-media-live-frame">
+        <img data-ai-result-preview alt="Подтверждённый результат обработки" hidden>
+        <span data-ai-result-empty>Результата пока нет. Он появится после запуска реальной модели и проверки копии.</span>
       </div></figure>
     </div>
-    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Локальный режим готов. Выбранный файл останется в этом браузере и пока не отправляется в Google Drive.</p>
+    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Исходный файл остаётся в этом браузере. Серверная обработка ещё не запущена.</p>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
   <div class="ai-media-tools">
-    <article><span>PHOTO RESTORATION</span><h3>Фотографии</h3><p>Повышение разрешения до 2K/4K, устранение размытия и шума, восстановление царапин, коррекция цвета и колоризация по запросу.</p></article>
-    <article><span>VIDEO ENHANCEMENT</span><h3>Видео</h3><p>Повышение разрешения, стабилизация, уменьшение шума и артефактов, коррекция цвета, очистка звука и проверка синхронизации.</p></article>
-    <article><span>ARCHIVE PROTECTION</span><h3>Защита архива</h3><p>Оригинал не перезаписывается. Каждая улучшенная версия получает собственный MATERIAL-ID и историю обработки.</p></article>
+    <article><span>PHOTO RESTORATION · ПЛАН</span><h3>Фотографии</h3><p>Повышение разрешения, устранение размытия и шума, восстановление царапин и коррекция цвета. Функции включаются после активации модели и проверки качества результата.</p></article>
+    <article><span>VIDEO ENHANCEMENT · ПЛАН</span><h3>Видео</h3><p>Повышение разрешения, стабилизация, уменьшение шума, коррекция цвета и проверка синхронизации. Нужен отдельный серверный видеообработчик.</p></article>
+    <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Оригинал никогда не перезаписывается. Для каждой подтверждённой улучшенной копии предусмотрены отдельный MATERIAL-ID, SHA-256 и связь с оригиналом. Регистрация пока не включена.</p></article>
   </div>
 
-  <div class="ai-media-principle"><strong>Оригинал сохраняем. Качество улучшаем на копиях. Историю изменений не теряем.</strong><span>ЛОКАЛЬНЫЙ ПРЕДПРОСМОТР · ИИ-ПРОВАЙДЕР И ПОСТОЯННОЕ ХРАНЕНИЕ НЕ ПОДКЛЮЧЕНЫ</span></div>
-  <p class="ai-media-footnote">Демонстрационные изображения и анимация показывают оформление интерфейса. Локальная коррекция в рабочей области не является ИИ-восстановлением. Выбранный файл не отправляется на сервер и не сохраняется в архиве. Подключение ИИ-провайдера, Google Drive и выдача постоянных MATERIAL-ID будут отдельными серверными этапами.</p>
+  <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>NEON AI GATEWAY ПОДКЛЮЧЁН · ДОСТУП К МОДЕЛЯМ ПРОВЕРЯЕТСЯ ДИНАМИЧЕСКИ</span></div>
+  <p class="ai-media-footnote">Сейчас доступ к моделям Neon AI Gateway ограничен требованием предоплаченных AI-кредитов. Выбранные файлы не передаются в модель. Экспорт отключён до появления настоящего результата, его проверки и регистрации отдельного MATERIAL-ID.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
