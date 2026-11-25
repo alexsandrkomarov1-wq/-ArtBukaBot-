@@ -45,7 +45,7 @@ def _check_archive_schema(connection: sqlite3.Connection) -> None:
         ).fetchall()
     }
     required = {"alembic_version", "people", "relationships", "audit_events",
-                "users", "auth_sessions", "system_state", "login_attempts"}
+                "users", "auth_sessions", "system_state", "login_attempts", "stored_blobs", "archive_items", "materials"}
     missing = required - tables
     if missing:
         raise RuntimeError(f"Backup is not a complete KOMAROVA_CORE database; missing tables: {sorted(missing)}")
