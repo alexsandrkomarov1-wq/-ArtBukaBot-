@@ -30,7 +30,7 @@
       form.elements.password.value="";$("[data-workspace]").classList.remove("registry-hidden");
       $("[data-user-label]").textContent="Вход выполнен как "+user.username+" · роль "+user.role;
       await refresh();message("Сервер подключён. Реестр загружен.","success");
-    }catch(error){$("[data-workspace]").classList.add("registry-hidden");message(error.message,"error");}
+    }catch(error){form.elements.password.value="";$("[data-workspace]").classList.add("registry-hidden");message(error.message,"error");}
     finally{button.disabled=false;}
   });
   $("[data-event-form]").addEventListener("submit",async event=>{
