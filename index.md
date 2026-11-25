@@ -150,8 +150,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         </div>
       </div>
     </div>
-    <a class="ai-media-external" href="https://ezenhancer.ai/ru/" target="_blank" rel="noopener noreferrer">Открыть EzEnhancer для внешнего AI-улучшения <span aria-hidden="true">↗</span></a>
-    <small class="ai-media-copy-note">Это отдельный сервис: фотографию потребуется загрузить туда вручную. Автоматическая передача файлов в EzEnhancer не подключена.</small>
+    <div class="ai-media-internal-engine" role="status" aria-live="polite"><strong>ВНУТРЕННИЙ AI-КОНВЕЙЕР KOMAROVA_CORE</strong><span>Файлы обрабатываются внутри нашей системы после подключения серверного worker. Внешние сайты и ручная повторная загрузка не используются. Сейчас серверный worker ещё не опубликован, поэтому автоматическая AI-обработка не запускается.</span></div>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
