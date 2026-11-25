@@ -16,7 +16,7 @@ description: Серверный реестр событий KOMAROVA_CORE с п�
     <form class="registry-connect" data-connect-form>
       <label>Адрес API<input name="api" type="url" placeholder="https://адрес-вашего-api" required></label>
       <label>Логин<input name="username" autocomplete="username" required></label>
-      <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+      <label>Пароль<input name="password" type="password" autocomplete="off" required></label>
       <button class="registry-button" type="submit">Подключиться</button>
     </form>
     <p class="registry-status" data-status role="status" aria-live="polite">Сервер не подключён. События не подменяются примерами.</p>
