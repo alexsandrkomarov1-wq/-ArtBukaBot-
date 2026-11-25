@@ -17,13 +17,19 @@
   const originalImage = root.querySelector("[data-ai-original-preview]");
   const originalVideo = root.querySelector("[data-ai-video-preview]");
   const originalEmpty = root.querySelector("[data-ai-original-empty]");
+  const resultPreview = root.querySelector("[data-ai-result-preview]");
+  const resultVideo = root.querySelector("[data-ai-result-video]");
   const resultEmpty = root.querySelector("[data-ai-result-empty]");
+  const resultInput = root.querySelector("[data-ai-result-input]");
+  const resultSelect = root.querySelector("[data-ai-result-select]");
   const gatewayState = document.querySelector("[data-ai-gateway-state]");
   const gatewayMessage = document.querySelector("[data-ai-gateway-message]");
   const gatewayRefresh = document.querySelector("[data-ai-gateway-refresh]");
 
   let sourceFile = null;
   let sourceUrl = null;
+  let resultFile = null;
+  let resultUrl = null;
   let gatewayStatus = null;
 
   function releaseUrl(url) {
@@ -84,7 +90,23 @@
     }
   }
 
+  function clearResult() {
+    releaseUrl(resultUrl);
+    resultUrl = null;
+    resultFile = null;
+    resultInput.value = "";
+    resultPreview.removeAttribute("src");
+    resultPreview.hidden = true;
+    resultVideo.pause();
+    resultVideo.removeAttribute("src");
+    resultVideo.load();
+    resultVideo.hidden = true;
+    resultEmpty.hidden = false;
+    resultSelect.disabled = !sourceFile;
+  }
+
   function clearWorkspace() {
+    clearResult();
     releaseUrl(sourceUrl);
     sourceUrl = null;
     sourceFile = null;
@@ -108,6 +130,7 @@
     releaseUrl(sourceUrl);
     sourceFile = file;
     sourceUrl = URL.createObjectURL(file);
+    clearResult();
     originalEmpty.hidden = true;
     originalImage.hidden = true;
     originalVideo.hidden = true;
@@ -132,6 +155,40 @@
     info.textContent = file.name + " · " + formatBytes(file.size) + " · " + (file.type || "тип не определён");
     view.disabled = false;
     reset.disabled = false;
+    resultSelect.disabled = false;
+  }
+
+  function showResultCopy(file) {
+    if (!sourceFile) return;
+    const sourceKind = sourceFile.type.startsWith("image/") ? "image" : "video";
+    const resultKind = file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "";
+    if (!resultKind || resultKind !== sourceKind) {
+      status.textContent = "Тип копии должен совпадать с оригиналом: изображение к изображению или видео к видео.";
+      resultInput.value = "";
+      return;
+    }
+    if (file.size === 0 || file.size > MAX_BYTES) {
+      status.textContent = file.size === 0 ? "Файл-копия пустой." : "Размер копии превышает 100 МБ.";
+      resultInput.value = "";
+      return;
+    }
+    if (file.name === sourceFile.name && file.size === sourceFile.size && file.lastModified === sourceFile.lastModified) {
+      status.textContent = "Выбран тот же файл, что и оригинал. Для сравнения укажите отдельную копию.";
+      resultInput.value = "";
+      return;
+    }
+    clearResult();
+    resultFile = file;
+    resultUrl = URL.createObjectURL(file);
+    resultEmpty.hidden = true;
+    if (resultKind === "image") {
+      resultPreview.src = resultUrl;
+      resultPreview.hidden = false;
+    } else {
+      resultVideo.src = resultUrl;
+      resultVideo.hidden = false;
+    }
+    status.textContent = "Показана отдельная локальная копия: " + file.name + ". Это ручной предпросмотр, не AI-обработка; серверная проверка и MATERIAL-ID не подтверждены.";
   }
 
   upload.addEventListener("click", () => input.click());
@@ -150,6 +207,12 @@
       return;
     }
     showFile(file);
+  });
+
+  resultSelect.addEventListener("click", () => resultInput.click());
+  resultInput.addEventListener("change", () => {
+    const file = resultInput.files && resultInput.files[0];
+    if (file) showResultCopy(file);
   });
 
   view.addEventListener("click", async () => {
@@ -172,6 +235,10 @@
   if (gatewayRefresh) gatewayRefresh.addEventListener("click", refreshGatewayStatus);
   reset.addEventListener("click", clearWorkspace);
   exportButton.disabled = true;
+  resultSelect.disabled = true;
   refreshGatewayStatus();
-  window.addEventListener("pagehide", () => releaseUrl(sourceUrl));
+  window.addEventListener("pagehide", () => {
+    releaseUrl(sourceUrl);
+    releaseUrl(resultUrl);
+  });
 })();
