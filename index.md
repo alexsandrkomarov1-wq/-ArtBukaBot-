@@ -135,8 +135,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
 
   <div class="ai-media-tools">
-    <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Серверный worker: Pillow подготавливает изображение; OpenCV корректирует контраст и шум; scikit-image восстанавливает детали. Пока backend не подключён, сайт создаёт локальную коррекционную копию в браузере.</p></article>
-    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>Real-ESRGAN увеличивает разрешение кадров в 2×, FFmpeg собирает видео и сохраняет исходную аудиодорожку. Готовый MP4 проверяется до регистрации отдельного MATERIAL-ID.</p></article>
+    <article><span>PHOTO ENHANCEMENT · NEURAL AI</span><h3>Фотографии</h3><p>Pillow подготавливает оригинал; Real-ESRGAN NCNN Vulkan восстанавливает детали и увеличивает разрешение до 4×; OpenCV и scikit-image уточняют контраст, шум и резкость. Pillow завершает коррекцию яркости и цвета. Требуются частный backend и веса модели; без них сайт не показывает фальшивый результат.</p></article>
+    <article><span>VIDEO ENHANCEMENT · NEURAL AI</span><h3>Видео</h3><p>Real-ESRGAN обрабатывает кадры с увеличением до 2×, FFmpeg собирает отдельный MP4 и сохраняет аудиодорожку оригинала. Результат проверяется до регистрации отдельного MATERIAL-ID.</p></article>
     <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Каждый оригинал и результат получают отдельный MATERIAL-ID. Производная запись хранит ссылку на исходный MATERIAL-ID, контрольные суммы и сведения о применённом конвейере.</p></article>
   </div>
 
