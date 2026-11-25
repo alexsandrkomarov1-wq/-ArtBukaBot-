@@ -7,7 +7,7 @@ description: Локальный просмотр фотографий и вид�
 <section class="media-heading">
   <p class="eyebrow">KOMAROVA_CORE · MEDIA</p>
   <h1>Семейная <em>медиатека.</em></h1>
-  <p class="media-lead">Google Drive подключён к проекту KOMAROVA_CORE. Эта страница пока показывает локальный просмотр файлов и закрытый архив через API; содержимое Google Drive здесь ещё не отображается. Локальный просмотр не отправляет файлы на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
+  <p class="media-lead">Google Drive рассматривается только как временный вариант подключения. Ответ по письму ожидается 27 ноября 2026 года. До подтверждения договорённостей это не считается постоянным хранилищем. Сейчас доступны локальный просмотр файлов и закрытый архив KOMAROVA_CORE через API; содержимое временного Google Drive здесь не отображается. Локальный просмотр не отправляет файлы на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
   <div class="media-entry-actions">
     <label class="media-open-button" for="media-file-input">Открыть фото и видео на устройстве</label>
     <a class="media-button" href="#cloud-archive">Перейти к закрытому архиву</a>
@@ -55,7 +55,7 @@ description: Локальный просмотр фотографий и вид�
 <section class="media-workspace" id="local-media-workspace" aria-label="Локальный просмотр фотографий и видео">
   <div class="media-toolbar">
     <label class="media-open-button" for="media-file-input">＋ Открыть фото и видео</label>
-    <input id="media-file-input" class="media-file-input" type="file" accept="image/*,video/*" multiple>
+    <input id="media-file-input" class="media-file-input" type="file" accept="image/*,video/*,audio/*,.pdf,.txt,.rtf,.doc,.docx,.odt,.xls,.xlsx,.ods,.ppt,.pptx,.odp" multiple>
     <div class="media-toolbar-actions">
       <button type="button" id="media-slideshow" class="media-button" disabled>▶ Слайдшоу</button>
       <button type="button" id="media-fullscreen" class="media-button" disabled>⛶ На весь экран</button>
@@ -71,6 +71,8 @@ description: Локальный просмотр фотографий и вид�
     <div class="media-stage" id="media-stage" hidden>
       <img id="media-image" alt="" hidden>
       <video id="media-video" controls playsinline preload="metadata" hidden></video>
+      <audio id="media-audio" controls preload="metadata" hidden></audio>
+      <div id="media-document" class="media-document-preview" hidden><p>Предпросмотр документа</p><a id="media-document-open" target="_blank" rel="noopener noreferrer">Открыть документ в новой вкладке</a></div>
       <div class="media-caption">
         <div><strong id="media-current-name"></strong><span id="media-current-meta"></span></div>
         <a id="media-download" class="media-download" href="#" download>Скачать файл</a>
@@ -88,6 +90,8 @@ description: Локальный просмотр фотографий и вид�
       <button type="button" class="media-filter is-active" data-filter="all" aria-pressed="true">Все</button>
       <button type="button" class="media-filter" data-filter="image" aria-pressed="false">Фото</button>
       <button type="button" class="media-filter" data-filter="video" aria-pressed="false">Видео</button>
+      <button type="button" class="media-filter" data-filter="audio" aria-pressed="false">Аудио</button>
+      <button type="button" class="media-filter" data-filter="document" aria-pressed="false">Документы</button>
     </div>
   </div>
   <div id="media-list" class="media-list" aria-live="polite">
@@ -99,7 +103,7 @@ description: Локальный просмотр фотографий и вид�
   <h2>Что работает сейчас, а что ещё впереди</h2>
   <ul>
     <li><strong>Работает в этой версии:</strong> локальный выбор фотографий и видео, просмотр изображений, встроенное воспроизведение видео, переключение файлов, слайдшоу фотографий, полноэкранный режим и скачивание выбранного файла.</li>
-    <li><strong>Пока не реализовано:</strong> загрузка в постоянное семейное хранилище, общие альбомы между устройствами, учёт PERSON-ID/EVENT-ID/PLACE-ID, ИИ-описания, экспорт ZIP и синхронизация.</li>
+    <li><strong>Пока не реализовано:</strong> загрузка в постоянное семейное хранилище, общие альбомы между устройствами, серверная регистрация локально выбранных файлов, постоянные MATERIAL-ID, связь с PERSON-ID/EVENT-ID/PLACE-ID, ИИ-описания, экспорт ZIP и синхронизация.</li>
     <li><strong>Ориентация:</strong> браузер применяет EXIF Orientation для поддерживаемых изображений. Для видео с метаданными поворота и HEIC/HEIF универсального браузерного решения нет. В закрытом архиве предусмотрен отдельный обработчик, который создаёт выровненную копию, не меняя оригинал; он пока не подключён к загрузке.</li>
     <li><strong>Совместимость:</strong> расширение не доказывает реальный формат и кодек. MP4/H.264 обычно поддерживается шире, чем MKV или HEVC. Ошибка декодирования будет показана отдельно, а не маскироваться под пустую фотографию.</li>
   </ul>
@@ -107,4 +111,4 @@ description: Локальный просмотр фотографий и вид�
 </section>
 <script>window.KOMAROVA_API_BASE = "https://komarova-core-api.onrender.com";</script>
 <script src="{{ '/assets/js/cloud-archive.js' | relative_url }}?v=1" defer></script>
-<script src="{{ '/assets/js/media-library.js' | relative_url }}" defer></script>
+<script src="{{ '/assets/js/media-library.js' | relative_url }}?v=20261125-catalogs-1" defer></script>
