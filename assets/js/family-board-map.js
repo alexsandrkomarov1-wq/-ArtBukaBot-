@@ -101,7 +101,7 @@
     const h=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
     return 2*R*Math.asin(Math.sqrt(h));
   };
-  const mapCenter = () => { const c=map ? map.getCenter() : fallbackCenter; return {lat:c.lat ?? c.lat,lon:c.lng ?? c.lon}; };
+  const mapCenter = () => { const c=map ? map.getCenter() : fallbackCenter; return {lat:c.lat,lon:map ? c.lng : c.lon}; };
   const renderMapFallback = (message) => {
     const box = $("#fb-map");
     if (!box) return;
