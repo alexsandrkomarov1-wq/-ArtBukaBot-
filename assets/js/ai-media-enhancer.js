@@ -5,7 +5,6 @@
   if (!root) return;
 
   const MAX_BYTES = 100 * 1024 * 1024;
-  const STATUS_URL = "https://br-winter-thunder-bd2t0is8-aistatus.compute.c-8.us-east-2.aws.neon.tech/status";
   const input = root.querySelector("[data-ai-file-input]");
   const upload = root.querySelector("[data-ai-upload]");
   const view = root.querySelector("[data-ai-view]");
@@ -22,15 +21,11 @@
   const resultEmpty = root.querySelector("[data-ai-result-empty]");
   const resultInput = root.querySelector("[data-ai-result-input]");
   const resultSelect = root.querySelector("[data-ai-result-select]");
-  const gatewayState = document.querySelector("[data-ai-gateway-state]");
-  const gatewayMessage = document.querySelector("[data-ai-gateway-message]");
-  const gatewayRefresh = document.querySelector("[data-ai-gateway-refresh]");
 
   let sourceFile = null;
   let sourceUrl = null;
   let resultFile = null;
   let resultUrl = null;
-  let gatewayStatus = null;
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
@@ -40,54 +35,6 @@
     if (bytes < 1024) return bytes + " Б";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " КБ";
     return (bytes / (1024 * 1024)).toFixed(1) + " МБ";
-  }
-
-  function setGatewayState(label, message, stateClass) {
-    if (gatewayState) {
-      gatewayState.textContent = label;
-      gatewayState.dataset.state = stateClass || "unknown";
-    }
-    if (gatewayMessage) gatewayMessage.textContent = message;
-  }
-
-  async function refreshGatewayStatus() {
-    if (gatewayRefresh) gatewayRefresh.disabled = true;
-    setGatewayState("ПРОВЕРЯЕМ", "Запрашиваем состояние Neon AI Gateway. Файлы не передаются.", "checking");
-    try {
-      const response = await fetch(STATUS_URL, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        cache: "no-store",
-        mode: "cors"
-      });
-      const payload = await response.json();
-      if (!response.ok || !payload.ok) {
-        throw new Error(payload.error || "Сервер статуса вернул ошибку " + response.status);
-      }
-      gatewayStatus = payload;
-      if (payload.model_access === "ready") {
-        setGatewayState("ШЛЮЗ РАБОТАЕТ · МОДЕЛИ ДОСТУПНЫ",
-          "Neon AI Gateway отвечает. Доступно моделей: " + payload.enabled_model_count + ". Серверный обработчик восстановления и архивная регистрация ещё должны пройти отдельную проверку.",
-          "ready");
-      } else if (payload.model_access === "credits_required") {
-        setGatewayState("ШЛЮЗ ПОДКЛЮЧЁН · НУЖНЫ КРЕДИТЫ",
-          "Соединение с Neon AI Gateway подтверждено. Доступных моделей: 0 из " + payload.total_model_count + ". Neon возвращает paid_plan_required: для вызова моделей нужны платёжная карта и предоплаченные AI-кредиты.",
-          "blocked");
-      } else {
-        setGatewayState("ШЛЮЗ ОТВЕЧАЕТ · ПРОВЕРКА НУЖНА",
-          "Сервер отвечает, но не удалось подтвердить доступность модели. Обработка файлов не запускается.",
-          "unknown");
-      }
-      return payload;
-    } catch (error) {
-      gatewayStatus = null;
-      setGatewayState("НЕТ ПОДТВЕРЖДЕНИЯ СОЕДИНЕНИЯ",
-        "Не удалось проверить Neon AI Gateway: " + error.message + ". Исходные файлы не отправлялись.",
-        "error");
-      return null;
-    } finally {
-      if (gatewayRefresh) gatewayRefresh.disabled = false;
-    }
   }
 
   function clearResult() {
@@ -216,28 +163,14 @@
     if (file) showResultCopy(file);
   });
 
-  view.addEventListener("click", async () => {
+  view.addEventListener("click", () => {
     if (!sourceFile) return;
-    view.disabled = true;
-    status.textContent = "Проверяем серверный доступ. Фотография или видео остаются локально.";
-    const current = await refreshGatewayStatus();
-    if (!current) {
-      status.textContent = "Проверка не пройдена. Файл остался в браузере и не отправлялся.";
-    } else if (current.model_access === "credits_required") {
-      status.textContent = "Шлюз Neon подключён, но все модели заблокированы требованием paid_plan_required. Файл не отправлялся. Экспорт остаётся отключённым.";
-    } else if (current.model_access === "ready") {
-      status.textContent = "Модели доступны, но обработчик восстановления, проверка результата и регистрация отдельного MATERIAL-ID ещё не подключены. Файл не отправлялся.";
-    } else {
-      status.textContent = "Доступность модели не подтверждена. Обработка не запускалась, оригинал не затронут.";
-    }
-    view.disabled = false;
+    status.textContent = "Серверная обработка пока не подключена. Файл остался в браузере и не отправлялся. Оригинал сохранён без изменений; экспорт недоступен.";
   });
 
-  if (gatewayRefresh) gatewayRefresh.addEventListener("click", refreshGatewayStatus);
   reset.addEventListener("click", clearWorkspace);
   exportButton.disabled = true;
   resultSelect.disabled = true;
-  refreshGatewayStatus();
   window.addEventListener("pagehide", () => {
     releaseUrl(sourceUrl);
     releaseUrl(resultUrl);
