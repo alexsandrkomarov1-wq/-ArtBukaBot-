@@ -135,7 +135,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
   <div class="ai-media-tools">
     <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Серверный worker: Pillow подготавливает изображение; OpenCV корректирует контраст и шум; scikit-image восстанавливает детали. Пока backend не подключён, сайт создаёт локальную коррекционную копию в браузере.</p></article>
-    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>FFmpeg и OpenCV: коррекция кадров, шумоподавление, резкость, сохранение аудиодорожки и проверка готового MP4. Обработка выполняется в частном worker после подключения backend.</p></article>
+    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>Real-ESRGAN увеличивает разрешение кадров в 2×, FFmpeg собирает видео и сохраняет исходную аудиодорожку. Готовый MP4 проверяется до регистрации отдельного MATERIAL-ID.</p></article>
     <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Каждый оригинал и результат получают отдельный MATERIAL-ID. Производная запись хранит ссылку на исходный MATERIAL-ID, контрольные суммы и сведения о применённом конвейере.</p></article>
   </div>
 
