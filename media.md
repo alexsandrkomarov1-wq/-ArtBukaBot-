@@ -7,11 +7,15 @@ description: Локальный просмотр фотографий и вид�
 <section class="media-heading">
   <p class="eyebrow">KOMAROVA_CORE · MEDIA</p>
   <h1>Семейная <em>медиатека.</em></h1>
-  <p class="media-lead">Закрытый облачный архив подключается через защищённый backend и приватное хранилище Neon. Локальный просмотр не отправляет их на сервер; файлы из облачного кабинета передаются только после входа в закрытый архив. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
+  <p class="media-lead">Google Drive подключён к проекту KOMAROVA_CORE. Эта страница пока показывает локальный просмотр файлов и закрытый архив через API; содержимое Google Drive здесь ещё не отображается. Локальный просмотр не отправляет файлы на сервер. Браузер обычно учитывает EXIF-поворот поддерживаемых фотографий, но HEIC/HEIF и поворот видео зависят от декодера устройства.</p>
+  <div class="media-entry-actions">
+    <label class="media-open-button" for="media-file-input">Открыть фото и видео на устройстве</label>
+    <a class="media-button" href="#cloud-archive">Перейти к закрытому архиву</a>
+  </div>
 </section>
 
-<section class="cloud-archive" aria-labelledby="cloud-archive-title">
-  <div class="media-library-heading"><div><p class="eyebrow">ЗАКРЫТЫЙ КАБИНЕТ · NEON OBJECT STORAGE</p><h2 id="cloud-archive-title">Семейный облачный архив</h2></div><span id="cloud-connection-state" class="media-status">Проверка подключения…</span></div>
+<section class="cloud-archive" id="cloud-archive" aria-labelledby="cloud-archive-title">
+  <div class="media-library-heading"><div><p class="eyebrow">ЗАКРЫТЫЙ КАБИНЕТ · KOMAROVA_CORE</p><h2 id="cloud-archive-title">Семейный облачный архив</h2></div><span id="cloud-connection-state" class="media-status">Проверка подключения…</span></div>
   <div id="cloud-auth">
     <form id="cloud-login-form" class="cloud-auth-form">
       <label>Логин<input id="cloud-username" name="username" autocomplete="username" required minlength="3"></label>
@@ -48,7 +52,7 @@ description: Локальный просмотр фотографий и вид�
     </div>
   </div>
 </section>
-<section class="media-workspace" aria-label="Локальный просмотр фотографий и видео">
+<section class="media-workspace" id="local-media-workspace" aria-label="Локальный просмотр фотографий и видео">
   <div class="media-toolbar">
     <label class="media-open-button" for="media-file-input">＋ Открыть фото и видео</label>
     <input id="media-file-input" class="media-file-input" type="file" accept="image/*,video/*" multiple>
