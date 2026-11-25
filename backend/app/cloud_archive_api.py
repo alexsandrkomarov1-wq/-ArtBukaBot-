@@ -16,9 +16,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from . import archive_api as legacy_archive_api
-from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Person, StoredBlob, User, new_id
+from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Material, Person, StoredBlob, User, new_id
 from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
 from .storage import PrivateMediaStorage
+from .media_processing import normalize_photo, normalize_video, sha256_file
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 CHUNK_SIZE = 1024 * 1024
@@ -64,8 +65,10 @@ def _detect_media(header: bytes, extension: str) -> tuple[str, str]:
     return detected
 
 
-def _item_payload(item: ArchiveItem, blob: StoredBlob) -> dict:
+def _item_payload(item: ArchiveItem, blob: StoredBlob, material: Material) -> dict:
     return {
+        "material_id": material.material_id,
+        "original_material_id": material.original_material_id,
         "archive_item_id": item.archive_item_id,
         "item_type": item.item_type,
         "title": item.title,
@@ -167,6 +170,12 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 created_by_user_id=actor.user_id,
             )
             db.add(item)
+            db.flush()
+            material = Material(
+                material_id=new_id("M"), archive_item_id=item.archive_item_id,
+                material_role="original", output_sha256=sha256,
+            )
+            db.add(material)
             if linked_person is not None:
                 link = ArchiveEntityLink(
                     archive_item_id=item.archive_item_id, target_entity_type="person",
@@ -188,7 +197,8 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             committed = True
             db.refresh(item)
             db.refresh(blob)
-            return _item_payload(item, blob)
+            db.refresh(material)
+            return _item_payload(item, blob, material)
         except HTTPException:
             db.rollback()
             raise
@@ -283,12 +293,152 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             db.commit()
             return {
                 "archive_item_id": item.archive_item_id,
+                "material_id": db.scalar(select(Material.material_id).where(Material.archive_item_id == item.archive_item_id)),
                 "scan_status": scan_status,
                 "record_status": item.record_status,
                 "storage_state": blob.storage_state,
             }
         finally:
             temp_path.unlink(missing_ok=True)
+
+
+    @router.post("/items/{archive_item_id}/enhance")
+    def enhance_archived_media(
+        archive_item_id: str,
+        db: Session = Depends(get_db),
+        actor: User = Depends(require_roles("owner", "moderator")),
+    ):
+        """Create a separately registered derivative after original malware verification."""
+        row = db.execute(
+            select(ArchiveItem, StoredBlob, Material)
+            .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
+            .join(Material, Material.archive_item_id == ArchiveItem.archive_item_id)
+            .where(ArchiveItem.archive_item_id == archive_item_id)
+        ).first()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Original archive material not found")
+        original_item, original_blob, original_material = row
+        if original_item.record_status != "available" or original_blob.storage_state != "verified":
+            raise HTTPException(status_code=423, detail="Original must pass malware scan before enhancement")
+        scanner = shutil.which(os.getenv("CORE_CLAMDSCAN_BINARY", "clamdscan"))
+        if not scanner:
+            raise HTTPException(status_code=503, detail="ClamAV is unavailable; no derivative was created")
+
+        object_key = None
+        stored = False
+        try:
+            with tempfile.TemporaryDirectory(prefix="core-enhance-", dir=intake_root) as temp_name:
+                work = Path(temp_name)
+                source_path = work / "original" / _safe_filename(original_blob.original_filename)
+                source_path.parent.mkdir(parents=True, exist_ok=True)
+                output_suffix = ".webp" if original_item.item_type == "photo" else ".mp4"
+                output_path = work / "derivative" / ("enhanced" + output_suffix)
+                digest = hashlib.sha256()
+                total = 0
+                chunks, expected_length, _ = storage.open_stream(original_blob.storage_object_key)
+                with source_path.open("wb") as stream:
+                    for chunk in chunks:
+                        total += len(chunk)
+                        digest.update(chunk)
+                        stream.write(chunk)
+                if total != expected_length or total != original_blob.size_bytes or digest.hexdigest() != original_blob.sha256:
+                    raise HTTPException(status_code=502, detail="Original integrity check failed; processing stopped")
+
+                try:
+                    if original_item.item_type == "photo":
+                        result = normalize_photo(source_path, output_path, scanner_state="clean")
+                    else:
+                        result = normalize_video(source_path, output_path, scanner_state="clean")
+                except (ValueError, RuntimeError, OSError) as exc:
+                    raise HTTPException(status_code=422, detail=f"Media processing failed: {exc}") from exc
+                if result.source_sha256 != original_blob.sha256 or sha256_file(source_path) != original_blob.sha256:
+                    raise HTTPException(status_code=502, detail="Original changed during processing; derivative was rejected")
+
+                try:
+                    scan = subprocess.run(
+                        [scanner, "--no-summary", str(output_path)],
+                        check=False, capture_output=True, text=True, timeout=180, shell=False,
+                    )
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    raise HTTPException(status_code=503, detail="Derivative malware scan could not complete") from exc
+                if scan.returncode != 0:
+                    raise HTTPException(status_code=422, detail="Derivative failed malware scan; it was not registered or released")
+                if not output_path.is_file() or output_path.stat().st_size == 0 or sha256_file(output_path) != result.output_sha256:
+                    raise HTTPException(status_code=502, detail="Derivative validation failed")
+
+                duplicate = db.scalar(select(StoredBlob).where(StoredBlob.sha256 == result.output_sha256))
+                if duplicate is not None:
+                    raise HTTPException(status_code=409, detail="Identical derivative content is already registered")
+
+                object_key = f"derivatives/{result.output_sha256[:2]}/{result.output_sha256}"
+                storage.put_file(object_key, output_path, result.output_format)
+                stored = True
+
+                derivative_blob = StoredBlob(
+                    blob_id=new_id("BL"), sha256=result.output_sha256,
+                    size_bytes=result.output_size, detected_mime_type=result.output_format,
+                    original_filename=Path(original_blob.original_filename).stem + "-enhanced" + output_suffix,
+                    storage_provider=storage.provider, storage_object_key=object_key,
+                    storage_state="verified",
+                )
+                db.add(derivative_blob)
+                db.flush()
+                derivative_item = ArchiveItem(
+                    archive_item_id=new_id("AR"), item_type=original_item.item_type,
+                    title=((original_item.title or Path(original_blob.original_filename).stem) + " — улучшенная копия")[:300],
+                    record_status="available", original_blob_id=derivative_blob.blob_id,
+                    created_by_user_id=actor.user_id,
+                )
+                db.add(derivative_item)
+                db.flush()
+                derivative_material = Material(
+                    material_id=new_id("M"), archive_item_id=derivative_item.archive_item_id,
+                    original_material_id=original_material.material_id,
+                    material_role="derivative", processing_engine=result.engine,
+                    source_sha256=result.source_sha256, output_sha256=result.output_sha256,
+                )
+                db.add(derivative_material)
+                db.add(AuditEvent(
+                    event_type="archive.media_derivative_created",
+                    entity_type="material", entity_id=derivative_material.material_id,
+                    actor_id=actor.user_id,
+                    details=json.dumps({
+                        "original_material_id": original_material.material_id,
+                        "derivative_material_id": derivative_material.material_id,
+                        "engine": result.engine,
+                        "source_sha256": result.source_sha256,
+                        "output_sha256": result.output_sha256,
+                        "source_size": result.source_size,
+                        "output_size": result.output_size,
+                        "output_width": result.output_width,
+                        "output_height": result.output_height,
+                    }, ensure_ascii=False),
+                ))
+                db.commit()
+                db.refresh(derivative_item)
+                db.refresh(derivative_blob)
+                db.refresh(derivative_material)
+                return {
+                    "archive_item_id": derivative_item.archive_item_id,
+                    "material_id": derivative_material.material_id,
+                    "original_material_id": original_material.material_id,
+                    "record_status": derivative_item.record_status,
+                    "storage_state": derivative_blob.storage_state,
+                    "engine": result.engine,
+                    "source_sha256": result.source_sha256,
+                    "output_sha256": result.output_sha256,
+                    "output_size": result.output_size,
+                    "output_width": result.output_width,
+                    "output_height": result.output_height,
+                }
+        except Exception:
+            db.rollback()
+            if stored and object_key:
+                try:
+                    storage.delete(object_key)
+                except Exception:
+                    pass
+            raise
 
     @router.get("/items", response_model=list[ArchiveItemRead])
     def list_archive_items(
@@ -299,13 +449,14 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         if limit < 1 or limit > 100 or offset < 0:
             raise HTTPException(status_code=422, detail="Invalid pagination")
         rows = db.execute(
-            select(ArchiveItem, StoredBlob)
+            select(ArchiveItem, StoredBlob, Material)
             .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
+            .join(Material, Material.archive_item_id == ArchiveItem.archive_item_id)
             .where(ArchiveItem.record_status.in_(["quarantined", "available", "infected"]))
             .order_by(ArchiveItem.created_at.desc(), ArchiveItem.archive_item_id)
             .limit(limit).offset(offset)
         ).all()
-        return [_item_payload(item, blob) for item, blob in rows]
+        return [_item_payload(item, blob, material) for item, blob, material in rows]
 
     @router.get("/items/{archive_item_id}", response_model=ArchiveItemRead)
     def get_archive_item(
@@ -313,14 +464,15 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
         _: User = Depends(require_roles("owner", "moderator", "family_member")),
     ):
         row = db.execute(
-            select(ArchiveItem, StoredBlob)
+            select(ArchiveItem, StoredBlob, Material)
             .join(StoredBlob, ArchiveItem.original_blob_id == StoredBlob.blob_id)
+            .join(Material, Material.archive_item_id == ArchiveItem.archive_item_id)
             .where(ArchiveItem.archive_item_id == archive_item_id,
                    ArchiveItem.record_status.in_(["quarantined", "available", "infected"]))
         ).first()
         if row is None:
             raise HTTPException(status_code=404, detail="Archive item not found")
-        return _item_payload(row[0], row[1])
+        return _item_payload(row[0], row[1], row[2])
 
     @router.get("/items/{archive_item_id}/content")
     def view_archive_item(

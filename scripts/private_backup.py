@@ -153,7 +153,7 @@ def read_and_verify(bundle: Path) -> tuple[dict, list[tarfile.TarInfo]]:
                 if violations:
                     raise RuntimeError("Backup database has foreign-key violations")
                 tables = {r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-                required = {"alembic_version", "people", "relationships", "audit_events", "users", "auth_sessions", "system_state", "login_attempts", "stored_blobs", "archive_items"}
+                required = {"alembic_version", "people", "relationships", "audit_events", "users", "auth_sessions", "system_state", "login_attempts", "stored_blobs", "archive_items", "materials"}
                 if not required.issubset(tables):
                     raise RuntimeError("Backup database is missing required KOMAROVA_CORE tables")
         return manifest, members

@@ -57,7 +57,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">Локальная лаборатория KOMAROVA_CORE. Выберите оригинал, создайте улучшенную копию средствами браузера и сохраните её на компьютер. Оригинал не перезаписывается; файл не покидает ваше устройство.</p>
+      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Выберите оригинал: фотография автоматически получает локальную улучшенную копию. При подключении частного backend включаются ClamAV, серверная обработка фото и видео и постоянная архивная регистрация. Исходник не изменяется.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
@@ -72,13 +72,13 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
         <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор с компьютера · обработка в браузере · до 100 МБ</small>
+        <small class="ai-media-action-note">Выбор файла · проверка и автоматическая обработка · до 100 МБ</small>
       </button>
-      <button class="ai-media-button" type="button" data-ai-view disabled>
+      <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
-        <strong class="ai-media-action-title">Улучшить фотографию</strong>
-        <small class="ai-media-action-note">Коррекция цвета, контраста и резкости на устройстве</small>
-      </button>
+        <strong class="ai-media-action-title">Автоматическое улучшение</strong>
+        <small class="ai-media-action-note">Запускается сразу после проверки выбранного оригинала</small>
+      </div>
       <button class="ai-media-button" type="button" data-ai-export disabled>
         <span class="ai-media-step">03 <span aria-hidden="true">/</span> EXPORT</span>
         <strong class="ai-media-action-title">Скачать улучшенную копию</strong>
@@ -86,16 +86,16 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       </button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
-    <div class="ai-media-live-preview">
+    <div class="ai-media-live-preview" data-ai-preview hidden>
       <figure><figcaption>ИСХОДНЫЙ ФАЙЛ · ОРИГИНАЛ</figcaption><div class="ai-media-live-frame">
         <img data-ai-original-preview alt="Предпросмотр выбранного оригинала" hidden>
         <video data-ai-video-preview controls playsinline hidden></video>
-        <span data-ai-original-empty>Здесь появится выбранная фотография или видео</span>
+        <span data-ai-original-empty>Оригинал появится после выбора файла</span>
       </div></figure>
       <figure><figcaption>РЕЗУЛЬТАТ · ОТДЕЛЬНАЯ КОПИЯ</figcaption><div class="ai-media-live-frame">
         <img data-ai-result-preview alt="Предпросмотр отдельной копии" hidden>
         <video data-ai-result-video controls playsinline hidden></video>
-        <span data-ai-result-empty>Здесь появится обработанная копия. Оригинал останется без изменений.</span>
+        <span data-ai-result-empty>Копия появится после автоматической обработки. Оригинал останется без изменений.</span>
       </div>
       <small class="ai-media-copy-note">Результат создаётся как отдельный файл. Исходник не изменяется.</small>
       </figure>
@@ -105,13 +105,13 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
 
   <div class="ai-media-tools">
-    <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Локальная коррекция контраста, цвета и резкости с созданием отдельной копии. Это алгоритмическое улучшение, а не генеративная AI-реставрация.</p></article>
-    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>Видеофайлы можно выбрать и просмотреть. Полноценное улучшение и экспорт видео потребуют отдельного локального видеоконвейера; сейчас кнопка обработки для видео не запускает фиктивную операцию.</p></article>
-    <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Оригинал никогда не перезаписывается. Локальная копия не получает архивный MATERIAL-ID автоматически. Для постоянной регистрации в семейном архиве потребуется подключённый backend.</p></article>
+    <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Серверный worker: Pillow подготавливает изображение; OpenCV корректирует контраст и шум; scikit-image восстанавливает детали. Пока backend не подключён, сайт создаёт локальную коррекционную копию в браузере.</p></article>
+    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>FFmpeg и OpenCV: коррекция кадров, шумоподавление, резкость, сохранение аудиодорожки и проверка готового MP4. Обработка выполняется в частном worker после подключения backend.</p></article>
+    <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Каждый оригинал и результат получают отдельный MATERIAL-ID. Производная запись хранит ссылку на исходный MATERIAL-ID, контрольные суммы и сведения о применённом конвейере.</p></article>
   </div>
 
   <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>ОРИГИНАЛ ЗАЩИЩЁН · КОПИЯ УЧИТЫВАЕТСЯ ОТДЕЛЬНО</span></div>
-  <p class="ai-media-footnote">Фотографии обрабатываются локально в браузере. Оригинал не изменяется, результат скачивается отдельным файлом. Архивная регистрация и полноценная обработка видео пока не подключены.</p>
+  <p class="ai-media-footnote">Оригинал никогда не изменяется. Результат проходит проверку, получает отдельный MATERIAL-ID и связь с оригиналом. Публичный сайт пока не подключён к развёрнутому backend worker: серверная обработка и архивная регистрация станут доступны после его публикации.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">

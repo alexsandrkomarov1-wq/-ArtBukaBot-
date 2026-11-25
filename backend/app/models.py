@@ -106,3 +106,16 @@ class ArchiveEntityLink(Base):
     source_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class Material(Base):
+    """Stable material identity; derivatives point to the immutable original material."""
+    __tablename__ = "materials"
+    material_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("M"))
+    archive_item_id: Mapped[str] = mapped_column(ForeignKey("archive_items.archive_item_id"), nullable=False, unique=True, index=True)
+    original_material_id: Mapped[str | None] = mapped_column(ForeignKey("materials.material_id"), nullable=True, index=True)
+    material_role: Mapped[str] = mapped_column(String(16), nullable=False, default="original")
+    processing_engine: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    source_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    output_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
