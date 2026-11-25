@@ -145,7 +145,7 @@ def _probe_video(path: Path) -> dict:
         payload = json.loads(result.stdout)
         stream = next(s for s in payload["streams"] if s.get("codec_type") == "video")
         width, height = int(stream["width"]), int(stream["height"])
-        duration = float(payload.get("format", {}).get("duration", 0))
+        duration = float(payload.get("format", {}).get("duration", 1.0))
     except (ValueError, KeyError, StopIteration, TypeError) as exc:
         raise RuntimeError("FFprobe returned incomplete video metadata") from exc
     rotation = 0
@@ -204,9 +204,9 @@ def normalize_video(source_path: str | Path, output_path: str | Path, *, scanner
     source = Path(source_path).resolve(strict=True)
     output = Path(output_path).resolve()
     _assert_input(source, output, VIDEO_SUFFIXES)
-    ffmpeg = shutil.which("ffmpeg")
-    if not ffmpeg:
+    if not shutil.which("ffmpeg"):
         raise RuntimeError("FFmpeg is required for video processing")
+    ffmpeg = "ffmpeg"
     source_meta = _probe_video(source)
     output.parent.mkdir(parents=True, exist_ok=True)
     source_hash, source_size = sha256_file(source), source.stat().st_size
