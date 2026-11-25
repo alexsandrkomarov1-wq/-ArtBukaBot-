@@ -87,6 +87,7 @@ def _enhance_rgb(rgb: np.ndarray) -> np.ndarray:
     if high > low + 1e-4:
         normalized = exposure.rescale_intensity(normalized, in_range=(low, high), out_range=(0.0, 1.0))
     sharpened = filters.unsharp_mask(normalized, radius=1.0, amount=0.4, preserve_range=True, channel_axis=-1)
+    sharpened = np.nan_to_num(sharpened, nan=0.0, posinf=1.0, neginf=0.0)
     return util.img_as_ubyte(np.clip(sharpened, 0.0, 1.0))
 
 
