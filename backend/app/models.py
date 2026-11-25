@@ -119,3 +119,53 @@ class Material(Base):
     source_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     output_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class EventRecord(Base):
+    __tablename__ = "events"
+    event_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("E"))
+    title: Mapped[str] = mapped_column(String(240), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    occurred_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
+    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+
+class PlaceRecord(Base):
+    __tablename__ = "places"
+    place_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("PL"))
+    name: Mapped[str] = mapped_column(String(240), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    latitude: Mapped[float | None] = mapped_column(nullable=True)
+    longitude: Mapped[float | None] = mapped_column(nullable=True)
+    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+
+class PlaceVisit(Base):
+    __tablename__ = "place_visits"
+    visit_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("V"))
+    place_id: Mapped[str] = mapped_column(ForeignKey("places.place_id"), nullable=False, index=True)
+    visited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class EntityLink(Base):
+    __tablename__ = "entity_links"
+    __table_args__ = (UniqueConstraint(
+        "source_type", "source_id", "target_type", "target_id", "relationship_type",
+        name="uq_entity_link_identity",
+    ),)
+    link_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("EL"))
+    source_type: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    source_id: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    target_type: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    target_id: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    relationship_type: Mapped[str] = mapped_column(String(48), nullable=False)
+    created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
