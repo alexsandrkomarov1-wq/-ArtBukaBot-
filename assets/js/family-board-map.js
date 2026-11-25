@@ -90,6 +90,7 @@
   renderPosts();
 
   let map = null, markerLayer = null, selectedPlace = null;
+  let fallbackCenter = { lat: 59.9343, lon: 30.3351 };
   const currentPerson = () => $("[data-fb-person]").value;
   const statusOf = place => state.placeStates[currentPerson() + "|" + place.id] || "new";
   const statusLabel = status => ({ visited:"Были", wishlist:"Хотим посетить", planned:"Предложено / запланировано", new:"Ещё не отмечено" }[status] || "Ещё не отмечено");
@@ -100,7 +101,25 @@
     const h=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
     return 2*R*Math.asin(Math.sqrt(h));
   };
-  const mapCenter = () => { const c=map ? map.getCenter() : {lat:59.9343,lng:30.3351}; return {lat:c.lat,lon:c.lng}; };
+  const mapCenter = () => { const c=map ? map.getCenter() : fallbackCenter; return {lat:c.lat ?? c.lat,lon:c.lng ?? c.lon}; };
+  const renderMapFallback = (message) => {
+    const box = $("#fb-map");
+    if (!box) return;
+    box.replaceChildren();
+    const panel = document.createElement("div");
+    panel.className = "fb-map-fallback";
+    const heading = document.createElement("strong");
+    heading.textContent = "Карта доступна в резервном режиме";
+    const note = document.createElement("p");
+    note.textContent = message || "Внешняя библиотека карты не загрузилась. Список мест и отметки остаются доступны справа.";
+    const link = document.createElement("a");
+    link.href = "https://www.openstreetmap.org/#map=13/" + fallbackCenter.lat + "/" + fallbackCenter.lon;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Открыть эту область в OpenStreetMap ↗";
+    panel.append(heading, note, link);
+    box.append(panel);
+  };
   const renderPlaceList = () => {
     const list=$("[data-fb-place-list]"); list.replaceChildren();
     const center=mapCenter();
@@ -114,21 +133,23 @@
     });
   };
   const renderMarkers = () => {
-    if(!map||!markerLayer)return;
-    markerLayer.clearLayers();
-    state.places.forEach(place=>{
-      const status=statusOf(place);
-      const colors={visited:"#2f7655",wishlist:"#bd8750",planned:"#637d9c",new:"#9a9a90"};
-      const marker=L.circleMarker([place.lat,place.lon],{radius:9,color:"#fff",weight:2,fillColor:colors[status]||colors.new,fillOpacity:.95});
-      marker.bindTooltip(place.name,{direction:"top"});
-      marker.on("click",()=>selectPlace(place,false));
-      marker.addTo(markerLayer);
-    });
+    if(map&&markerLayer){
+      markerLayer.clearLayers();
+      state.places.forEach(place=>{
+        const status=statusOf(place);
+        const colors={visited:"#2f7655",wishlist:"#bd8750",planned:"#637d9c",new:"#9a9a90"};
+        const marker=L.circleMarker([place.lat,place.lon],{radius:9,color:"#fff",weight:2,fillColor:colors[status]||colors.new,fillOpacity:.95});
+        marker.bindTooltip(place.name,{direction:"top"});
+        marker.on("click",()=>selectPlace(place,false));
+        marker.addTo(markerLayer);
+      });
+    }
     renderPlaceList();
   };
   const selectPlace = (place, pan) => {
     selectedPlace=place;
     if(pan&&map)map.setView([place.lat,place.lon],Math.max(map.getZoom(),14));
+    else if(pan) { fallbackCenter = {lat:place.lat,lon:place.lon}; renderMapFallback("Выбрано место: " + place.name + ". Список и отметки работают; интерактивная подложка временно недоступна."); }
     const box=$("[data-fb-place-detail]");box.replaceChildren();
     const kicker=document.createElement("p");kicker.className="fb-kicker";kicker.textContent="КАРТОЧКА МЕСТА · "+place.id;
     const title=document.createElement("h3");title.textContent=place.name;
@@ -145,8 +166,13 @@
   };
   const setMapStatus = message => { $("[data-fb-map-status]").textContent=message; };
   const initMap = () => {
-    if(!window.L){setMapStatus("Библиотека карты не загрузилась. Проверьте подключение к интернету и обновите страницу.");return;}
-    map=L.map("fb-map",{scrollWheelZoom:false}).setView([59.9343,30.3351],13);
+    if(!window.L){
+      setMapStatus("Интерактивная подложка OpenStreetMap не загрузилась. Список мест и личные отметки доступны в резервном режиме.");
+      renderMapFallback();
+      renderMarkers();
+      return;
+    }
+    map=L.map("fb-map",{scrollWheelZoom:false}).setView([fallbackCenter.lat,fallbackCenter.lon],13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
     markerLayer=L.layerGroup().addTo(map);
     renderMarkers();
@@ -159,12 +185,14 @@
       const response=await fetch(url,{headers:{Accept:"application/json"}});
       if(!response.ok)throw new Error("Геопоиск временно недоступен");
       const results=await response.json();if(!results.length)throw new Error("Город не найден");
-      const point=results[0];map.setView([Number(point.lat),Number(point.lon)],13);
+      const point=results[0];
+      fallbackCenter={lat:Number(point.lat),lon:Number(point.lon)};
+      if(map)map.setView([fallbackCenter.lat,fallbackCenter.lon],13);
+      else renderMapFallback("Центр поиска: " + point.display_name + ". Нажмите «Найти места рядом», чтобы загрузить точки из OpenStreetMap.");
       setMapStatus("Центр карты: "+point.display_name+". Нажмите ↻, чтобы найти достопримечательности в выбранном радиусе.");
     }catch(error){setMapStatus(error.message||"Не удалось найти город.");}
   };
   const findNearby = async () => {
-    if(!map)return;
     const center=mapCenter(),radius=Number($("[data-fb-radius]").value);
     setMapStatus("Запрашиваем открытые данные OpenStreetMap в радиусе "+(radius/1000)+" км…");
     const query='[out:json][timeout:25];(node["tourism"~"museum|attraction|gallery|artwork|viewpoint"](around:'+radius+','+center.lat+','+center.lon+');way["tourism"~"museum|attraction|gallery|artwork|viewpoint"](around:'+radius+','+center.lat+','+center.lon+');node["historic"~"monument|memorial|castle"](around:'+radius+','+center.lat+','+center.lon+');way["historic"~"monument|memorial|castle"](around:'+radius+','+center.lat+','+center.lon+');node["leisure"="park"](around:'+radius+','+center.lat+','+center.lon+');way["leisure"="park"](around:'+radius+','+center.lat+','+center.lon+'););out center tags;';
@@ -184,7 +212,12 @@
       state.places=unique;
       selectedPlace=null;
       renderMarkers();
-      map.fitBounds(L.latLngBounds(unique.map(p=>[p.lat,p.lon])).pad(.15));
+      if(map)map.fitBounds(L.latLngBounds(unique.map(p=>[p.lat,p.lon])).pad(.15));
+      else {
+        const first=unique[0];
+        fallbackCenter={lat:first.lat,lon:first.lon};
+        renderMapFallback("Загружено мест: " + unique.length + ". Выберите место в списке справа, чтобы открыть карточку и поставить личную отметку.");
+      }
       setMapStatus("Найдено мест: "+unique.length+". Это данные OpenStreetMap, а не подтверждённые часы работы или посещения.");
       $("[data-fb-place-detail]").innerHTML='<p class="fb-kicker">РЕЗУЛЬТАТ ПОИСКА</p><h3>Места рядом загружены</h3><p>Выберите точку, чтобы добавить личную отметку. Посещение не определяется автоматически.</p>';
     }catch(error){setMapStatus((error.message||"Поиск не выполнен")+". Можно продолжить с демонстрационными точками.");}
@@ -199,5 +232,9 @@
     if(button.dataset.fbTab==="map"&&map)setTimeout(()=>map.invalidateSize(),80);
   }));
   initMap();
+  if(window.location.hash==="#fb-map-panel"){
+    const mapTab=$("[data-fb-tab='map']");
+    if(mapTab)mapTab.click();
+  }
   persist();
 })();
