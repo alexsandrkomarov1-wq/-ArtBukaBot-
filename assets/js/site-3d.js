@@ -40,6 +40,9 @@
   Promise.all([import(threeUrl), webgpuModule]).then(async ([THREE, THREEGPU]) => {
     let renderer = null;
     let graphicsMode = "webgl2";
+    let handleWebGPUDeviceLost = null;
+    let webgpuLostBeforeRecoveryReady = false;
+    let recoveringWebGPU = false;
 
     if (THREEGPU && THREEGPU.WebGPURenderer && canAttemptWebGPU) {
       try {
@@ -50,7 +53,16 @@
           powerPreference: "high-performance"
         });
         await renderer.init();
-        graphicsMode = "webgpu";
+        graphicsMode = renderer.backend && renderer.backend.isWebGLBackend ? "webgl2" : "webgpu";
+        if (graphicsMode === "webgpu" && typeof renderer.onDeviceLost === "function") {
+          const defaultDeviceLostHandler = renderer.onDeviceLost.bind(renderer);
+          renderer.onDeviceLost = (info) => {
+            defaultDeviceLostHandler(info);
+            if (info && info.reason === "destroyed") return;
+            webgpuLostBeforeRecoveryReady = true;
+            if (handleWebGPUDeviceLost) handleWebGPUDeviceLost();
+          };
+        }
       } catch (error) {
         if (renderer) {
           try { renderer.dispose(); } catch (disposeError) { /* release best-effort */ }
@@ -262,7 +274,7 @@
       pointerY = 0;
     }, { passive: true });
 
-    renderer.setAnimationLoop((time) => {
+    const renderFrame = (time) => {
       if (document.hidden || !visible) return;
       const t = time * 0.00022;
       targetX += (pointerY * 0.13 - targetX) * 0.035;
@@ -282,7 +294,61 @@
         particles.rotation.y = t * 0.08;
       }
       renderer.render(scene, camera);
-    });
+    };
+
+    handleWebGPUDeviceLost = () => {
+      if (recoveringWebGPU || graphicsMode !== "webgpu" || !renderer) return;
+      recoveringWebGPU = true;
+      const previousRenderer = renderer;
+      const replacementCanvas = createCanvas();
+      canvas.replaceWith(replacementCanvas);
+      canvas = replacementCanvas;
+      try {
+        const replacementRenderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: !lowPower,
+          powerPreference: lowPower ? "low-power" : "high-performance",
+          failIfMajorPerformanceCaveat: false
+        });
+        replacementRenderer.setClearColor(0x000000, 0);
+        replacementRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.45));
+        replacementRenderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer = replacementRenderer;
+        graphicsMode = lowPower ? "lite-3d" : "webgl2";
+        resize();
+        setRenderStatus("WebGPU остановлен · автоматический переход на " + (lowPower ? "Lite 3D" : "WebGL2"));
+        replacementRenderer.setAnimationLoop(renderFrame);
+        try {
+          previousRenderer.setAnimationLoop(null);
+          previousRenderer.dispose();
+        } catch (disposeError) {
+          /* release best-effort after device loss */
+        }
+      } catch (error) {
+        try {
+          previousRenderer.setAnimationLoop(null);
+          previousRenderer.dispose();
+        } catch (disposeError) {
+          /* release best-effort after device loss */
+        }
+        fallback();
+      } finally {
+        recoveringWebGPU = false;
+      }
+    };
+
+    if (webgpuLostBeforeRecoveryReady) {
+      handleWebGPUDeviceLost();
+    } else {
+      renderer.setAnimationLoop(renderFrame);
+    }
+
+    canvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      if (renderer) renderer.setAnimationLoop(null);
+      fallback();
+    }, { once: true });
 
     window.addEventListener("pagehide", () => {
       visibilityObserver.disconnect();
