@@ -371,12 +371,12 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                     raise HTTPException(status_code=409, detail="Identical derivative content is already registered")
 
                 object_key = f"derivatives/{result.output_sha256[:2]}/{result.output_sha256}"
-                storage.put_file(object_key, output_path, result.output_format)
+                storage.put_file(object_key, output_path, result.output_mime)
                 stored = True
 
                 derivative_blob = StoredBlob(
                     blob_id=new_id("BL"), sha256=result.output_sha256,
-                    size_bytes=result.output_size, detected_mime_type=result.output_format,
+                    size_bytes=result.output_size, detected_mime_type=result.output_mime,
                     original_filename=Path(original_blob.original_filename).stem + "-enhanced" + output_suffix,
                     storage_provider=storage.provider, storage_object_key=object_key,
                     storage_state="verified",
