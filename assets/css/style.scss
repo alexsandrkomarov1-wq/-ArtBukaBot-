@@ -411,30 +411,29 @@ a { color:var(--green); }
 .ai-media-seal { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; width:104px; height:104px; border:1px solid rgba(212,177,138,.55); border-radius:50%; color:#d4b18a; transform:rotate(-8deg); }
 .ai-media-seal span,.ai-media-seal small { font-size:7px; letter-spacing:.15em; }
 .ai-media-seal strong { font-family:Georgia,serif; font-size:26px; font-weight:400; }
-.ai-media-before-after { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-.ai-media-photo { min-width:0; margin:0; padding:10px; background:#f4f0e7; color:#24322e; }
-.ai-media-photo-frame { position:relative; height:clamp(220px,32vw,390px); overflow:hidden; background:#d7d0c1; }
-.ai-media-photo-frame img { display:block; width:100%; height:100%; object-fit:cover; }
-.ai-media-original img { filter:grayscale(.82) sepia(.36) contrast(.82) brightness(.82); }
-.ai-media-enhanced img { filter:contrast(1.08) brightness(1.04) saturate(1.13); }
-.ai-media-tag { position:absolute; top:13px; left:13px; padding:7px 10px; background:rgba(31,43,39,.9); color:#fff; font-size:9px; font-weight:800; letter-spacing:.15em; }
-.ai-media-tag-after { background:#526d58; }
-.ai-media-photo figcaption { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; padding:13px 5px 4px; }
-.ai-media-photo figcaption strong { font-family:Georgia,serif; font-size:17px; font-weight:500; }
-.ai-media-photo figcaption span { color:#73786e; font-size:10px; }
+.ai-media-before-after { display:none; }
 .ai-media-motion { margin-top:22px; padding:16px; border:1px solid rgba(212,177,138,.28); background:#182526; }
 .ai-media-motion-head { display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; color:#d4b18a; font-size:9px; font-weight:800; letter-spacing:.14em; }
 .ai-media-loop { display:flex; align-items:center; gap:7px; color:#aebbb0; }
 .ai-media-loop i { width:7px; height:7px; border-radius:50%; background:#86aa84; box-shadow:0 0 0 4px rgba(134,170,132,.12); }
-.ai-media-motion-stage { position:relative; height:clamp(180px,30vw,330px); overflow:hidden; background:#6c6254; }
-.ai-media-motion-base,.ai-media-motion-reveal img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 42%; }
-.ai-media-motion-base { filter:grayscale(.9) sepia(.5) contrast(.8) brightness(.78); }
-.ai-media-motion-reveal { position:absolute; inset:0; clip-path:inset(0 50% 0 0); animation:ai-media-reveal 9s ease-in-out infinite alternate; }
-.ai-media-motion-reveal img { filter:contrast(1.08) brightness(1.05) saturate(1.12); }
-.ai-media-motion-line { position:absolute; top:0; bottom:0; left:50%; width:2px; background:#f5e6cc; box-shadow:0 0 18px 4px rgba(245,230,204,.45); animation:ai-media-scan 9s ease-in-out infinite alternate; }
-.ai-media-motion-label { position:absolute; bottom:13px; padding:7px 10px; background:rgba(24,37,38,.88); color:#fff; font-size:8px; font-weight:800; letter-spacing:.12em; }
+.ai-media-motion-stage { position:relative; height:clamp(200px,32vw,390px); overflow:hidden; background:#101b1c; isolation:isolate; }
+.ai-media-motion-base { display:block; width:100%; height:100%; object-fit:cover; object-position:center 42%; filter:none; }
+.ai-media-scan-grid { position:absolute; inset:0; opacity:.2; pointer-events:none; background-image:linear-gradient(rgba(160,221,210,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(160,221,210,.24) 1px,transparent 1px); background-size:42px 42px; mix-blend-mode:screen; }
+.ai-media-motion-line { position:absolute; z-index:2; top:0; bottom:0; left:0; width:3px; opacity:0; background:#d8fff4; box-shadow:0 0 12px 3px rgba(91,255,219,.9),0 0 38px 12px rgba(91,255,219,.5); }
+.ai-media-motion-line::before { content:""; position:absolute; top:0; bottom:0; left:-34px; width:36px; background:linear-gradient(90deg,transparent,rgba(91,255,219,.2)); }
+.ai-media-motion-stage.is-scanning .ai-media-motion-line { opacity:1; animation:ai-media-scan 6s cubic-bezier(.22,.61,.36,1) 1 forwards; }
+.ai-media-motion-stage.is-scanning .ai-media-scan-grid { animation:ai-media-grid-pulse 1.2s ease-in-out infinite alternate; }
+.ai-media-motion-label { position:absolute; z-index:3; bottom:13px; padding:7px 10px; background:rgba(24,37,38,.88); color:#fff; font-size:8px; font-weight:800; letter-spacing:.12em; }
 .ai-media-motion-left { left:13px; }
 .ai-media-motion-right { right:13px; }
+.ai-media-scan-corner { position:absolute; z-index:3; width:22px; height:22px; border-color:#c5fff0; border-style:solid; opacity:.75; }
+.ai-media-scan-corner-tl { top:12px; left:12px; border-width:2px 0 0 2px; }
+.ai-media-scan-corner-tr { top:12px; right:12px; border-width:2px 2px 0 0; }
+.ai-media-scan-corner-bl { bottom:12px; left:12px; border-width:0 0 2px 2px; }
+.ai-media-scan-corner-br { bottom:12px; right:12px; border-width:0 2px 2px 0; }
+.ai-media-scan-progress { height:4px; margin-top:10px; overflow:hidden; background:rgba(255,255,255,.12); }
+.ai-media-scan-progress span { display:block; width:0; height:100%; background:#79e6ca; transition:width 6s linear; }
+.ai-media-motion.is-scanning .ai-media-scan-progress span { width:100%; }
 .ai-media-motion-note { display:flex; justify-content:space-between; gap:18px; margin:13px 2px 0; color:#bdc7bf; font-size:11px; line-height:1.7; }
 .ai-media-motion-note strong { color:#f3eee4; font-family:Georgia,serif; font-size:16px; font-weight:400; }
 .ai-media-actions,.ai-media-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:18px; }
@@ -447,7 +446,8 @@ a { color:var(--green); }
 .ai-media-principle strong { max-width:620px; color:#dce1d9; font-size:13px; line-height:1.7; }
 .ai-media-principle span { color:#d4b18a; font-size:8px; font-weight:800; letter-spacing:.12em; text-align:right; }
 .ai-media-footnote { margin:14px 0 0; color:#9eada4; font-size:9px; line-height:1.6; }
-@keyframes ai-media-scan { 0% { left:2%; } 100% { left:98%; } }
+@keyframes ai-media-scan { 0% { left:0%; } 100% { left:calc(100% - 3px); } }
+@keyframes ai-media-grid-pulse { from { opacity:.12; } to { opacity:.42; } }
 @keyframes ai-media-reveal { 0% { clip-path:inset(0 98% 0 0); } 100% { clip-path:inset(0 2% 0 0); } }
 @media(max-width:700px) {
  .ai-media-lab { margin:44px 0; padding:19px; }
