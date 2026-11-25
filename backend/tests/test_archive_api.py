@@ -401,6 +401,22 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
         cloud_api.subprocess, "run",
         lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="OK", stderr=""),
     )
+
+    def fake_realesrgan(source_path, output_path, *, scale):
+        from PIL import Image
+        Image.new("RGB", (64, 48), (180, 205, 225)).save(output_path, format="PNG")
+        return SimpleNamespace(
+            output_path=str(output_path), output_mime="image/png",
+            source_sha256=cloud_api.sha256_file(source_path),
+            output_sha256=cloud_api.sha256_file(output_path),
+            source_size=Path(source_path).stat().st_size,
+            output_size=Path(output_path).stat().st_size,
+            engine=f"Real-ESRGAN NCNN Vulkan x{scale}",
+            output_width=64, output_height=48,
+        )
+
+    from pathlib import Path
+    monkeypatch.setattr(cloud_api, "restore_photo", fake_realesrgan)
     with make_client(tmp_path) as client:
         headers = auth(owner_token(client))
         from io import BytesIO
