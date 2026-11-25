@@ -24,7 +24,6 @@ def upgrade() -> None:
         sa.Column("source_sha256", sa.String(length=64), nullable=True),
         sa.Column("output_sha256", sa.String(length=64), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.UniqueConstraint("archive_item_id", name="uq_materials_archive_item"),
     )
     op.create_index("ix_materials_archive_item_id", "materials", ["archive_item_id"], unique=True)
     op.create_index("ix_materials_original_material_id", "materials", ["original_material_id"], unique=False)
