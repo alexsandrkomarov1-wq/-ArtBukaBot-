@@ -30,6 +30,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check assets/js/site-3d.js
+          python3 scripts/check_graphics_runtime.py
           node --check assets/js/ai-world-navigation.js
           node --check assets/js/registry-client.js
           node --check assets/js/generations.js
