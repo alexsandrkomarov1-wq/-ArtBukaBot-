@@ -57,42 +57,32 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">ИИ-лаборатория KOMAROVA_CORE. Neon AI Gateway уже подключён к проекту. Доступность моделей проверяется напрямую; исходные файлы не изменяются и не отправляются на обработку без подтверждённого серверного контура.</p>
+      <p class="ai-media-lead">Локальная лаборатория KOMAROVA_CORE. Выберите оригинал, создайте улучшенную копию средствами браузера и сохраните её на компьютер. Оригинал не перезаписывается; файл не покидает ваше устройство.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
 
-  <div class="ai-media-gateway-card" data-ai-gateway-card>
-    <div class="ai-media-gateway-head">
-      <span class="ai-media-kicker">NEON AI GATEWAY · PRODUCTION</span>
-      <span class="ai-media-gateway-state" data-ai-gateway-state>ПРОВЕРЯЕМ СОЕДИНЕНИЕ</span>
-    </div>
-    <h3>Подключение ИИ к семейному архиву</h3>
-    <p data-ai-gateway-message role="status" aria-live="polite">Проверяем доступность сервера и моделей. Проверка не отправляет ваши фотографии или видео.</p>
-    <button class="ai-media-refresh" type="button" data-ai-gateway-refresh>Обновить статус</button>
-  </div>
-
   <div class="ai-media-workspace" data-ai-media-lab>
     <div class="ai-media-workspace-heading">
-      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · БЕЗОПАСНЫЙ ПРЕДПРОСМОТР</span><h3>Работа с вашим материалом</h3></div>
+      <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · ЛОКАЛЬНАЯ ОБРАБОТКА</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
-        <strong class="ai-media-action-title">Выбрать фото или видео</strong>
-        <small class="ai-media-action-note">Локальный выбор с устройства · до 100 МБ</small>
+        <strong class="ai-media-action-title">Загрузить фото или видео</strong>
+        <small class="ai-media-action-note">Выбор с компьютера · обработка в браузере · до 100 МБ</small>
       </button>
       <button class="ai-media-button" type="button" data-ai-view disabled>
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
-        <strong class="ai-media-action-title">Проверить доступность ИИ</strong>
-        <small class="ai-media-action-note">Проверка сервера и выбранного файла · без отправки файла</small>
+        <strong class="ai-media-action-title">Улучшить фотографию</strong>
+        <small class="ai-media-action-note">Коррекция цвета, контраста и резкости на устройстве</small>
       </button>
       <button class="ai-media-button" type="button" data-ai-export disabled>
         <span class="ai-media-step">03 <span aria-hidden="true">/</span> EXPORT</span>
-        <strong class="ai-media-action-title">Экспорт результата</strong>
-        <small class="ai-media-action-note">Откроется только после настоящей обработки и проверки копии</small>
+        <strong class="ai-media-action-title">Скачать улучшенную копию</strong>
+        <small class="ai-media-action-note">Сохранение результата на компьютер после обработки</small>
       </button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
@@ -103,22 +93,25 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <span data-ai-original-empty>Здесь появится выбранная фотография или видео</span>
       </div></figure>
       <figure><figcaption>РЕЗУЛЬТАТ · ОТДЕЛЬНАЯ КОПИЯ</figcaption><div class="ai-media-live-frame">
-        <img data-ai-result-preview alt="Подтверждённый результат обработки" hidden>
-        <span data-ai-result-empty>Результата пока нет. Он появится после запуска реальной модели и проверки копии.</span>
-      </div></figure>
+        <img data-ai-result-preview alt="Предпросмотр отдельной копии" hidden>
+        <video data-ai-result-video controls playsinline hidden></video>
+        <span data-ai-result-empty>Здесь появится обработанная копия. Оригинал останется без изменений.</span>
+      </div>
+      <small class="ai-media-copy-note">Результат создаётся как отдельный файл. Исходник не изменяется.</small>
+      </figure>
     </div>
-    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Исходный файл остаётся в этом браузере. Серверная обработка ещё не запущена.</p>
+    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Выберите изображение. Обработка выполняется локально в браузере, без отправки файла на сервер.</p>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
   <div class="ai-media-tools">
-    <article><span>PHOTO RESTORATION · ПЛАН</span><h3>Фотографии</h3><p>Повышение разрешения, устранение размытия и шума, восстановление царапин и коррекция цвета. Функции включаются после активации модели и проверки качества результата.</p></article>
-    <article><span>VIDEO ENHANCEMENT · ПЛАН</span><h3>Видео</h3><p>Повышение разрешения, стабилизация, уменьшение шума, коррекция цвета и проверка синхронизации. Нужен отдельный серверный видеообработчик.</p></article>
-    <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Оригинал никогда не перезаписывается. Для каждой подтверждённой улучшенной копии предусмотрены отдельный MATERIAL-ID, SHA-256 и связь с оригиналом. Регистрация пока не включена.</p></article>
+    <article><span>PHOTO ENHANCEMENT · LOCAL</span><h3>Фотографии</h3><p>Локальная коррекция контраста, цвета и резкости с созданием отдельной копии. Это алгоритмическое улучшение, а не генеративная AI-реставрация.</p></article>
+    <article><span>VIDEO ENHANCEMENT · NEXT</span><h3>Видео</h3><p>Видеофайлы можно выбрать и просмотреть. Полноценное улучшение и экспорт видео потребуют отдельного локального видеоконвейера; сейчас кнопка обработки для видео не запускает фиктивную операцию.</p></article>
+    <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Оригинал никогда не перезаписывается. Локальная копия не получает архивный MATERIAL-ID автоматически. Для постоянной регистрации в семейном архиве потребуется подключённый backend.</p></article>
   </div>
 
-  <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>NEON AI GATEWAY ПОДКЛЮЧЁН · ДОСТУП К МОДЕЛЯМ ПРОВЕРЯЕТСЯ ДИНАМИЧЕСКИ</span></div>
-  <p class="ai-media-footnote">Сейчас доступ к моделям Neon AI Gateway ограничен требованием предоплаченных AI-кредитов. Выбранные файлы не передаются в модель. Экспорт отключён до появления настоящего результата, его проверки и регистрации отдельного MATERIAL-ID.</p>
+  <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>ОРИГИНАЛ ЗАЩИЩЁН · КОПИЯ УЧИТЫВАЕТСЯ ОТДЕЛЬНО</span></div>
+  <p class="ai-media-footnote">Фотографии обрабатываются локально в браузере. Оригинал не изменяется, результат скачивается отдельным файлом. Архивная регистрация и полноценная обработка видео пока не подключены.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
