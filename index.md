@@ -57,19 +57,9 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">ИИ-лаборатория KOMAROVA_CORE. Neon AI Gateway уже подключён к проекту. Доступность моделей проверяется напрямую; исходные файлы не изменяются и не отправляются на обработку без подтверждённого серверного контура.</p>
+      <p class="ai-media-lead">ИИ-лаборатория KOMAROVA_CORE. Здесь можно просматривать оригиналы и отдельные копии. Исходные файлы не изменяются; обработка станет доступна после подключения и проверки серверной модели.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
-  </div>
-
-  <div class="ai-media-gateway-card" data-ai-gateway-card>
-    <div class="ai-media-gateway-head">
-      <span class="ai-media-kicker">NEON AI GATEWAY · PRODUCTION</span>
-      <span class="ai-media-gateway-state" data-ai-gateway-state>ПРОВЕРЯЕМ СОЕДИНЕНИЕ</span>
-    </div>
-    <h3>Подключение ИИ к семейному архиву</h3>
-    <p data-ai-gateway-message role="status" aria-live="polite">Проверяем доступность сервера и моделей. Проверка не отправляет ваши фотографии или видео.</p>
-    <button class="ai-media-refresh" type="button" data-ai-gateway-refresh>Обновить статус</button>
   </div>
 
   <div class="ai-media-workspace" data-ai-media-lab>
@@ -86,8 +76,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       </button>
       <button class="ai-media-button" type="button" data-ai-view disabled>
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
-        <strong class="ai-media-action-title">Проверить доступность ИИ</strong>
-        <small class="ai-media-action-note">Проверка сервера и выбранного файла · без отправки файла</small>
+        <strong class="ai-media-action-title">Запустить обработку</strong>
+        <small class="ai-media-action-note">Серверная обработка будет доступна после подключения модели</small>
       </button>
       <button class="ai-media-button" type="button" data-ai-export disabled>
         <span class="ai-media-step">03 <span aria-hidden="true">/</span> EXPORT</span>
@@ -122,8 +112,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Оригинал никогда не перезаписывается. Для каждой подтверждённой улучшенной копии предусмотрены отдельный MATERIAL-ID, SHA-256 и связь с оригиналом. Регистрация пока не включена.</p></article>
   </div>
 
-  <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>NEON AI GATEWAY ПОДКЛЮЧЁН · ДОСТУП К МОДЕЛЯМ ПРОВЕРЯЕТСЯ ДИНАМИЧЕСКИ</span></div>
-  <p class="ai-media-footnote">Сейчас доступ к моделям Neon AI Gateway ограничен требованием предоплаченных AI-кредитов. Выбранные файлы не передаются в модель. Экспорт отключён до появления настоящего результата, его проверки и регистрации отдельного MATERIAL-ID.</p>
+  <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>ОРИГИНАЛ ЗАЩИЩЁН · КОПИЯ УЧИТЫВАЕТСЯ ОТДЕЛЬНО</span></div>
+  <p class="ai-media-footnote">Серверная обработка пока не активна. Выбранные файлы остаются в браузере и не отправляются на сервер. Экспорт откроется только после реальной обработки, проверки копии и регистрации отдельного MATERIAL-ID.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
