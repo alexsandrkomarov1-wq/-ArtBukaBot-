@@ -350,6 +350,8 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                         result = normalize_video(source_path, output_path, scanner_state="clean")
                 except (ValueError, RuntimeError, OSError) as exc:
                     raise HTTPException(status_code=422, detail=f"Media processing failed: {exc}") from exc
+                if result.source_sha256 != original_blob.sha256 or sha256_file(source_path) != original_blob.sha256:
+                    raise HTTPException(status_code=502, detail="Original changed during processing; derivative was rejected")
 
                 try:
                     scan = subprocess.run(
