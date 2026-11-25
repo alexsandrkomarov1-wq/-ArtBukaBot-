@@ -1,44 +1,47 @@
 ---
 layout: default
-title: События и хронология
+title: События и семейная хронология
 permalink: /events/
-description: Раздел событий и семейной хронологии KOMAROVA_CORE
+description: Серверный реестр событий KOMAROVA_CORE с постоянными EVENT-ID.
 ---
 <section class="page-heading events-heading">
   <p class="eyebrow">KOMAROVA_CORE · ВРЕМЯ И ПАМЯТЬ</p>
   <h1>События и <em>хронология.</em></h1>
-  <p class="lead">Значимые даты, встречи, семейные события и исторический контекст. Здесь должна собираться проверяемая история, связанная с людьми, местами и архивными материалами.</p>
+  <p class="lead">События получают постоянный EVENT-ID и связываются с участниками, местами и материалами через единый граф сущностей.</p>
 </section>
-
-<section class="events-status" aria-live="polite">
-  <span class="events-status-label">СОСТОЯНИЕ РАЗДЕЛА</span>
-  <h2>Хронология открывается, но реестр событий ещё не подключён.</h2>
-  <p>В текущей версии KOMAROVA_CORE пока нет подтверждённого API событий и таблицы главного реестра для EVENT-ID. Поэтому здесь не показываются вымышленные записи и не создаются локальные события, которые можно ошибочно принять за семейные данные.</p>
-</section>
-
-<section class="events-empty">
-  <div class="events-empty-mark" aria-hidden="true">◷</div>
-  <div>
-    <p class="eyebrow">ЛЕНТА СОБЫТИЙ</p>
-    <h2>Записи пока не загружены</h2>
-    <p>После реализации реестра здесь будут отображаться события с датой или периодом, названием, описанием, участниками (PERSON-ID), местом (PLACE-ID), источниками и связанными фотографиями или документами.</p>
+<section class="registry-shell" data-events-app>
+  <div class="registry-panel">
+    <h2>Подключение к семейному серверу</h2>
+    <p class="registry-muted">Используется защищённый API. До размещения backend реестр остаётся недоступен. Локальные демонстрационные события не создаются.</p>
+    <form class="registry-connect" data-connect-form>
+      <label>Адрес API<input name="api" type="url" placeholder="https://адрес-вашего-api" required></label>
+      <label>Логин<input name="username" autocomplete="username" required></label>
+      <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="registry-button" type="submit">Подключиться</button>
+    </form>
+    <p class="registry-status" data-status role="status" aria-live="polite">Сервер не подключён. События не подменяются примерами.</p>
+  </div>
+  <div class="registry-panel registry-hidden" data-workspace>
+    <div class="registry-toolbar"><div><h2>Лента событий</h2><p class="registry-muted" data-user-label></p></div><button class="registry-button" type="button" data-refresh>Обновить</button></div>
+    <form class="registry-form" data-event-form>
+      <label>Название события<input name="title" maxlength="240" required placeholder="Например: семейная встреча"></label>
+      <label>Дата и время<input name="occurred_at" type="datetime-local"></label>
+      <label class="wide">Описание<textarea name="description" maxlength="10000" placeholder="Контекст, участники, источники…"></textarea></label>
+      <button class="registry-button" type="submit">Создать событие и EVENT-ID</button>
+    </form>
+    <div class="registry-grid" data-events-list><div class="registry-empty">События ещё не загружены.</div></div>
+    <div class="registry-panel">
+      <h3>Связать событие с человеком</h3>
+      <form class="registry-form" data-event-link-form>
+        <label>Событие<select name="event_id" required></select></label>
+        <label>Участник<select name="person_id" required></select></label>
+        <label>Тип связи<input name="relationship_type" value="participant" maxlength="48" required></label>
+        <button class="registry-button" type="submit">Сохранить связь</button>
+      </form>
+      <p class="registry-muted">Для связи с местами и материалами используется тот же API графа сущностей. Этот экран пока предлагает связь с участником.</p>
+    </div>
   </div>
 </section>
-
-<section class="events-structure" aria-label="Структура будущей хронологии">
-  <h2>Что будет храниться в записи события</h2>
-  <ul>
-    <li><strong>EVENT-ID</strong><span>Постоянный идентификатор события.</span></li>
-    <li><strong>Дата или период</strong><span>Точная дата, приблизительная дата либо временной интервал с указанием точности.</span></li>
-    <li><strong>Участники</strong><span>Связи с существующими PERSON-ID, без создания дубликатов людей.</span></li>
-    <li><strong>Место</strong><span>Связь с PLACE-ID, если место известно.</span></li>
-    <li><strong>Источники и материалы</strong><span>Документы, фотографии, ссылки и отметка достоверности сведений.</span></li>
-    <li><strong>История изменений</strong><span>Кто и когда добавил или исправил запись.</span></li>
-  </ul>
-</section>
-
-<nav class="events-actions" aria-label="Переходы по семейному архиву">
-  <a class="primary-link" href="{{ '/family-board/' | relative_url }}">Семейная доска и карта <span aria-hidden="true">↗</span></a>
-  <a class="outline-link" href="{{ '/media/' | relative_url }}">Фотографии и документы <span aria-hidden="true">↗</span></a>
-  <a class="text-link" href="{{ '/' | relative_url }}#archive-directions">Вернуться к направлениям архива ↑</a>
-</nav>
+<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-1">
+<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-1" defer></script>
+<script src="{{ '/assets/js/events-registry.js' | relative_url }}?v=20261125-1" defer></script>
