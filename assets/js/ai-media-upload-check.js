@@ -63,10 +63,9 @@
       if (width < 1920 || height < 1080) recommendations.push("Небольшое исходное разрешение. Можно рассмотреть увеличение до 2K; 4K имеет смысл только после оценки результата.");
       if (width * height < 1000000) recommendations.push("Меньше 1 Мп: увеличение разрешения может быть полезно, но новые детали будут предположительными.");
       const canvas = document.createElement("canvas");
-      const sampleWidth = 128;
-      const sampleHeight = Math.max(1, Math.round(sampleWidth * height / width));
-      canvas.width = sampleWidth;
-      canvas.height = Math.min(128, sampleHeight);
+      const scale = Math.min(128 / width, 128 / height);
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
       const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context) {
         recommendations.push("Не удалось получить пиксельные данные для предварительной оценки.");
