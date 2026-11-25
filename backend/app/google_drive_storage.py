@@ -93,8 +93,10 @@ def upload_file(db: Session, user_id: str, source: Path, filename: str, content_
         raise HTTPException(status_code=502, detail="Google Drive returned invalid upload metadata") from exc
     file_id = result.get("id") if isinstance(result, dict) else None
     parents = result.get("parents", []) if isinstance(result, dict) else []
-    if not file_id or folder_id not in parents:
-        raise HTTPException(status_code=502, detail="Google Drive upload was not confirmed inside the configured archive folder")
+    uploaded_size = result.get("size") if isinstance(result, dict) else None
+    uploaded_type = result.get("mimeType") if isinstance(result, dict) else None
+    if not file_id or folder_id not in parents or str(uploaded_size) != str(size_bytes) or uploaded_type != content_type:
+        raise HTTPException(status_code=502, detail="Google Drive upload metadata did not match the original file")
     return file_id
 
 
