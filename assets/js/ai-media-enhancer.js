@@ -132,7 +132,7 @@
     const scan = await scanResponse.json();
     if (scan.scan_status !== "clean") throw new Error("Оригинал не прошёл антивирусную проверку.");
 
-    setStage("Обработка проверенного оригинала", "Pillow · OpenCV · scikit-image / FFmpeg · OpenCV");
+    setStage("Обработка проверенного оригинала", "Real-ESRGAN NCNN Vulkan x4 · видео x2");
     status.textContent = "Оригинал проверен и сохранён. Запущена автоматическая обработка отдельной копии.";
     const enhancedResponse = await fetch(base + "/api/v1/archive/items/" + encodeURIComponent(original.archive_item_id) + "/enhance", {
       method: "POST", headers, cache: "no-store"
@@ -189,9 +189,11 @@
         return;
       }
       if (file.type.startsWith("video/")) {
-        setStage("Видеообработчик подготовлен", "FFmpeg + OpenCV · требуется подключение частного backend worker");
-        status.textContent = "Оригинал видео открыт и проверен по типу и размеру. Автоматическая обработка FFmpeg + OpenCV подготовлена в backend, но публичный сайт пока не подключён к серверу. Фиктивный результат не создаётся.";
-        mode.textContent = "ВИДЕО · ОЖИДАЕТ BACKEND";
+        setStage("Ожидается AI video worker", "Real-ESRGAN x2 · FFmpeg · сохранение аудио");
+        resultEmpty.textContent = "AI-обработка видео появится после подключения частного worker. Исходник не изменён, фиктивный ролик не создаётся.";
+        resultEmpty.hidden = false;
+        status.textContent = "Оригинал видео выбран. Для автоматического улучшения требуется частный backend с Real-ESRGAN, FFmpeg и моделью. Внешний EzEnhancer предназначен для фотографий.";
+        mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
         return;
       }
       setStage("Ожидается AI worker", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
