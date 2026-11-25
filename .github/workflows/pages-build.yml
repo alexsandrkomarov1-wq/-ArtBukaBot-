@@ -24,7 +24,7 @@ jobs:
           source: ./
           destination: ./_site
       - name: Check media viewer JavaScript syntax
-        run: node --check assets/js/family-portraits.js && node --check assets/js/media-library.js && node --check assets/js/site-guide.js && node --check assets/js/places-gallery.js
+        run: node --check assets/js/family-portraits.js && node --check assets/js/media-library.js && node --check assets/js/site-guide.js && node --check assets/js/places-gallery.js && node --check assets/js/family-board-map.js
       - name: Check media viewer interface contract
         run: python3 scripts/check_media_viewer.py
       - name: Check generated pages and local links
