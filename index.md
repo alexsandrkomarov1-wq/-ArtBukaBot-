@@ -116,10 +116,10 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
             <button type="button" data-scene-choice="sunset" aria-pressed="false">Закат</button>
           </div>
           <div class="music-moods" aria-label="Музыкальное настроение">
-            <button type="button" data-mood-choice="romance">Романтика</button>
-            <button type="button" data-mood-choice="calm">Спокойствие</button>
-            <button type="button" data-mood-choice="focus">Фокус</button>
-            <button type="button" data-mood-choice="nature">Звуки природы</button>
+            <button type="button" data-mood-choice="romance" aria-pressed="true">Романтика</button>
+            <button type="button" data-mood-choice="calm" aria-pressed="false">Спокойствие</button>
+            <button type="button" data-mood-choice="focus" aria-pressed="false">Фокус</button>
+            <button type="button" data-mood-choice="nature" aria-pressed="false">Природная мелодия</button>
           </div>
           <div class="assistant-controls">
             <button type="button" class="ai-media-sound-toggle" data-sound-toggle>▶ Включить музыку</button>
@@ -130,6 +130,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       </div>
     </div>
     <a class="ai-media-external" href="https://ezenhancer.ai/ru/" target="_blank" rel="noopener noreferrer">Открыть EzEnhancer для внешнего AI-улучшения <span aria-hidden="true">↗</span></a>
+    <small class="ai-media-copy-note">Это отдельный сервис: фотографию потребуется загрузить туда вручную. Автоматическая передача файлов в EzEnhancer не подключена.</small>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
 
