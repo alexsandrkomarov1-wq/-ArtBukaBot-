@@ -140,7 +140,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 </section>
 <section class="places-gallery" aria-labelledby="places-gallery-title" data-places-gallery>
   <div class="places-gallery-heading">
-    <div><p class="eyebrow">МИР ВОКРУГ НАС · МЕСТА И КУЛЬТУРА</p><h2 id="places-gallery-title">Места, которые <em>стоит увидеть.</em></h2><p>Музеи, архитектура, природные памятники и города. Фотографии загружаются из открытой медиатеки Wikimedia Commons с указанием источника и лицензии.</p></div>
+    <div><p class="eyebrow">МИР ВОКРУГ НАС · МЕСТА И КУЛЬТУРА</p><h2 id="places-gallery-title">Места, которые <em>стоит увидеть.</em></h2><p>Музеи, архитектура, природные памятники и города. Фотографии ищутся в нескольких независимых медиатеках: Openverse (каталог материалов из разных коллекций), Wikimedia Commons и NASA Image and Video Library. Для каждого изображения отдельно указаны автор, первоисточник и лицензия или условия использования.</p></div>
     <button type="button" class="gallery-refresh" data-gallery-refresh>Обновить фотографии <span aria-hidden="true">↻</span></button>
   </div>
   <div class="places-gallery-grid">
