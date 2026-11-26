@@ -49,7 +49,7 @@ create policy "archive_items_insert_own"
 -- No DELETE policy: archive records are not deletable from this first release.
 
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('komarova_core_private', 'komarova_core_private', false, 104857600)
+values ('komarova_core_private', 'komarova_core_private', false, 52428800)
 on conflict (id) do update
 set public = false,
     file_size_limit = excluded.file_size_limit;
