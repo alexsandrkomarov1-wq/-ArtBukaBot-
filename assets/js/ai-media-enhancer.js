@@ -303,7 +303,7 @@
       resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался. Войдите в частный backend для антивирусной проверки и обработки Real-ESRGAN. Внешний EzEnhancer доступен отдельно по ссылке ниже.";
+      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался. Войдите в частный backend для антивирусной проверки и обработки Real-ESRGAN. Внешние сервисы не используются. Серверная обработка KOMAROVA_CORE ожидает подключения собственного AI worker.";
       exportButton.disabled = true;
     } catch (error) {
       if (token !== generation) return;
