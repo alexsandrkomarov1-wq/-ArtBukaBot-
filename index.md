@@ -70,7 +70,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <div>
       <p class="eyebrow">ВОССТАНОВЛЕНИЕ · СОХРАНЕНИЕ · ПОКОЛЕНИЯ</p>
       <h2 id="ai-media-title">AI MEDIA <em>ENHANCER</em></h2>
-      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Оригинал остаётся неизменным. После подключения частного backend ClamAV проверит файл, а AI worker на базе Real-ESRGAN создаст отдельную копию с восстановлением деталей и увеличением разрешения до 4×.</p>
+      <p class="ai-media-lead">Лаборатория восстановления KOMAROVA_CORE. Оригинал остаётся неизменным. Внутренний AI-движок KOMAROVA_CORE проверяет файл и создаёт отдельную улучшенную копию с восстановлением деталей и увеличением разрешения до 4×.</p>
     </div>
     <div class="ai-media-seal" aria-hidden="true"><span>KOMAROVA</span><strong>CORE</strong><small>MEDIA LAB</small></div>
   </div>
@@ -80,25 +80,18 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · AI SUPER-RESOLUTION</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
-    <form class="ai-media-connect" data-ai-connect-form>
-      <div class="ai-media-connect-heading"><strong>ПОДКЛЮЧЕНИЕ ЧАСТНОГО BACKEND</strong><span>HTTPS · пароль не сохраняется</span></div>
-      <label>Адрес API<input data-ai-api-url type="url" placeholder="https://адрес-частного-api" autocomplete="url" required></label>
-      <label>Логин<input data-ai-username type="text" autocomplete="username" required></label>
-      <label>Пароль<input data-ai-password type="password" autocomplete="off" required></label>
-      <button type="submit" class="ai-media-button ai-media-button-primary" data-ai-connect-submit>Подключить частный worker</button>
-      <p class="ai-media-live-status" data-ai-backend-status role="status" aria-live="polite">Частный backend пока не развёрнут. Адрес API указывается после публикации сервиса. Поле пароля пустое: ввод вручную. Без успешного входа файл не отправляется на сервер.</p>
-    </form>
+    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>АВТОМАТИЧЕСКОЕ AI-УЛУЧШЕНИЕ</strong><span>Выберите фото или видео. После установки внутреннего AI-движка обработка будет запускаться автоматически. Адрес API, логин, пароль и регистрация для редактирования не потребуются.</span><small>Сейчас движок ещё не установлен на сервере. Поэтому настоящая AI-копия пока не создаётся.</small></div>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
         <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
         <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор файла · проверка формата · AI-обработка после подключения worker · до 100 МБ</small>
+        <small class="ai-media-action-note">Выбор файла · проверка формата · автоматическое AI-улучшение · до 100 МБ</small>
       </button>
       <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
         <strong class="ai-media-action-title">Автоматическое улучшение</strong>
-        <small class="ai-media-action-note">Запускается сразу после проверки выбранного оригинала</small>
+        <small class="ai-media-action-note">Автоматический запуск после выбора фотографии или видео</small>
       </div>
       <button class="ai-media-button" type="button" data-ai-export disabled>
         <span class="ai-media-step">03 <span aria-hidden="true">/</span> EXPORT</span>
@@ -121,7 +114,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <small class="ai-media-copy-note">Результат создаётся как отдельный файл. Исходник не изменяется.</small>
       </figure>
     </div>
-    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Выберите фотографию. После проверки частный AI worker создаст улучшенную копию.</p>
+    <p class="ai-media-live-status" data-ai-status role="status" aria-live="polite">Выберите фотографию. После автоматической проверки внутренний AI-движок создаст улучшенную копию.</p>
     <div class="ai-media-atmosphere" data-media-atmosphere>
       <div class="ai-media-nature-scene" data-nature-scene="forest" aria-hidden="true">
         <span class="nature-sun"></span><span class="nature-mountains"></span><span class="nature-hills"></span>
@@ -161,7 +154,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
 
   <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>ОРИГИНАЛ ЗАЩИЩЁН · КОПИЯ УЧИТЫВАЕТСЯ ОТДЕЛЬНО</span></div>
-  <p class="ai-media-footnote">Оригинал никогда не изменяется. Результат проходит проверку, получает отдельный MATERIAL-ID и связь с оригиналом. Публичный сайт пока не подключён к развёрнутому backend worker: серверная обработка и архивная регистрация станут доступны после его публикации.</p>
+  <p class="ai-media-footnote">Оригинал никогда не изменяется. Результат проходит проверку, получает отдельный MATERIAL-ID и связь с оригиналом. Внутренний AI-движок пока не установлен на сервере. До его установки автоматическая обработка недоступна.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
