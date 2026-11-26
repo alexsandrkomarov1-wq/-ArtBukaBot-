@@ -184,3 +184,35 @@ class EntityLink(Base):
     relationship_type: Mapped[str] = mapped_column(String(48), nullable=False)
     created_by_user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class GoogleDriveReplica(Base):
+    __tablename__ = "google_drive_replicas"
+    __table_args__ = (UniqueConstraint("blob_id", name="uq_google_drive_replica_blob"),)
+    replica_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("GDR"))
+    blob_id: Mapped[str] = mapped_column(ForeignKey("stored_blobs.blob_id"), nullable=False)
+    drive_file_id: Mapped[str | None] = mapped_column(String(160), nullable=True, unique=True)
+    folder_id: Mapped[str] = mapped_column(String(160), nullable=False)
+    expected_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    state: Mapped[str] = mapped_column(String(24), nullable=False, default="pending")
+    attempt_count: Mapped[int] = mapped_column(nullable=False, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+
+class GoogleDriveOutbox(Base):
+    __tablename__ = "google_drive_outbox"
+    job_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("GDO"))
+    blob_id: Mapped[str] = mapped_column(ForeignKey("stored_blobs.blob_id"), nullable=False, unique=True)
+    state: Mapped[str] = mapped_column(String(24), nullable=False, default="pending", index=True)
+    attempts: Mapped[int] = mapped_column(nullable=False, default=0)
+    available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, index=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
