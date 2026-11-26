@@ -514,6 +514,7 @@ a { color:var(--green); }
 .ai-media-live-preview figcaption{padding:3px 3px 9px;color:#56645b;font:800 9px Consolas,monospace;letter-spacing:.1em}
 .ai-media-live-frame{display:flex;align-items:center;justify-content:center;min-height:190px;max-height:360px;overflow:hidden;background:#d7d0c1;color:#536158;text-align:center;font-size:11px}
 .ai-media-live-frame img,.ai-media-live-frame video{display:block;width:100%;max-height:360px;object-fit:contain}
+.ai-media-live-frame img[hidden],.ai-media-live-frame video[hidden]{display:none!important}
 .ai-media-live-status{border-left:2px solid #c7a57d}
 .ai-media-reset{margin-top:12px;padding:8px 11px;border:1px solid rgba(212,177,138,.4);background:transparent;color:#d4b18a;font-size:10px;cursor:pointer}
 .ai-media-reset:disabled{opacity:.4;cursor:not-allowed}
