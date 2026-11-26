@@ -75,6 +75,12 @@ description: Закрытый семейный архив фотографий, 
       <label>Название / подпись
         <input id="cloud-upload-title" maxlength="300" placeholder="Например, семейная встреча">
       </label>
+      <label>Описание
+        <textarea id="cloud-upload-description" rows="2" maxlength="2000" placeholder="Кто, что и при каких обстоятельствах изображено"></textarea>
+      </label>
+      <label>Дата съёмки / создания
+        <input id="cloud-captured-at" type="date">
+      </label>
       <label>Человек · PERSON-ID
         <input id="cloud-person-id" maxlength="40" placeholder="P-...">
       </label>
