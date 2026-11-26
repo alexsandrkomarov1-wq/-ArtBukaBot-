@@ -47,6 +47,20 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
 
+class ExternalIdentity(Base):
+    """Explicit mapping from an external identity provider to a local role-bearing account."""
+    __tablename__ = "external_identities"
+    __table_args__ = (
+        UniqueConstraint("provider", "subject", name="uq_external_identity_provider_subject"),
+        UniqueConstraint("provider", "user_id", name="uq_external_identity_provider_user"),
+    )
+    identity_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("XI"))
+    provider: Mapped[str] = mapped_column(String(24), nullable=False)
+    subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_id"), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
 class AuthSession(Base):
     __tablename__ = "auth_sessions"
     session_id: Mapped[str] = mapped_column(String(34), primary_key=True, default=lambda: new_id("S"))
