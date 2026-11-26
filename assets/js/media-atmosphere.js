@@ -10,6 +10,8 @@
   const voiceButton = root.querySelector("[data-voice-assistant]");
   const sceneButtons = [...root.querySelectorAll("[data-scene-choice]")];
   const moodButtons = [...root.querySelectorAll("[data-mood-choice]")];
+  const autoButton = root.querySelector("[data-scene-auto]");
+  const desktopButton = root.querySelector("[data-desktop-mode]");
 
   const scenes = ["forest", "lake", "mountain", "sunset"];
   const sceneNames = { forest: "Лес", lake: "Озеро", mountain: "Горы", sunset: "Закат" };
@@ -31,10 +33,18 @@
   let sceneTimer = null;
   let recognition = null;
   let sceneManuallySelected = false;
+  let autoCycleEnabled = true;
 
   function setScene(name, manual = true) {
     if (!scenes.includes(name)) return;
-    if (manual) sceneManuallySelected = true;
+    if (manual) {
+      sceneManuallySelected = true;
+      autoCycleEnabled = false;
+      if (autoButton) {
+        autoButton.setAttribute("aria-pressed", "false");
+        autoButton.textContent = "Автосмена пейзажа: выключена";
+      }
+    }
     currentScene = name;
     scene.dataset.natureScene = name;
     sceneButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.sceneChoice === name)));
@@ -200,6 +210,29 @@
   }
 
   sceneButtons.forEach(button => button.addEventListener("click", () => setScene(button.dataset.sceneChoice)));
+  if (autoButton) autoButton.addEventListener("click", () => {
+    autoCycleEnabled = !autoCycleEnabled;
+    sceneManuallySelected = !autoCycleEnabled;
+    autoButton.setAttribute("aria-pressed", String(autoCycleEnabled));
+    autoButton.textContent = "Автосмена пейзажа: " + (autoCycleEnabled ? "включена" : "выключена");
+    status.textContent = autoCycleEnabled
+      ? "Автоматическая смена природных сцен включена."
+      : "Пейзаж зафиксирован. Вы можете выбрать сцену вручную.";
+  });
+  if (desktopButton) desktopButton.addEventListener("click", async () => {
+    try {
+      if (document.fullscreenElement === root) await document.exitFullscreen();
+      else if (root.requestFullscreen) await root.requestFullscreen();
+      else throw new Error("Полноэкранный режим не поддерживается этим браузером.");
+    } catch (error) {
+      status.textContent = error.message || "Не удалось открыть полноэкранную заставку.";
+    }
+  });
+  document.addEventListener("fullscreenchange", () => {
+    if (desktopButton) desktopButton.textContent = document.fullscreenElement === root
+      ? "Закрыть заставку"
+      : "Полноэкранная заставка";
+  });
   moodButtons.forEach(button => button.addEventListener("click", () => {
     setMood(button.dataset.moodChoice);
     void startMusic();
@@ -210,7 +243,7 @@
   sceneTimer = window.setInterval(() => {
     if (document.hidden) return;
     const next = (scenes.indexOf(currentScene) + 1) % scenes.length;
-    if (!sceneManuallySelected) setScene(scenes[next], false);
+    if (autoCycleEnabled && !sceneManuallySelected) setScene(scenes[next], false);
   }, 18000);
 
   window.addEventListener("pagehide", () => {
