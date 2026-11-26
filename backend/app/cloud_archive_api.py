@@ -177,7 +177,6 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 material_role="original", output_sha256=sha256,
             )
             db.add(material)
-            enqueue_google_drive_replica(db, blob)
             if linked_person is not None:
                 link = ArchiveEntityLink(
                     archive_item_id=item.archive_item_id, target_entity_type="person",
@@ -272,6 +271,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
             if result.returncode == 0:
                 item.record_status = "available"
                 blob.storage_state = "verified"
+                enqueue_google_drive_replica(db, blob)
                 scan_status = "clean"
             elif result.returncode == 1:
                 item.record_status = "infected"
@@ -414,6 +414,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                     source_sha256=result.source_sha256, output_sha256=result.output_sha256,
                 )
                 db.add(derivative_material)
+                enqueue_google_drive_replica(db, derivative_blob)
                 db.add(AuditEvent(
                     event_type="archive.media_derivative_created",
                     entity_type="material", entity_id=derivative_material.material_id,
