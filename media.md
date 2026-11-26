@@ -43,7 +43,7 @@ description: Закрытый семейный архив фотографий, 
     <summary>Первичная настройка структуры архива в Supabase</summary>
     <p>Откройте SQL Editor в проекте Supabase и выполните подготовленный SQL-файл. Он создаёт приватный bucket, таблицу реестра и политики Row Level Security. Скрипт не переносит и не удаляет существующие данные.</p>
     <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/backend/supabase/001_private_media_archive.sql">Открыть SQL-настройку KOMAROVA_CORE ↗</a></p>
-    <p>После SQL-настройки создайте учётную запись владельца в Supabase Authentication. Публичная регистрация с сайта не включена.</p>
+    <p>Учётная запись требуется только для входа в закрытый семейный архив. В редакторе фотографий вход по почте не используется.</p>
   </details>
 </section>
 
@@ -80,15 +80,6 @@ description: Закрытый семейный архив фотографий, 
       </label>
       <label>Дата съёмки / создания
         <input id="cloud-captured-at" type="date">
-      </label>
-      <label>Человек · PERSON-ID
-        <input id="cloud-person-id" maxlength="40" placeholder="P-...">
-      </label>
-      <label>Событие · EVENT-ID
-        <input id="cloud-event-id" maxlength="40" placeholder="EVENT-ID">
-      </label>
-      <label>Место · PLACE-ID
-        <input id="cloud-place-id" maxlength="40" placeholder="PLACE-ID">
       </label>
       <button id="cloud-upload-submit" type="submit" class="media-open-button">Сохранить оригинал в архив</button>
     </form>
