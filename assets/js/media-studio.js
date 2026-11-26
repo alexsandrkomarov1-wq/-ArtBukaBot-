@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const root = document.querySelector("[data-media-atmosphere]");
+  const root = document.querySelector("[data-ai-media-lab]");
   if (!root) return;
 
   const fileInput = root.querySelector("[data-music-files]");
