@@ -2,7 +2,7 @@
 
 **Target branch:** `core-backend-foundation`  
 **Provider status:** temporary parallel copy only; not the authoritative archive  
-**Implementation status:** integration contract recorded; live transfer is not enabled
+**Implementation status:** backend adapter, transactional queue, retry worker and verification code added; deployment and live Drive authorization are still pending
 
 ## 1. Required behavior
 
@@ -84,7 +84,29 @@ Do not show a generic cloud-success badge until Drive read-back and SHA-256 veri
 9. A deployment restart does not lose pending outbox jobs.
 10. No Google Drive credentials or personal media appear in the Git repository or public Pages bundle.
 
-## 7. Current verified gap
+## 7. Implemented in the working branch
+
+The backend now contains:
+
+- GoogleDriveReplica and GoogleDriveOutbox SQLAlchemy models plus migration 0009_google_drive_replication;
+- an archive-intake hook that writes an outbox job in the same database transaction as the original blob/material;
+- a server-side worker started with `python -m backend.app.google_drive_sync`, polling every 10 seconds;
+- resumable Drive upload, application metadata for idempotency, read-back download and SHA-256/size verification;
+- bounded exponential retry, sanitized error codes and expired-lease recovery.
+
+The worker is disabled unless GOOGLE_DRIVE_SYNC_ENABLED=true and GOOGLE_DRIVE_FOLDER_ID are configured. Required hosting secrets are GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_DRIVE_REFRESH_TOKEN. Keep them in the private backend host's secret settings, never in Git or the browser. The local token file is not automatically available to the hosted backend.
+
+The worker does not create a folder. It uses only the explicitly configured folder ID. With the current drive.file scope, a manually created folder may still be inaccessible until the owner selects/shares it through an approved Google Picker flow. Do not widen the OAuth scope or create a duplicate folder to bypass this.
+
+## 8. Remaining deployment and acceptance gates
+
+- Apply migration 0009_google_drive_replication to the intended backend database only after the deployment target is confirmed.
+- Configure the five secrets above in the private backend host.
+- Confirm the existing KOMAROVA_CORE folder is authorized to the OAuth app without creating a second folder.
+- Start the worker as a private background process and verify a synthetic test file uploads, downloads back, and matches SHA-256.
+- Verify duplicate retry, transient failure retry, restart recovery and pause behavior before calling synchronization operational.
+
+## 9. Previously verified gap
 
 The current backend's `PrivateMediaStorage` supports local-private and S3-compatible storage only. The archive upload and enhancement routes write to that configured primary backend. There is no Google Drive adapter, replica/outbox table, background replication worker, or Drive read-back verification in the current branch.
 
