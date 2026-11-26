@@ -89,7 +89,7 @@ Do not show a generic cloud-success badge until Drive read-back and SHA-256 veri
 The backend now contains:
 
 - GoogleDriveReplica and GoogleDriveOutbox SQLAlchemy models plus migration 0009_google_drive_replication;
-- an archive-intake hook that writes an outbox job in the same database transaction as the original blob/material;
+- a post-ClamAV hook that writes an outbox job only after an original passes malware scanning, plus a derivative hook after its own malware scan; both jobs are committed in the same transaction as their verified material records;
 - a server-side worker started with `python -m backend.app.google_drive_sync`, polling every 10 seconds;
 - resumable Drive upload, application metadata for idempotency, read-back download and SHA-256/size verification;
 - bounded exponential retry, sanitized error codes and expired-lease recovery.
@@ -106,10 +106,6 @@ The worker does not create a folder. It uses only the explicitly configured fold
 - Start the worker as a private background process and verify a synthetic test file uploads, downloads back, and matches SHA-256.
 - Verify duplicate retry, transient failure retry, restart recovery and pause behavior before calling synchronization operational.
 
-## 9. Previously verified gap
+## 9. Operational status
 
-The current backend's `PrivateMediaStorage` supports local-private and S3-compatible storage only. The archive upload and enhancement routes write to that configured primary backend. There is no Google Drive adapter, replica/outbox table, background replication worker, or Drive read-back verification in the current branch.
-
-The current `requirements.txt` also does not include the Google Drive API client libraries. The existing local OAuth files are not deployment secrets and do not configure the hosted backend.
-
-Consequently, this document records the required implementation contract; it does **not** claim that automatic synchronization is active. Do not enable the feature until the adapter, persistence, worker, server-side secrets, folder authorization, and acceptance tests are implemented and verified.
+The code path is implemented in the working branch, but automatic synchronization is not active until the database migration is applied, the private backend worker is deployed, the five server-side settings are configured, and the existing folder is authorized. No upload to the owner's Drive has been performed by this implementation yet.
