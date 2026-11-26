@@ -30,9 +30,6 @@
   let resultUrl = null;
   let generation = 0;
   let archiveResult = null;
-  let apiBase = "";
-  let accessToken = "";
-  let accountRole = "";
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
@@ -86,7 +83,7 @@
     originalEmpty.hidden = false;
     preview.hidden = true;
     reset.disabled = true;
-    mode.textContent = accessToken ? "API ПОДКЛЮЧЁН · ОЖИДАЕТ ФАЙЛ" : "AI WORKER НЕ ПОДКЛЮЧЁН";
+    mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
     setStage("Ожидается AI worker", "ClamAV и Real-ESRGAN запускаются после подключения частного backend");
     info.textContent = "Файл ещё не выбран. Выберите фотографию или видео.";
     status.textContent = "Оригинал не изменяется. После выбора выполняются локальные проверки; ClamAV и AI-обработка требуют входа в частный backend.";
@@ -104,7 +101,7 @@
     if (file.type.startsWith("image/")) {
       originalImage.src = sourceUrl;
       originalImage.hidden = false;
-      mode.textContent = accessToken ? "ОРИГИНАЛ ОТПРАВЛЯЕТСЯ В КАРАНТИН" : "ЛОКАЛЬНАЯ ПРОВЕРКА ОРИГИНАЛА";
+      mode.textContent = "ЛОКАЛЬНАЯ ПРОВЕРКА ОРИГИНАЛА";
     } else {
       originalVideo.src = sourceUrl;
       originalVideo.hidden = false;
@@ -114,21 +111,6 @@
     reset.disabled = false;
   }
 
-  function friendlyNetworkError(error) {
-    if (error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(error && error.message || "")) {
-      return "Частный backend не отвечает. Проверьте адрес API, доступность сервиса и настройки HTTPS/CORS";
-    }
-    return error && error.message ? error.message : "Неизвестная ошибка";
-  }
-
-  function normalizeApiBase(value) {
-    if (!value || !value.trim()) throw new Error("Адрес частного API пока не указан: сервер ещё не опубликован.");
-    const url = new URL(value.trim());
-    if (url.protocol !== "https:" && !(url.hostname === "localhost" || url.hostname === "127.0.0.1")) {
-      throw new Error("Для удалённого частного API требуется HTTPS.");
-    }
-    return url.href.replace(/\/+$/, "");
-  }
 
   async function validateImageDimensions(file) {
     if (!file.type.startsWith("image/") || typeof createImageBitmap !== "function") return;
@@ -146,109 +128,9 @@
     }
   }
 
-  async function connectPrivateBackend(event) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const apiInput = form.querySelector("[data-ai-api-url]");
-    const usernameInput = form.querySelector("[data-ai-username]");
-    const passwordInput = form.querySelector("[data-ai-password]");
-    const connectButton = form.querySelector("[data-ai-connect-submit]");
-    const connectionStatus = root.querySelector("[data-ai-backend-status]");
-    accessToken = "";
-    accountRole = "";
-    try {
-      apiBase = normalizeApiBase(apiInput.value);
-      if (!usernameInput.value.trim() || !passwordInput.value) {
-        throw new Error("Введите логин и пароль вручную. Пароль не сохраняется.");
-      }
-      connectButton.disabled = true;
-      connectionStatus.textContent = "Проверяем частный backend…";
-      const health = await fetch(apiBase + "/health", { cache: "no-store" });
-      if (!health.ok) throw new Error("Backend ответил HTTP " + health.status + ".");
-      const response = await fetch(apiBase + "/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({ username: usernameInput.value.trim(), password: passwordInput.value }),
-        cache: "no-store"
-      });
-      passwordInput.value = "";
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload.access_token) {
-        throw new Error(response.status === 401 ? "Логин или пароль не принят." : "Вход не выполнен. HTTP " + response.status + ".");
-      }
-      accessToken = payload.access_token;
-      accountRole = payload.user && payload.user.role || "";
-      if (!accountRole) {
-        const me = await fetch(apiBase + "/api/v1/auth/me", {
-          headers: { Authorization: "Bearer " + accessToken, "Accept": "application/json" },
-          cache: "no-store"
-        });
-        if (!me.ok) throw new Error("Не удалось подтвердить роль учётной записи.");
-        const user = await me.json();
-        accountRole = user.role || "";
-      }
-      connectionStatus.textContent = "Частный API подключён · вход выполнен · роль: " + (accountRole || "не определена") + ". Пароль очищен и не сохранён.";
-      if (!["owner", "moderator"].includes(accountRole)) {
-        connectionStatus.textContent += " AI-обработка доступна владельцу или модератору.";
-      } else if (sourceFile) {
-        void processSelected(sourceFile, generation);
-      }
-    } catch (error) {
-      accessToken = "";
-      accountRole = "";
-      connectionStatus.textContent = "Подключение не выполнено: " + friendlyNetworkError(error) + ". Поле пароля очищено.";
-      status.textContent = "Частный AI worker не запущен. Оригинал не изменяется.";
-    } finally {
-      passwordInput.value = "";
-      connectButton.disabled = false;
-    }
-  }
-
-  const connectionForm = root.querySelector("[data-ai-connect-form]");
-  if (connectionForm) connectionForm.addEventListener("submit", connectPrivateBackend);
-
-  async function runPrivateWorker(file, token) {
-    if (!apiBase || !accessToken) return null;
-    if (!["owner", "moderator"].includes(accountRole)) {
-      throw new Error("Для запуска ClamAV и Real-ESRGAN нужна роль владельца или модератора.");
-    }
-    const base = apiBase;
-    const headers = { Authorization: "Bearer " + accessToken };
-    const form = new FormData();
-    form.append("file", file, file.name);
-    const uploadedResponse = await fetch(base + "/api/v1/archive/items", {
-      method: "POST", headers, body: form, cache: "no-store"
-    });
-    if (!uploadedResponse.ok) throw new Error("Архив не принял оригинал: HTTP " + uploadedResponse.status);
-    const original = await uploadedResponse.json();
-    if (token !== generation) throw new Error("Выбран другой файл.");
-
-    const scanResponse = await fetch(base + "/api/v1/archive/items/" + encodeURIComponent(original.archive_item_id) + "/scan", {
-      method: "POST", headers, cache: "no-store"
-    });
-    if (!scanResponse.ok) throw new Error("Проверка безопасности не завершена: HTTP " + scanResponse.status);
-    const scan = await scanResponse.json();
-    if (scan.scan_status !== "clean") throw new Error("Оригинал не прошёл антивирусную проверку.");
-
-    setStage("Обработка проверенного оригинала", "Real-ESRGAN NCNN Vulkan x4 · видео x2");
-    status.textContent = "Оригинал проверен и сохранён. Запущена автоматическая обработка отдельной копии.";
-    const enhancedResponse = await fetch(base + "/api/v1/archive/items/" + encodeURIComponent(original.archive_item_id) + "/enhance", {
-      method: "POST", headers, cache: "no-store"
-    });
-    if (!enhancedResponse.ok) throw new Error("Обработка не завершилась: HTTP " + enhancedResponse.status);
-    const derivative = await enhancedResponse.json();
-    if (token !== generation) throw new Error("Выбран другой файл.");
-
-    const contentResponse = await fetch(base + "/api/v1/archive/items/" + encodeURIComponent(derivative.archive_item_id) + "/content", {
-      method: "GET", headers, cache: "no-store"
-    });
-    if (!contentResponse.ok) throw new Error("Не удалось получить проверенную копию: HTTP " + contentResponse.status);
-    const blob = await contentResponse.blob();
-    const result = new File([blob], file.name.replace(/\.[^.]+$/, "") + "-enhanced" + (file.type.startsWith("video/") ? ".mp4" : ".png"), {
-      type: blob.type || (file.type.startsWith("video/") ? "video/mp4" : "image/webp"),
-      lastModified: Date.now()
-    });
-    return { file: result, material: derivative };
+  async function runPrivateWorker() {
+    // No browser-side credentials or manual backend connection. A deployed first-party worker will be invoked by the site service.
+    return null;
   }
 
   async function displayResult(file, token, material) {
@@ -297,19 +179,19 @@
         mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
         return;
       }
-      setStage("Ожидается AI worker", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
-      mode.textContent = "AI WORKER НЕ ПОДКЛЮЧЁН";
+      setStage("Ожидается установка AI-движка", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
+      mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
       resultEmpty.textContent = "Настоящее AI-улучшение появится после подключения частного worker. Сейчас здесь не показывается поддельная копия.";
       resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-      status.textContent = "Оригинал сохранён без изменений. Локально проверены формат, размер и SHA-256; ClamAV не запускался. Войдите в частный backend для антивирусной проверки и обработки Real-ESRGAN. Внешние сервисы не используются. Серверная обработка KOMAROVA_CORE ожидает подключения собственного AI worker.";
+      status.textContent = "Оригинал сохранён без изменений. Формат, размер и SHA-256 проверены локально. Внутренний AI-движок ещё не установлен, поэтому настоящая нейросетевая обработка не запускалась.";
       exportButton.disabled = true;
     } catch (error) {
       if (token !== generation) return;
       setStage("Обработка остановлена", "Оригинал сохранён без изменений");
       mode.textContent = "ОШИБКА ОБРАБОТКИ";
-      status.textContent = "Не удалось создать проверенную копию: " + friendlyNetworkError(error) + ". Исходный файл не изменён.";
+      status.textContent = "Не удалось создать проверенную копию: " + (error && error.message ? error.message : "неизвестная ошибка") + ". Исходный файл не изменён.";
     }
   }
 
@@ -347,8 +229,8 @@
   reset.addEventListener("click", clearWorkspace);
   exportButton.disabled = true;
   preview.hidden = true;
-  mode.textContent = "AI WORKER НЕ ПОДКЛЮЧЁН";
-  setStage("Ожидается AI worker", "Подключите частный backend для ClamAV и Real-ESRGAN x4");
+  mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
+  setStage("Ожидается AI-движок", "Real-ESRGAN NCNN Vulkan · автоматическое улучшение x4");
   window.addEventListener("pagehide", () => {
     releaseUrl(sourceUrl);
     releaseUrl(resultUrl);
