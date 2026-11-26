@@ -46,6 +46,7 @@
       if (!image) return;
       const frame = image.parentElement;
       if (frame) {
+        frame.style.display = "block";
         frame.style.overflow = "auto";
         frame.style.maxHeight = "360px";
         frame.style.maxWidth = "100%";
