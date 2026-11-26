@@ -72,3 +72,56 @@ def test_s3_upload_does_not_send_unsupported_encryption_header(tmp_path, monkeyp
     assert name == "put_object"
     assert kwargs["ContentType"] == "image/jpeg"
     assert "ServerSideEncryption" not in kwargs
+
+
+
+def test_cloudflare_r2_configuration_uses_auto_region_and_path_style(tmp_path, monkeypatch):
+    monkeypatch.setenv("CORE_STORAGE_BACKEND", "cloudflare-r2")
+    monkeypatch.setenv("CORE_S3_ENDPOINT_URL", "https://account-id.r2.cloudflarestorage.com")
+    monkeypatch.setenv("CORE_S3_REGION", "auto")
+    monkeypatch.setenv("CORE_S3_BUCKET", "komarova-core-private")
+    monkeypatch.setenv("CORE_S3_ACCESS_KEY_ID", "test-access-key")
+    monkeypatch.setenv("CORE_S3_SECRET_ACCESS_KEY", "test-secret-key")
+    captured = {}
+
+    def fake_client(service, **kwargs):
+        captured["service"] = service
+        captured.update(kwargs)
+        return FakeS3Client()
+
+    monkeypatch.setattr("backend.app.storage.boto3.client", fake_client)
+
+    storage = PrivateMediaStorage(tmp_path / "private")
+
+    assert storage.provider == "cloudflare-r2"
+    assert storage.health_check() == {"status": "ok", "backend": "cloudflare-r2"}
+    assert captured["service"] == "s3"
+    assert captured["endpoint_url"] == "https://account-id.r2.cloudflarestorage.com"
+    assert captured["region_name"] == "auto"
+    assert captured["config"].s3["addressing_style"] == "path"
+
+
+def test_cloudflare_r2_rejects_non_r2_endpoint(tmp_path, monkeypatch):
+    monkeypatch.setenv("CORE_STORAGE_BACKEND", "cloudflare-r2")
+    monkeypatch.setenv("CORE_S3_ENDPOINT_URL", "https://s3.example.com")
+    monkeypatch.setenv("CORE_S3_REGION", "auto")
+    monkeypatch.setenv("CORE_S3_BUCKET", "komarova-core-private")
+    monkeypatch.setenv("CORE_S3_ACCESS_KEY_ID", "test-access-key")
+    monkeypatch.setenv("CORE_S3_SECRET_ACCESS_KEY", "test-secret-key")
+
+    import pytest
+    with pytest.raises(RuntimeError, match="Cloudflare R2 endpoint"):
+        PrivateMediaStorage(tmp_path / "private")
+
+
+def test_cloudflare_r2_requires_auto_region(tmp_path, monkeypatch):
+    monkeypatch.setenv("CORE_STORAGE_BACKEND", "cloudflare-r2")
+    monkeypatch.setenv("CORE_S3_ENDPOINT_URL", "https://account-id.r2.cloudflarestorage.com")
+    monkeypatch.setenv("CORE_S3_REGION", "us-east-1")
+    monkeypatch.setenv("CORE_S3_BUCKET", "komarova-core-private")
+    monkeypatch.setenv("CORE_S3_ACCESS_KEY_ID", "test-access-key")
+    monkeypatch.setenv("CORE_S3_SECRET_ACCESS_KEY", "test-secret-key")
+
+    import pytest
+    with pytest.raises(RuntimeError, match="CORE_S3_REGION=auto"):
+        PrivateMediaStorage(tmp_path / "private")
