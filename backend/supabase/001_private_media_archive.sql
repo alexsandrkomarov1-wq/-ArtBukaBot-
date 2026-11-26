@@ -24,6 +24,9 @@ create table if not exists public.archive_items (
   created_at timestamptz not null default now()
 );
 
+alter table public.archive_items add column if not exists description text;
+alter table public.archive_items add column if not exists captured_at timestamptz;
+
 create index if not exists archive_items_user_created_idx
   on public.archive_items (user_id, created_at desc);
 create index if not exists archive_items_person_idx
