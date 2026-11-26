@@ -114,3 +114,21 @@ def test_video_worker_rejects_crop_outside_source(tmp_path, monkeypatch):
             source, tmp_path / "out.mp4",
             crop_x=600, crop_y=0, crop_width=80, crop_height=100,
         )
+
+
+def test_audio_filter_uses_neural_rnnoise_when_model_is_configured(tmp_path, monkeypatch):
+    model = tmp_path / "rnnoise-model.rnnn"
+    model.write_bytes(b"test-model-placeholder")
+    monkeypatch.setenv("CORE_RNNOISE_MODEL", str(model))
+
+    audio_filter, label = worker._build_audio_filter(has_audio=True, enhance_audio=True)
+
+    assert "arnndn=m=" in audio_filter
+    assert str(model) in audio_filter
+    assert "RNNoise neural" in label
+
+
+def test_audio_filter_fails_closed_when_configured_model_is_missing(tmp_path, monkeypatch):
+    monkeypatch.setenv("CORE_RNNOISE_MODEL", str(tmp_path / "missing.rnnn"))
+    with pytest.raises(RuntimeError, match="RNNoise model file is missing"):
+        worker._build_audio_filter(has_audio=True, enhance_audio=True)
