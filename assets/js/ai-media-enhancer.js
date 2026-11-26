@@ -36,6 +36,8 @@
   const cropWidth = root.querySelector("[data-ai-crop-width]");
   const cropHeight = root.querySelector("[data-ai-crop-height]");
   const audioEnhance = root.querySelector("[data-ai-audio-enhance]");
+  const videoSettings = root.querySelector("[data-ai-video-settings]");
+  const reprocessButton = root.querySelector("[data-ai-reprocess]");
   const apiBase = String(window.KOMAROVA_API_BASE || root.dataset.apiBase || "").replace(/\\/$/, "");
   const viewTitle = viewStage.querySelector(".ai-media-action-title");
   const viewNote = viewStage.querySelector(".ai-media-action-note");
@@ -247,6 +249,8 @@
     sourceUrl = null;
     sourceFile = null;
     archiveOriginal = null;
+    if (videoSettings) videoSettings.hidden = true;
+    if (reprocessButton) reprocessButton.disabled = true;
     input.value = "";
     originalImage.removeAttribute("src");
     originalImage.hidden = true;
@@ -268,6 +272,8 @@
     releaseUrl(sourceUrl);
     sourceFile = file;
     archiveOriginal = null;
+    if (videoSettings) videoSettings.hidden = !file.type.startsWith("video/");
+    if (reprocessButton) reprocessButton.disabled = false;
     sourceUrl = URL.createObjectURL(file);
     clearResult();
     preview.hidden = false;
@@ -383,6 +389,7 @@
       uploadForm.append("title", file.name);
       setStage("Сохранение оригинала в архив", "Оригинал отправляется в приватное хранилище без преобразования");
       archiveOriginal = await privateApiRequest("/api/v1/archive/items", { method: "POST", body: uploadForm });
+      await persistWorkspace();
     }
     if (archiveOriginal.record_status === "quarantined" || archiveOriginal.storage_state === "quarantined") {
       setStage("Антивирусная проверка", "Оригинал остаётся в карантине до подтверждения ClamAV");
@@ -392,6 +399,7 @@
       }
       archiveOriginal.record_status = scan.record_status;
       archiveOriginal.storage_state = scan.storage_state;
+      await persistWorkspace();
     }
     if (archiveOriginal.record_status !== "available" || archiveOriginal.storage_state !== "verified") {
       throw new Error("Оригинал ещё не подтверждён сервером и не может быть обработан.");
@@ -592,6 +600,14 @@
     logoutButton.hidden = true;
     if (loginStatus) loginStatus.textContent = "Сессия завершена. Для сохранения результата войдите снова.";
     clearResult();
+  });
+
+  if (reprocessButton) reprocessButton.addEventListener("click", () => {
+    if (!sourceFile) return;
+    generation += 1;
+    const token = generation;
+    clearResult();
+    void processSelected(sourceFile, token);
   });
 
   if (qualityControl) {
