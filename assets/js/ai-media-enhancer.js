@@ -35,6 +35,130 @@
   let resultUrl = null;
   let generation = 0;
   let archiveResult = null;
+  const STORAGE_DB = "komarova-core-ai-media";
+  const STORAGE_STORE = "workspace";
+  const STORAGE_KEY = "current";
+
+  function openWorkspaceDB() {
+    return new Promise((resolve, reject) => {
+      if (!("indexedDB" in window)) return reject(new Error("Локальное хранилище IndexedDB недоступно."));
+      const request = indexedDB.open(STORAGE_DB, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORAGE_STORE)) db.createObjectStore(STORAGE_STORE);
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error("Не удалось открыть локальное хранилище."));
+    });
+  }
+
+  async function writeWorkspace(record) {
+    const db = await openWorkspaceDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORAGE_STORE, "readwrite");
+      tx.objectStore(STORAGE_STORE).put(record, STORAGE_KEY);
+      tx.oncomplete = () => { db.close(); resolve(); };
+      tx.onerror = tx.onabort = () => { const error = tx.error; db.close(); reject(error || new Error("Не удалось сохранить рабочую область.")); };
+    });
+  }
+
+  async function readWorkspace() {
+    const db = await openWorkspaceDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORAGE_STORE, "readonly");
+      const request = tx.objectStore(STORAGE_STORE).get(STORAGE_KEY);
+      request.onsuccess = () => { const value = request.result || null; db.close(); resolve(value); };
+      request.onerror = () => { const error = request.error; db.close(); reject(error || new Error("Не удалось прочитать рабочую область.")); };
+    });
+  }
+
+  async function deleteWorkspace() {
+    const db = await openWorkspaceDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORAGE_STORE, "readwrite");
+      tx.objectStore(STORAGE_STORE).delete(STORAGE_KEY);
+      tx.oncomplete = () => { db.close(); resolve(); };
+      tx.onerror = tx.onabort = () => { const error = tx.error; db.close(); reject(error || new Error("Не удалось очистить рабочую область.")); };
+    });
+  }
+
+  async function persistWorkspace() {
+    if (!sourceFile) return;
+    const record = {
+      version: 1,
+      savedAt: Date.now(),
+      original: sourceFile,
+      originalName: sourceFile.name,
+      originalType: sourceFile.type,
+      originalLastModified: sourceFile.lastModified,
+      result: resultFile || null,
+      resultName: resultFile ? resultFile.name : "",
+      resultType: resultFile ? resultFile.type : "",
+      quality: qualityControl ? qualityControl.value : "65",
+      zoom: zoomControl ? zoomControl.value : "100"
+    };
+    try {
+      await writeWorkspace(record);
+      if (info) info.textContent = (sourceFile.name || "Файл") + " · " + formatBytes(sourceFile.size) + " · сохранено в памяти этого браузера";
+    } catch (error) {
+      status.textContent = "Файл доступен в текущем сеансе, но браузер не смог сохранить его для следующего открытия: " + (error && error.message ? error.message : "недостаточно места или запрет хранилища") + ". Скачайте оригинал отдельно.";
+    }
+  }
+
+  async function restoreWorkspace() {
+    try {
+      const saved = await readWorkspace();
+      if (!saved || !saved.original) return;
+      const original = saved.original instanceof File
+        ? saved.original
+        : new File([saved.original], saved.originalName || "saved-original", { type: saved.originalType || saved.original.type || "", lastModified: saved.originalLastModified || Date.now() });
+      sourceFile = original;
+      sourceUrl = URL.createObjectURL(original);
+      preview.hidden = false;
+      originalEmpty.hidden = true;
+      originalImage.hidden = true;
+      originalVideo.hidden = true;
+      if (original.type.startsWith("image/")) {
+        originalImage.src = sourceUrl;
+        originalImage.hidden = false;
+      } else if (original.type.startsWith("video/")) {
+        originalVideo.src = sourceUrl;
+        originalVideo.hidden = false;
+      }
+      if (saved.result) {
+        const result = saved.result instanceof File
+          ? saved.result
+          : new File([saved.result], saved.resultName || "saved-result", { type: saved.resultType || saved.result.type || "", lastModified: Date.now() });
+        resultFile = result;
+        resultUrl = URL.createObjectURL(result);
+        resultEmpty.hidden = true;
+        if (result.type.startsWith("image/")) {
+          resultImage.src = resultUrl;
+          resultImage.hidden = false;
+          resultVideo.hidden = true;
+        } else if (result.type.startsWith("video/")) {
+          resultVideo.src = resultUrl;
+          resultVideo.hidden = false;
+          resultImage.hidden = true;
+        }
+        exportButton.disabled = false;
+        setStage("Сохранённая копия восстановлена", "Локальный результат · не является архивной записью MATERIAL-ID");
+        mode.textContent = "РАБОЧАЯ ОБЛАСТЬ ВОССТАНОВЛЕНА";
+      } else {
+        setStage("Оригинал восстановлен", "Выберите обработку или замените исходный файл");
+        mode.textContent = "ОРИГИНАЛ ВОССТАНОВЛЕН";
+      }
+      if (qualityControl && saved.quality) qualityControl.value = saved.quality;
+      if (qualityValue && qualityControl) qualityValue.value = qualityControl.value + "%";
+      if (zoomControl && saved.zoom) zoomControl.value = saved.zoom;
+      applyZoom();
+      info.textContent = original.name + " · " + formatBytes(original.size) + " · восстановлено из памяти этого браузера";
+      status.textContent = "Рабочая область восстановлена. Файлы хранятся только в памяти этого браузера и не синхронизируются автоматически между телефоном и компьютером.";
+      reset.disabled = false;
+    } catch (error) {
+      status.textContent = "Не удалось восстановить локальную рабочую область. Возможно, браузер очистил данные или не поддерживает сохранение больших файлов.";
+    }
+  }
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
@@ -117,6 +241,7 @@
     setStage("Ожидается AI-движок", "Автоматическая проверка и Real-ESRGAN x4 будут запускаться внутри KOMAROVA_CORE");
     info.textContent = "Файл ещё не выбран. Выберите фотографию или видео.";
     status.textContent = "Оригинал не изменяется. После выбора выполняются локальные проверки. Серверный AI-движок пока не установлен.";
+    void deleteWorkspace().catch(() => {});
   }
 
   function showOriginal(file) {
@@ -140,6 +265,7 @@
     }
     info.textContent = file.name + " · " + formatBytes(file.size) + " · " + (file.type || "тип не определён");
     reset.disabled = false;
+    void persistWorkspace();
   }
 
 
@@ -242,6 +368,7 @@
     status.textContent = material
       ? "Готово. MATERIAL-ID " + material.material_id + " связан с оригиналом " + material.original_material_id + ". Конвейер: " + material.engine + "."
       : "Готово. Создана отдельная локальная копия (" + formatBytes(file.size) + "). Оригинал не изменён. Постоянная архивная регистрация не выполнялась.";
+    void persistWorkspace();
   }
 
   async function processSelected(file, token) {
@@ -352,7 +479,10 @@
   originalImage.addEventListener("load", applyZoom);
   resultImage.addEventListener("load", applyZoom);
   if (zoomControl) {
-    zoomControl.addEventListener("input", applyZoom);
+    zoomControl.addEventListener("input", () => {
+      applyZoom();
+      void persistWorkspace();
+    });
     applyZoom();
   }
 
@@ -360,6 +490,7 @@
   preview.hidden = true;
   mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
   setStage("Ожидается AI-движок", "Real-ESRGAN NCNN Vulkan · автоматическое улучшение x4");
+  void restoreWorkspace();
   window.addEventListener("pagehide", () => {
     releaseUrl(sourceUrl);
     releaseUrl(resultUrl);
