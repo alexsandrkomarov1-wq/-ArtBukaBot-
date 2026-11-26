@@ -100,6 +100,27 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       </button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
+    <div class="ai-media-adjustments" data-ai-adjustments aria-label="Настройки фотографии">
+      <label class="ai-media-range-control" for="ai-quality-range"><span><strong>Сила улучшения</strong><output data-ai-quality-value>65%</output></span>
+        <input id="ai-quality-range" data-ai-quality type="range" min="0" max="100" step="5" value="65">
+        <small>Меняет контраст, насыщенность и резкость создаваемой копии. После изменения ползунка фотография обрабатывается заново.</small>
+      </label>
+      <label class="ai-media-range-control" for="ai-zoom-range"><span><strong>Масштаб просмотра</strong><output data-ai-zoom-value>100%</output></span>
+        <input id="ai-zoom-range" data-ai-zoom type="range" min="100" max="300" step="25" value="100">
+        <small>Увеличивает обе фотографии для детального просмотра. Масштаб не меняет исходный файл и не влияет на экспорт.</small>
+      </label>
+    </div>
+    <style>
+      .ai-media-adjustments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:16px 0;padding:18px;border:1px solid rgba(125,170,190,.28);border-radius:14px;background:rgba(12,28,43,.72);color:#eaf3f7}
+      .ai-media-range-control{display:grid;gap:9px;min-width:0}
+      .ai-media-range-control>span{display:flex;justify-content:space-between;gap:10px;align-items:center}
+      .ai-media-range-control output{color:#86c8d8;font-variant-numeric:tabular-nums}
+      .ai-media-range-control input{width:100%;accent-color:#76c7d5;cursor:pointer}
+      .ai-media-range-control small{color:#a9becb;font-size:.78rem;line-height:1.5}
+      .ai-media-live-frame{overflow:auto}
+      .ai-media-live-frame img[data-ai-original-preview],.ai-media-live-frame img[data-ai-result-preview]{display:block;max-width:none;height:auto;margin-inline:auto}
+      @media(max-width:650px){.ai-media-adjustments{grid-template-columns:1fr}}
+    </style>
     <div class="ai-media-live-preview" data-ai-preview hidden>
       <figure><figcaption>ИСХОДНЫЙ ФАЙЛ · ОРИГИНАЛ</figcaption><div class="ai-media-live-frame">
         <img data-ai-original-preview alt="Предпросмотр выбранного оригинала" hidden>
