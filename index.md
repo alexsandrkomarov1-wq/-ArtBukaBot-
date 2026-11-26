@@ -122,7 +122,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <input id="ai-quality-range" data-ai-quality type="range" min="0" max="100" step="5" value="65">
         <small>Меняет силу обработки в экспортируемом файле. После изменения ползунка сервер повторно создаёт отдельную копию; оригинал не перезаписывается.</small>
       </label>
-      <div class="ai-media-video-settings" aria-label="Монтаж видео">
+      <div class="ai-media-video-settings" data-ai-video-settings aria-label="Монтаж видео" hidden>
         <strong>МОНТАЖ ВИДЕО · ПРИМЕНЯЕТСЯ К ЭКСПОРТУ</strong>
         <div class="ai-media-video-grid">
           <label>Обрезать с, сек
@@ -146,6 +146,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         </div>
         <label class="ai-media-audio-option"><input type="checkbox" data-ai-audio-enhance checked> Уменьшить шум и выровнять громкость звука при экспорте</label>
         <small>Обрезка и кадрирование применяются к новому MP4. Звуковая обработка сейчас использует FFmpeg-фильтры, это не нейросетевая реставрация голоса.</small>
+        <button type="button" class="ai-media-button" data-ai-reprocess disabled>Применить монтаж и создать новую копию</button>
       </div>
       <label class="ai-media-range-control" for="ai-zoom-range"><span><strong>Масштаб просмотра</strong><output data-ai-zoom-value>100%</output></span>
         <input id="ai-zoom-range" data-ai-zoom type="range" min="100" max="300" step="25" value="100">
@@ -162,6 +163,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       .ai-media-live-frame{overflow:auto}
       .ai-media-live-frame img[data-ai-original-preview],.ai-media-live-frame img[data-ai-result-preview]{display:block;max-width:none;height:auto;margin-inline:auto}
       .ai-media-login{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:16px;border:1px solid rgba(125,170,190,.28);border-radius:12px;background:rgba(12,28,43,.72);color:#eaf3f7}
+      .ai-media-login[hidden],.ai-media-video-settings[hidden]{display:none}
       .ai-media-login label,.ai-media-video-grid label{display:grid;gap:6px;font-size:.82rem}
       .ai-media-login input,.ai-media-video-grid input{width:100%;min-width:0;padding:10px;border:1px solid rgba(125,170,190,.35);border-radius:8px;background:#0b1b2a;color:#eaf3f7}
       .ai-media-login button{min-height:40px}
@@ -274,7 +276,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
-<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-1"></script>
+<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-2"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261125-manual-scene-1"></script>
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
