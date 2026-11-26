@@ -167,5 +167,5 @@ description: Закрытый семейный архив фотографий, 
     <li>Для бесплатного Supabase фактические ограничения размера файла и объёма Storage зависят от настроек и лимитов проекта. Большие видео следует проверять отдельно до массовой загрузки.</li>
   </ul>
 </section>
-<script src="{{ '/assets/js/supabase-archive.js' | relative_url }}?v=20261126-supabase-archive-1" defer></script>
+<script src="{{ '/assets/js/supabase-archive.js' | relative_url }}?v=20261126-supabase-archive-2" defer></script>
 <script src="{{ '/assets/js/media-library.js' | relative_url }}?v=20261126-archive-navigation-1" defer></script>
