@@ -989,3 +989,19 @@ body {
 .ai-video-editor-dialog .ai-media-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:760px){.media-playback-grid{grid-template-columns:1fr}.ai-video-editor-dialog .ai-media-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.ai-media-nature-scene .nature-water{animation:none}}
+
+
+/* Visible project clock and spatial portal navigation */
+.ai-world-home .world-interface{pointer-events:none}
+.ai-world-home .world-hud,.ai-world-home .world-portals,.ai-world-home .world-footer{pointer-events:auto}
+.ai-world-home .world-time-counter{display:grid;gap:5px;margin-top:8px;padding-top:9px;border-top:1px solid rgba(155,192,255,.2);font-variant-numeric:tabular-nums}
+.world-time-label{color:#8fe7ff;font-size:8px;font-weight:800;letter-spacing:.15em}
+.world-time-counter strong{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#eaf3ff}
+.world-time-counter time{color:#a8f4dd;font-size:11px;white-space:nowrap}
+.world-time-counter>span:not(.world-time-label){display:flex;justify-content:space-between;gap:8px;color:#b7c8ed;font-size:9px}
+.world-time-counter b{color:#fff;font-size:10px}
+.world-time-counter small{color:#8f9fc5;font-size:8px;line-height:1.35}
+.ai-world-home .hero-art:focus-visible{outline:3px solid #8deaff;outline-offset:4px}
+.ai-world-home .world-portal{position:relative;z-index:5}
+.ai-world-home .world-portal:active{transform:translateY(0) scale(.985)}
+@media(max-width:760px){.ai-world-home .world-hud{max-width:min(280px,85%)}.world-time-counter{gap:4px}}
