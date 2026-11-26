@@ -32,7 +32,7 @@ The initial provider set is:
 |---|---|---|---|
 | `microsoft_onedrive` | Microsoft OneDrive | Optional external copy of family archive objects | Designed; not connected |
 | `google_drive` | Google Drive | Optional external copy of family archive objects | Designed; not connected |
-| `yandex_disk` | Yandex Disk | Optional external copy of family archive objects | Designed; not connected |
+| `yandex_disk` | Yandex Disk | Optional external copy of family archive objects | Designed; not connected |\n| `cloudflare_r2` | Cloudflare R2 (S3 API) | Optional private object replica; not the authoritative registry | Adapter configuration added; account/bucket authorization and read-back test pending |
 | `local_private` | Private local/server storage | Development and staging storage adapter; not a durable production guarantee | Implemented in current archive intake, deployment-dependent |
 | `supabase_storage` | Supabase Storage + PostgreSQL metadata | Candidate private media target for the current web archive | Client and SQL schema prepared; project credentials, RLS, upload/read-back and restore tests still pending |
 
@@ -104,6 +104,27 @@ Each person authorizes their own provider account through the provider's officia
 Use least-privilege scopes and request only the access required for the selected archive folder and operations. Use authorization-code flow with state validation and PKCE where supported. Refresh tokens, where issued, must be encrypted at rest and kept only in the server-side secret store/database encryption layer. Access tokens must never be exposed to browser JavaScript, GitHub Pages, logs, or repository files.
 
 OAuth application registration, redirect URI configuration, provider verification requirements, and secret provisioning are deployment prerequisites. They are not inferred from the user's email address and cannot be completed by writing a repository file alone.
+
+## 6A. Cloudflare R2 adapter configuration
+
+The backend storage adapter now accepts `CORE_STORAGE_BACKEND=cloudflare-r2` and uses the existing boto3 S3 client. This is an explicit configuration mode for Cloudflare R2, not proof that an account, bucket, or credentials have been connected.
+
+Required server-side environment variables:
+
+- `CORE_STORAGE_BACKEND=cloudflare-r2`
+- `CORE_S3_ENDPOINT_URL=https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
+- `CORE_S3_REGION=auto`
+- `CORE_S3_BUCKET=<private bucket name>`
+- `CORE_S3_ACCESS_KEY_ID=<R2 access key ID>`
+- `CORE_S3_SECRET_ACCESS_KEY=<R2 secret access key>`
+
+Create an R2 token with Object Read & Write permissions restricted to the single private archive bucket. Store both credential values only in the private backend secret environment. Never paste them into chat, commit them to Git, or expose them to browser JavaScript. Use a private bucket and do not enable public access for family originals.
+
+The adapter validates the HTTPS R2 endpoint suffix and the required `auto` region. Automated tests use a fake S3 client and dummy test credentials; they do not contact Cloudflare or prove live authorization.
+
+R2's published Standard free tier includes 10 GB-month storage, 1 million Class A requests, and 10 million Class B requests per month. Usage above those allowances is billable; the account may require a payment method. Set usage alerts and review the billable-usage dashboard before enabling production writes. No subscription, payment method, bucket, or API token is activated by this code change.
+
+Official references: Cloudflare R2 S3 API and pricing documentation.
 
 ## 7. Connector lifecycle and user controls
 
