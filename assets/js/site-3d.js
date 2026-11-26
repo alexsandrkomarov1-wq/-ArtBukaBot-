@@ -179,6 +179,41 @@
     arch.rotation.z = Math.PI;
     museum.add(arch);
 
+    const portalAnchors = [...document.querySelectorAll(".world-portals .world-portal")];
+    const portalTargets = [];
+    const portalGroup = new THREE.Group();
+    museum.add(portalGroup);
+    const portalPalette = [0x79eaff,0xa7a0ff,0x83f0cf,0xffd28b,0x7bdcff,0xc5a5ff,0x8ce6c1,0xffa9bf];
+    portalAnchors.forEach((anchor, index) => {
+      const angle = (index / Math.max(1, portalAnchors.length)) * Math.PI * 2 - Math.PI / 2;
+      const group = new THREE.Group();
+      group.position.set(Math.cos(angle) * 3.15, Math.sin(angle) * 1.72 + 0.08, -0.72);
+      group.rotation.z = -angle * 0.08;
+      const tint = portalPalette[index % portalPalette.length];
+      const glass = new THREE.Mesh(
+        new THREE.BoxGeometry(0.78, 0.98, 0.075),
+        new THREE.MeshPhysicalMaterial({ color: 0x152c58, metalness: 0.5, roughness: 0.2, transparent: true, opacity: 0.78, clearcoat: 1, emissive: tint, emissiveIntensity: 0.12 })
+      );
+      glass.userData.portalIndex = index;
+      group.add(glass);
+      portalTargets.push(glass);
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.48, 0.035, 10, 64),
+        new THREE.MeshStandardMaterial({ color: tint, metalness: 0.62, roughness: 0.2, emissive: tint, emissiveIntensity: 0.75 })
+      );
+      ring.position.z = 0.07;
+      ring.userData.portalIndex = index;
+      group.add(ring);
+      portalTargets.push(ring);
+      const beacon = new THREE.Mesh(
+        new THREE.SphereGeometry(0.075, 14, 14),
+        new THREE.MeshBasicMaterial({ color: tint })
+      );
+      beacon.position.set(0, 0, 0.13);
+      group.add(beacon);
+      portalGroup.add(group);
+    });
+
     const frameGroup = new THREE.Group();
     museum.add(frameGroup);
     const framePositions = [
@@ -247,6 +282,61 @@
     let pointerY = 0;
     let targetX = 0;
     let targetY = 0;
+    let keyboardX = 0;
+    let keyboardY = 0;
+    const portalRaycaster = new THREE.Raycaster();
+    const portalPointer = new THREE.Vector2();
+    let hoveredPortal = -1;
+    const portalAt = (event, targetCanvas) => {
+      const bounds = targetCanvas.getBoundingClientRect();
+      if (!bounds.width || !bounds.height || event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return -1;
+      portalPointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+      portalPointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+      portalRaycaster.setFromCamera(portalPointer, camera);
+      const hit = portalRaycaster.intersectObjects(portalTargets, false)[0];
+      return hit ? hit.object.userData.portalIndex : -1;
+    };
+    const bindPortalInteractions = (targetCanvas) => {
+      targetCanvas.addEventListener("pointermove", (event) => {
+        if (event.pointerType === "touch") return;
+        const index = portalAt(event, targetCanvas);
+        targetCanvas.style.cursor = index >= 0 ? "pointer" : "grab";
+        if (index !== hoveredPortal) {
+          hoveredPortal = index;
+          if (index >= 0 && portalAnchors[index]) {
+            const label = portalAnchors[index].querySelector("strong");
+            setRenderStatus("Портал: " + (label ? label.textContent : "раздел") + " · нажмите для входа");
+          }
+        }
+      }, { passive: true });
+      targetCanvas.addEventListener("click", (event) => {
+        const index = portalAt(event, targetCanvas);
+        if (index < 0 || !portalAnchors[index]) return;
+        portalAnchors[index].click();
+      });
+    };
+    bindPortalInteractions(canvas);
+    host.addEventListener("keydown", (event) => {
+      if (event.target !== host) return;
+      const keyName = event.key.toLowerCase();
+      if (["arrowup","w"].includes(keyName)) keyboardX = -0.22;
+      else if (["arrowdown","s"].includes(keyName)) keyboardX = 0.22;
+      else if (["arrowleft","a"].includes(keyName)) keyboardY = -0.28;
+      else if (["arrowright","d"].includes(keyName)) keyboardY = 0.28;
+      else if (keyName === "+" || keyName === "=") camera.position.z = Math.max(6.2, camera.position.z - 0.45);
+      else if (keyName === "-" || keyName === "_") camera.position.z = Math.min(13.5, camera.position.z + 0.45);
+      else if (/^[1-8]$/.test(keyName)) {
+        const anchor = portalAnchors[Number(keyName) - 1];
+        if (anchor) anchor.click();
+      } else return;
+      event.preventDefault();
+    });
+    host.addEventListener("keyup", (event) => {
+      const keyName = event.key.toLowerCase();
+      if (["arrowup","arrowdown","w","s"].includes(keyName)) keyboardX = 0;
+      if (["arrowleft","arrowright","a","d"].includes(keyName)) keyboardY = 0;
+    });
+    window.addEventListener("blur", () => { keyboardX = 0; keyboardY = 0; });
     let visible = true;
     const resize = () => {
       const width = Math.max(1, host.clientWidth);
@@ -277,8 +367,8 @@
     const renderFrame = (time) => {
       if (document.hidden || !visible) return;
       const t = time * 0.00022;
-      targetX += (pointerY * 0.13 - targetX) * 0.035;
-      targetY += (pointerX * 0.2 - targetY) * 0.035;
+      targetX += (pointerY * 0.13 + keyboardX - targetX) * 0.035;
+      targetY += (pointerX * 0.2 + keyboardY - targetY) * 0.035;
       museum.rotation.x = targetX + (reducedMotion ? 0 : Math.sin(t) * 0.025);
       museum.rotation.y = targetY + (reducedMotion ? 0 : Math.sin(t * 0.7) * 0.045);
       if (!reducedMotion) {
@@ -292,6 +382,7 @@
           frame.position.y = framePositions[index][1] + Math.sin(t * 1.5 + index) * 0.045;
         });
         particles.rotation.y = t * 0.08;
+        portalGroup.children.forEach((portal, index) => { portal.rotation.y = Math.sin(t + index * 0.8) * 0.07; portal.scale.setScalar(1 + Math.sin(t * 1.7 + index) * 0.025); });
       }
       renderer.render(scene, camera);
     };
@@ -303,6 +394,7 @@
       const replacementCanvas = createCanvas();
       canvas.replaceWith(replacementCanvas);
       canvas = replacementCanvas;
+      bindPortalInteractions(canvas);
       canvas.addEventListener("webglcontextlost", (event) => {
         event.preventDefault();
         if (renderer) renderer.setAnimationLoop(null);
