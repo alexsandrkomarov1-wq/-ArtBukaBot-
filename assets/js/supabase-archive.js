@@ -120,12 +120,7 @@
   }
 
   async function checkBucket() {
-    try {
-      await request("/storage/v1/bucket/" + bucket);
-      $("cloud-storage-location").textContent = "Supabase Storage · " + bucket + " · private";
-    } catch (_) {
-      $("cloud-storage-location").textContent = "Supabase Storage · bucket не подтверждён. Выполните SQL-настройку ниже.";
-    }
+    $("cloud-storage-location").textContent = "Supabase Storage · " + bucket + " · приватный режим; фактическая запись проверяется при загрузке.";
   }
 
   async function loadArchive() {
@@ -238,11 +233,14 @@
     const file = fileInput.files?.[0];
     if (!file || !currentUser) return;
     const submit = $("cloud-upload-submit");
+    let storageUploaded = false;
+    let uploadedPath = "";
     submit.disabled = true;
     try {
       const materialId = makeMaterialId();
       const hash = await sha256(file);
       const path = storagePath(currentUser.id, materialId, file.name);
+      uploadedPath = path;
       const uploadResponse = await fetch(api("/storage/v1/object/" + bucket + "/" + path), {
         method: "POST",
         headers: headers({
@@ -257,6 +255,7 @@
         const detail = await uploadResponse.text().catch(() => "");
         throw new Error("Supabase Storage отклонил загрузку: HTTP " + uploadResponse.status + (detail ? " · " + detail.slice(0, 220) : ""));
       }
+      storageUploaded = true;
       const record = {
         user_id: currentUser.id,
         material_id: materialId,
@@ -286,7 +285,10 @@
       await loadArchive();
       setStatus("Оригинал сохранён в закрытом Supabase Storage. MATERIAL-ID: " + materialId + ". SHA-256 рассчитан; файл не обрабатывался и не перезаписывался.");
     } catch (error) {
-      setStatus(error.message, true);
+      const message = storageUploaded
+        ? error.message + " Файл уже находится в приватном Storage по пути " + uploadedPath + "; не повторяйте загрузку, пока не проверите реестр."
+        : error.message;
+      setStatus(message, true);
     } finally {
       submit.disabled = false;
     }
