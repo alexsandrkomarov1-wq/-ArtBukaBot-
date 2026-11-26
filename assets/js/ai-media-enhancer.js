@@ -40,11 +40,24 @@
   }
 
   function applyZoom() {
-    const zoom = Number(zoomControl && zoomControl.value) || 100;
+    const zoom = Math.max(100, Math.min(300, Number(zoomControl && zoomControl.value) || 100));
     if (zoomValue) zoomValue.value = zoom + "%";
     [originalImage, resultImage].forEach(image => {
+      if (!image) return;
+      const frame = image.parentElement;
+      if (frame) {
+        frame.style.overflow = "auto";
+        frame.style.maxHeight = "360px";
+        frame.style.maxWidth = "100%";
+      }
+      image.style.display = "block";
       image.style.width = zoom + "%";
       image.style.maxWidth = "none";
+      image.style.maxHeight = "none";
+      image.style.height = "auto";
+      image.style.flex = "0 0 auto";
+      image.style.objectFit = "contain";
+      image.style.imageRendering = "auto";
     });
   }
 
