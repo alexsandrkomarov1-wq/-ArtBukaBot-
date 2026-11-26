@@ -305,6 +305,14 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
     @router.post("/items/{archive_item_id}/enhance")
     def enhance_archived_media(
         archive_item_id: str,
+        strength: int = Form(default=65),
+        start_seconds: float = Form(default=0.0),
+        end_seconds: float | None = Form(default=None),
+        crop_x: int | None = Form(default=None),
+        crop_y: int | None = Form(default=None),
+        crop_width: int | None = Form(default=None),
+        crop_height: int | None = Form(default=None),
+        enhance_audio: bool = Form(default=True),
         db: Session = Depends(get_db),
         actor: User = Depends(require_roles("owner", "moderator")),
     ):
@@ -346,9 +354,15 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
 
                 try:
                     if original_item.item_type == "photo":
-                        result = restore_photo(source_path, output_path, scale=4)
+                        result = restore_photo(source_path, output_path, scale=4, strength=strength)
                     else:
-                        result = restore_video(source_path, output_path, scale=2)
+                        result = restore_video(
+                            source_path, output_path, scale=2, strength=strength,
+                            start_seconds=start_seconds, end_seconds=end_seconds,
+                            crop_x=crop_x, crop_y=crop_y,
+                            crop_width=crop_width, crop_height=crop_height,
+                            enhance_audio=enhance_audio,
+                        )
                 except (ValueError, RuntimeError, OSError, subprocess.SubprocessError) as exc:
                     raise HTTPException(status_code=422, detail=f"Media processing failed: {exc}") from exc
                 if result.source_sha256 != original_blob.sha256 or sha256_file(source_path) != original_blob.sha256:
