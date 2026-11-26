@@ -92,6 +92,24 @@ def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: in
         source.stat().st_size, output.stat().st_size,
         f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image · strength {strength}%", width, height)
 
+def _build_audio_filter(has_audio: bool, enhance_audio: bool) -> tuple[str, str]:
+    if not has_audio or not enhance_audio:
+        return "", ""
+    model_setting = os.getenv("CORE_RNNOISE_MODEL", "").strip()
+    if model_setting:
+        model_path = Path(model_setting).expanduser().resolve()
+        if not model_path.is_file():
+            raise RuntimeError("Configured RNNoise model file is missing")
+        return (
+            f"arnndn=m={model_path},highpass=f=70,loudnorm=I=-16:TP=-1.5:LRA=11",
+            " + RNNoise neural noise reduction + loudness normalization",
+        )
+    return (
+        "highpass=f=70,afftdn=nf=-25,loudnorm=I=-16:TP=-1.5:LRA=11",
+        " + FFmpeg DSP noise reduction + loudness normalization (RNNoise model not configured)",
+    )
+
+
 def restore_video(
     source_path: str | Path,
     output_path: str | Path,
@@ -160,7 +178,7 @@ def restore_video(
     brightness = 0.025 * factor
     sharpen = 0.65 * factor
     video_finish = f"eq=contrast={contrast:.4f}:saturation={saturation:.4f}:brightness={brightness:.4f},unsharp=5:5:{sharpen:.4f}:3:3:0.0"
-    audio_filter = "highpass=f=70,afftdn=nf=-25,loudnorm=I=-16:TP=-1.5:LRA=11"
+    audio_filter, audio_label = _build_audio_filter(has_audio, enhance_audio)
     with tempfile.TemporaryDirectory(prefix="core-video-restore-") as temp:
         work = Path(temp); frames = work / "frames"; enhanced = work / "enhanced"
         frames.mkdir(); enhanced.mkdir()
@@ -195,7 +213,6 @@ def restore_video(
         width, height = int(video_stream["width"]), int(video_stream["height"])
     except (ValueError, KeyError, IndexError, TypeError) as exc:
         raise RuntimeError("Could not verify enhanced video dimensions") from exc
-    audio_label = " + FFmpeg denoise/normalization" if has_audio and enhance_audio else ""
     return WorkerResult(str(output), "video/mp4", original_hash, sha256_file(output),
         source.stat().st_size, output.stat().st_size,
         f"Real-ESRGAN NCNN Vulkan x{scale} + FFmpeg · strength {strength}%{audio_label}", width, height)
