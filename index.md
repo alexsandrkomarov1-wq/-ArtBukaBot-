@@ -112,8 +112,9 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <input id="ai-quality-range" data-ai-quality type="range" min="0" max="100" step="5" value="65">
         <small>Меняет силу обработки в экспортируемом файле. После изменения ползунка сервер повторно создаёт отдельную копию; оригинал не перезаписывается.</small>
       </label>
-      <div class="ai-media-video-settings" data-ai-video-settings aria-label="Монтаж видео" hidden>
-        <strong>МОНТАЖ ВИДЕО · ПРИМЕНЯЕТСЯ К ЭКСПОРТУ</strong>
+      <button type="button" class="ai-media-button ai-video-editor-open" data-ai-open-video-editor disabled>Открыть отдельный редактор видео</button>
+      <dialog class="ai-video-editor-dialog" data-ai-video-editor aria-labelledby="ai-video-editor-title"><div class="ai-media-video-settings" data-ai-video-settings aria-label="Монтаж видео" hidden>
+        <strong id="ai-video-editor-title">МОНТАЖ ВИДЕО · ПРИМЕНЯЕТСЯ К ЭКСПОРТУ</strong>
         <div class="ai-media-video-grid">
           <label>Обрезать с, сек
             <input type="number" min="0" step="0.1" value="0" data-ai-trim-start>
@@ -137,7 +138,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <label class="ai-media-audio-option"><input type="checkbox" data-ai-audio-enhance checked> Уменьшить шум и выровнять громкость звука при экспорте</label>
         <small>Обрезка и кадрирование применяются к новому MP4. При установленной модели RNNoise применяется нейросетевое шумоподавление; без неё используется фильтр FFmpeg afftdn. Это не восстановление утраченной речи.</small>
         <button type="button" class="ai-media-button" data-ai-reprocess disabled>Применить монтаж и создать новую копию</button>
-      </div>
+        <button type="button" class="ai-media-button" data-ai-close-video-editor>Закрыть редактор</button>
+      </div></dialog>
       <label class="ai-media-range-control" for="ai-zoom-range"><span><strong>Масштаб просмотра</strong><output data-ai-zoom-value>100%</output></span>
         <input id="ai-zoom-range" data-ai-zoom type="range" min="100" max="300" step="25" value="100">
         <small>Увеличивает обе фотографии для детального просмотра. Масштаб не меняет исходный файл и не влияет на экспорт.</small>
@@ -201,6 +203,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
             <button type="button" data-mood-choice="nature" aria-pressed="false">Природная мелодия</button>
           </div>
           <div class="assistant-controls">
+            <button type="button" data-scene-auto aria-pressed="true">Автосмена пейзажа: включена</button>
+            <button type="button" data-desktop-mode>Полноэкранная заставка</button>
             <button type="button" class="ai-media-sound-toggle" data-sound-toggle>▶ Включить музыку</button>
             <button type="button" data-voice-assistant>🎙 Голосовой помощник</button>
           </div>
@@ -208,6 +212,41 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         </div>
       </div>
     </div>
+
+      <div class="media-playback-grid" aria-label="Музыкальная коллекция и интернет-радио">
+        <section class="media-player-panel" aria-labelledby="music-archive-title">
+          <span class="ai-media-kicker">ЛИЧНАЯ МУЗЫКАЛЬНАЯ КОЛЛЕКЦИЯ</span>
+          <h4 id="music-archive-title">MP3-плеер и список воспроизведения</h4>
+          <label class="media-file-picker">Добавить аудиофайлы с устройства
+            <input type="file" data-music-files accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple>
+          </label>
+          <div class="media-player-controls">
+            <button type="button" data-music-previous aria-label="Предыдущий трек">⏮</button>
+            <button type="button" data-music-play>▶ Воспроизвести</button>
+            <button type="button" data-music-next aria-label="Следующий трек">⏭</button>
+          </div>
+          <div class="media-player-timeline"><span data-music-current-time>0:00</span><input type="range" data-music-seek min="0" max="0" value="0" aria-label="Позиция воспроизведения"><span data-music-duration>0:00</span></div>
+          <label class="media-volume-control">Громкость <input type="range" data-music-volume min="0" max="100" value="75"></label>
+          <audio data-music-audio preload="metadata"></audio>
+          <div class="media-music-playlist" data-music-playlist aria-live="polite"><p class="media-player-empty">Добавьте MP3-файлы с устройства.</p></div>
+          <p class="media-player-status" data-music-status role="status" aria-live="polite">Плеер готов. Локальные файлы не загружаются на сервер и не попадают в семейный архив.</p>
+        </section>
+        <section class="media-player-panel media-radio-panel" aria-labelledby="radio-title">
+          <span class="ai-media-kicker">ИНТЕРНЕТ · РАДИО</span>
+          <h4 id="radio-title">Радиоэфир</h4>
+          <label>Найти станцию
+            <input type="search" data-radio-search placeholder="Например: jazz, classical, nature">
+          </label>
+          <button type="button" data-radio-find>Найти интернет-радио</button>
+          <div class="media-radio-list" data-radio-list aria-live="polite"></div>
+          <label>Или вставить прямую ссылку на аудиопоток
+            <input type="url" data-radio-url placeholder="https://…">
+          </label>
+          <button type="button" data-radio-connect>Подключить поток</button>
+          <audio data-radio-audio controls preload="none"></audio>
+          <p class="media-player-status" data-radio-status role="status" aria-live="polite">Список станций загружается из открытого каталога Radio Browser. Доступность потоков зависит от станции и сети.</p>
+        </section>
+      </div>
     <div class="ai-media-internal-engine" role="status" aria-live="polite"><strong>ВНУТРЕННИЙ AI-КОНВЕЙЕР KOMAROVA_CORE</strong><span>Файлы будут автоматически обрабатываться внутренним AI-движком KOMAROVA_CORE. Внешние сайты, ручная повторная загрузка, адрес API, логин и пароль не нужны. Сейчас движок ещё не установлен на сервере.</span></div>
     <button class="ai-media-reset" type="button" data-ai-reset disabled>Очистить рабочую область</button>
   </div>
@@ -267,7 +306,9 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-4"></script>
-<script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261125-manual-scene-1"></script>
+<script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261126-atmosphere-controls-2"></script>
+
+<script defer src="{{ '/assets/js/media-studio.js' | relative_url }}?v=20261126-media-studio-1"></script>
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
