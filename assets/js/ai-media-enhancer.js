@@ -26,9 +26,6 @@
   const qualityValue = root.querySelector("[data-ai-quality-value]");
   const zoomControl = root.querySelector("[data-ai-zoom]");
   const zoomValue = root.querySelector("[data-ai-zoom-value]");
-  const loginForm = root.querySelector("[data-ai-login-form]");
-  const loginStatus = root.querySelector("[data-ai-login-status]");
-  const logoutButton = root.querySelector("[data-ai-logout]");
   const trimStart = root.querySelector("[data-ai-trim-start]");
   const trimEnd = root.querySelector("[data-ai-trim-end]");
   const cropX = root.querySelector("[data-ai-crop-x]");
@@ -38,7 +35,7 @@
   const audioEnhance = root.querySelector("[data-ai-audio-enhance]");
   const videoSettings = root.querySelector("[data-ai-video-settings]");
   const reprocessButton = root.querySelector("[data-ai-reprocess]");
-  const apiBase = String(window.KOMAROVA_API_BASE || root.dataset.apiBase || "").replace(/\/$/, "");
+  const privateApi = window.KOMAROVA_CORE_PRIVATE_API || null;
   const viewTitle = viewStage.querySelector(".ai-media-action-title");
   const viewNote = viewStage.querySelector(".ai-media-action-note");
 
@@ -49,7 +46,6 @@
   let generation = 0;
   let archiveResult = null;
   let archiveOriginal = null;
-  let apiToken = "";
   const STORAGE_DB = "komarova-core-ai-media";
   const STORAGE_STORE = "workspace";
   const STORAGE_KEY = "current";
@@ -368,21 +364,14 @@
   }
 
   async function privateApiRequest(path, options = {}) {
-    const response = await fetch(apiBase + path, {
-      ...options,
-      headers: { ...(apiToken ? { Authorization: "Bearer " + apiToken } : {}), ...(options.headers || {}) }
-    });
-    const contentType = response.headers.get("content-type") || "";
-    const payload = contentType.includes("application/json") ? await response.json() : await response.text();
-    if (!response.ok) {
-      const detail = payload && payload.detail;
-      throw new Error(typeof detail === "string" ? detail : detail && detail.message ? detail.message : "HTTP " + response.status);
+    if (!privateApi || typeof privateApi.request !== "function") {
+      throw new Error("Приватный API и защищённая сессия не подключены к сайту.");
     }
-    return payload;
+    return privateApi.request(path, options);
   }
 
   async function runPrivateWorker(file, token) {
-    if (!apiBase || !apiToken) return null;
+    if (!privateApi || typeof privateApi.request !== "function" || typeof privateApi.download !== "function") return null;
     if (!archiveOriginal) {
       const uploadForm = new FormData();
       uploadForm.append("file", file, file.name);
@@ -427,12 +416,7 @@
       "/api/v1/archive/items/" + encodeURIComponent(archiveOriginal.archive_item_id) + "/enhance",
       { method: "POST", body: settings }
     );
-    const response = await fetch(apiBase + "/api/v1/archive/items/" + encodeURIComponent(derivative.archive_item_id) + "/content", {
-      headers: { Authorization: "Bearer " + apiToken },
-      cache: "no-store"
-    });
-    if (!response.ok) throw new Error("Сервер создал запись, но не удалось получить файл результата (HTTP " + response.status + ").");
-    const blob = await response.blob();
+    const blob = await privateApi.download("/api/v1/archive/items/" + encodeURIComponent(derivative.archive_item_id) + "/content");
     const extension = file.type.startsWith("video/") ? "mp4" : "png";
     const name = file.name.replace(/\.[^.]+$/, "") + "-enhanced." + extension;
     return { file: new File([blob], name, { type: blob.type || (extension === "mp4" ? "video/mp4" : "image/png"), lastModified: Date.now() }), material: derivative };
@@ -483,9 +467,7 @@
         setStage("Серверная студия не подключена", "Видео не будет имитировать обработку в окне предпросмотра");
         resultEmpty.textContent = "Для создания сохранённого MP4 требуется авторизация и доступный приватный backend. Оригинал не изменён.";
         resultEmpty.hidden = false;
-        status.textContent = apiBase
-          ? "Войдите в приватный архив выше. После проверки ClamAV сервер создаст отдельный MP4 с применёнными настройками."
-          : "Адрес серверной среды не настроен. Видео можно просматривать, но обрезка, ИИ-обработка и экспорт пока не запускаются.";
+        status.textContent = "Приватный API/защищённая сессия не подключены. ClamAV не запускалась; фиктивный ролик не создаётся. Обрезка, AI-обработка и экспорт начнут работать после подключения серверной среды.";
         mode.textContent = "ОЖИДАЕТСЯ ПРИВАТНЫЙ BACKEND";
         return;
       }
@@ -493,9 +475,7 @@
         setStage("Серверная студия не подключена", "Не создаём фиктивную копию предпросмотра");
         resultEmpty.textContent = "Для сохранённой производной копии требуется авторизация и доступный приватный backend.";
         resultEmpty.hidden = false;
-        status.textContent = apiBase
-          ? "Войдите в приватный архив выше. Сервер применит силу улучшения к отдельному файлу и присвоит ему MATERIAL-ID."
-          : "Адрес серверной среды не настроен. Локальный предпросмотр доступен, но постоянная обработанная копия не создаётся.";
+        status.textContent = "Приватный API/защищённая сессия не подключены. Серверная обработка не запускалась, постоянная копия и MATERIAL-ID не создавались.";
         mode.textContent = "ОЖИДАЕТСЯ ПРИВАТНЫЙ BACKEND";
         return;
       }
@@ -556,51 +536,6 @@
   });
 
   reset.addEventListener("click", clearWorkspace);
-
-  if (loginForm) {
-    if (!apiBase) {
-      loginForm.hidden = true;
-      if (loginStatus) loginStatus.textContent = "Серверный адрес не настроен. Вход и сохранение результата недоступны.";
-    } else {
-      loginForm.hidden = false;
-      loginForm.addEventListener("submit", async event => {
-        event.preventDefault();
-        const username = loginForm.querySelector("[data-ai-login-user]");
-        const password = loginForm.querySelector("[data-ai-login-password]");
-        try {
-          if (loginStatus) loginStatus.textContent = "Проверяем доступ к приватному архиву…";
-          const response = await fetch(apiBase + "/api/v1/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: username.value.trim(), password: password.value })
-          });
-          const body = await response.json();
-          if (!response.ok) throw new Error(body.detail || "Ошибка входа");
-          apiToken = body.access_token;
-          password.value = "";
-          if (loginStatus) loginStatus.textContent = "Вход выполнен · " + body.user.role + ". Токен хранится только в памяти этой вкладки.";
-          if (logoutButton) logoutButton.hidden = false;
-          if (sourceFile) {
-            generation += 1;
-            const token = generation;
-            clearResult();
-            void processSelected(sourceFile, token);
-          }
-        } catch (error) {
-          apiToken = "";
-          password.value = "";
-          if (loginStatus) loginStatus.textContent = "Вход не выполнен: " + (error.message || "backend недоступен");
-        }
-      });
-    }
-  }
-  if (logoutButton) logoutButton.addEventListener("click", () => {
-    apiToken = "";
-    archiveOriginal = null;
-    logoutButton.hidden = true;
-    if (loginStatus) loginStatus.textContent = "Сессия завершена. Для сохранения результата войдите снова.";
-    clearResult();
-  });
 
   if (reprocessButton) reprocessButton.addEventListener("click", () => {
     if (!sourceFile) return;
