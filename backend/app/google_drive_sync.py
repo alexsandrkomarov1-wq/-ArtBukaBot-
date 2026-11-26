@@ -21,15 +21,22 @@ SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
 
 def _service():
-    values = [os.getenv(key, "").strip() for key in (
-        "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_DRIVE_REFRESH_TOKEN"
-    )]
-    if not all(values):
-        raise RuntimeError("google_drive_credentials_missing")
-    credentials = Credentials(
-        token=None, refresh_token=values[2], token_uri="https://oauth2.googleapis.com/token",
-        client_id=values[0], client_secret=values[1], scopes=SCOPES,
-    )
+    token_file = os.getenv("GOOGLE_DRIVE_TOKEN_FILE", "").strip()
+    if token_file:
+        path = Path(token_file).expanduser()
+        if not path.is_file():
+            raise RuntimeError("google_drive_token_file_missing")
+        credentials = Credentials.from_authorized_user_file(str(path), scopes=SCOPES)
+    else:
+        values = [os.getenv(key, "").strip() for key in (
+            "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_DRIVE_REFRESH_TOKEN"
+        )]
+        if not all(values):
+            raise RuntimeError("google_drive_credentials_missing")
+        credentials = Credentials(
+            token=None, refresh_token=values[2], token_uri="https://oauth2.googleapis.com/token",
+            client_id=values[0], client_secret=values[1], scopes=SCOPES,
+        )
     return build("drive", "v3", credentials=credentials, cache_discovery=False)
 
 
