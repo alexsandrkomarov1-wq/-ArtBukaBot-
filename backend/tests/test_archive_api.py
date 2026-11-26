@@ -314,7 +314,7 @@ def test_quarantined_media_is_released_only_after_clean_clamav_scan(tmp_path, mo
         lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="OK", stderr=""),
     )
 
-    def fake_realesrgan(source_path, output_path, *, scale):
+    def fake_realesrgan(source_path, output_path, *, scale, strength=65):
         from PIL import Image
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         Image.new("RGB", (64, 48), (180, 205, 225)).save(output_path, format="PNG")
@@ -324,7 +324,7 @@ def test_quarantined_media_is_released_only_after_clean_clamav_scan(tmp_path, mo
             output_sha256=cloud_api.sha256_file(output_path),
             source_size=Path(source_path).stat().st_size,
             output_size=Path(output_path).stat().st_size,
-            engine=f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image",
+            engine=f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image · strength {strength}%",
             output_width=64, output_height=48,
         )
 
@@ -439,7 +439,11 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
 
         scanned = client.post(f"/api/v1/archive/items/{original_id}/scan", headers=headers)
         assert scanned.status_code == 200, scanned.text
-        enhanced = client.post(f"/api/v1/archive/items/{original_id}/enhance", headers=headers)
+        enhanced = client.post(
+            f"/api/v1/archive/items/{original_id}/enhance",
+            headers=headers,
+            data={"strength": "80"},
+        )
         assert enhanced.status_code == 200, enhanced.text
         derivative = enhanced.json()
         assert derivative["material_id"].startswith("M-")
@@ -447,7 +451,7 @@ def test_automatic_enhancement_creates_new_material_linked_to_immutable_original
         assert derivative["original_material_id"] == original_material_id
         assert derivative["record_status"] == "available"
         assert derivative["storage_state"] == "verified"
-        assert derivative["engine"] == "Real-ESRGAN NCNN Vulkan x4 + OpenCV + scikit-image"
+        assert derivative["engine"] == "Real-ESRGAN NCNN Vulkan x4 + OpenCV + scikit-image · strength 80%"
 
         original_content = client.get(f"/api/v1/archive/items/{original_id}/content", headers=headers)
         derivative_content = client.get(
