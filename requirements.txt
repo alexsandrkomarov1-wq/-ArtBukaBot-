@@ -12,3 +12,5 @@ boto3>=1.35,<2
 
 opencv-python-headless>=4.10,<5
 scikit-image>=0.24,<1
+google-api-python-client>=2.150,<3
+google-auth>=2.35,<3
