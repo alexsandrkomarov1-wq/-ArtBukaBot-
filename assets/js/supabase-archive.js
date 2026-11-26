@@ -24,7 +24,7 @@
   };
   const headers = (extra = {}) => ({
     apikey: anonKey,
-    Authorization: "Bearer " + (accessToken || anonKey),
+    ...(accessToken ? { Authorization: "Bearer " + accessToken } : {}),
     ...extra
   });
   const api = (path) => projectUrl + path;
@@ -239,6 +239,8 @@
     try {
       const materialId = makeMaterialId();
       const hash = await sha256(file);
+      const duplicate = items.find(item => item.sha256 === hash);
+      if (duplicate) throw new Error("Файл с таким SHA-256 уже есть в архиве: " + duplicate.material_id + ". Повторная копия не загружена.");
       const path = storagePath(currentUser.id, materialId, file.name);
       uploadedPath = path;
       const uploadResponse = await fetch(api("/storage/v1/object/" + bucket + "/" + path), {
@@ -263,6 +265,8 @@
         bucket_id: bucket,
         original_filename: file.name,
         title: $("cloud-upload-title").value.trim() || file.name,
+        description: $("cloud-upload-description").value.trim() || null,
+        captured_at: $("cloud-captured-at").value ? new Date($("cloud-captured-at").value + "T12:00:00Z").toISOString() : null,
         item_type: kindOf(file),
         mime_type: file.type || "application/octet-stream",
         size_bytes: file.size,
@@ -282,6 +286,8 @@
       }
       fileInput.value = "";
       $("cloud-upload-title").value = "";
+      $("cloud-upload-description").value = "";
+      $("cloud-captured-at").value = "";
       await loadArchive();
       setStatus("Оригинал сохранён в закрытом Supabase Storage. MATERIAL-ID: " + materialId + ". SHA-256 рассчитан; файл не обрабатывался и не перезаписывался.");
     } catch (error) {
