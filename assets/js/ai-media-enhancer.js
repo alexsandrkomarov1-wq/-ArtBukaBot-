@@ -34,6 +34,9 @@
   const cropHeight = root.querySelector("[data-ai-crop-height]");
   const audioEnhance = root.querySelector("[data-ai-audio-enhance]");
   const videoSettings = root.querySelector("[data-ai-video-settings]");
+  const videoEditor = root.querySelector("[data-ai-video-editor]");
+  const openVideoEditor = root.querySelector("[data-ai-open-video-editor]");
+  const closeVideoEditor = root.querySelector("[data-ai-close-video-editor]");
   const reprocessButton = root.querySelector("[data-ai-reprocess]");
   const privateApi = window.KOMAROVA_CORE_PRIVATE_API || null;
   const viewTitle = viewStage.querySelector(".ai-media-action-title");
@@ -265,6 +268,8 @@
     sourceFile = null;
     archiveOriginal = null;
     if (videoSettings) videoSettings.hidden = true;
+    if (videoEditor && videoEditor.open) videoEditor.close();
+    if (openVideoEditor) openVideoEditor.disabled = true;
     if (reprocessButton) reprocessButton.disabled = true;
     input.value = "";
     originalImage.removeAttribute("src");
@@ -287,8 +292,10 @@
     releaseUrl(sourceUrl);
     sourceFile = file;
     archiveOriginal = null;
-    if (videoSettings) videoSettings.hidden = !file.type.startsWith("video/");
-    if (reprocessButton) reprocessButton.disabled = false;
+    const isVideo = file.type.startsWith("video/");
+    if (videoSettings) videoSettings.hidden = !isVideo;
+    if (openVideoEditor) openVideoEditor.disabled = !isVideo;
+    if (reprocessButton) reprocessButton.disabled = !isVideo;
     sourceUrl = URL.createObjectURL(file);
     clearResult();
     preview.hidden = false;
@@ -556,6 +563,17 @@
 
   reset.addEventListener("click", clearWorkspace);
 
+  if (openVideoEditor) openVideoEditor.addEventListener("click", () => {
+    if (!sourceFile || !sourceFile.type.startsWith("video/") || !videoEditor) return;
+    if (typeof videoEditor.showModal === "function") videoEditor.showModal();
+    else {
+      status.textContent = "Этот браузер не поддерживает отдельное окно редактора. Обновите браузер или используйте встроенный просмотр.";
+    }
+    status.textContent = "Редактор видео открыт. Параметры применятся только при доступном приватном backend и установленном FFmpeg/AI-worker.";
+  });
+  if (closeVideoEditor) closeVideoEditor.addEventListener("click", () => {
+    if (videoEditor && videoEditor.open) videoEditor.close();
+  });
   if (reprocessButton) reprocessButton.addEventListener("click", () => {
     if (!sourceFile) return;
     generation += 1;
