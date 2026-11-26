@@ -21,6 +21,10 @@
   const resultVideo = root.querySelector("[data-ai-result-video]");
   const originalEmpty = root.querySelector("[data-ai-original-empty]");
   const resultEmpty = root.querySelector("[data-ai-result-empty]");
+  const qualityControl = root.querySelector("[data-ai-quality]");
+  const qualityValue = root.querySelector("[data-ai-quality-value]");
+  const zoomControl = root.querySelector("[data-ai-zoom]");
+  const zoomValue = root.querySelector("[data-ai-zoom-value]");
   const viewTitle = viewStage.querySelector(".ai-media-action-title");
   const viewNote = viewStage.querySelector(".ai-media-action-note");
 
@@ -33,6 +37,15 @@
 
   function releaseUrl(url) {
     if (url) URL.revokeObjectURL(url);
+  }
+
+  function applyZoom() {
+    const zoom = Number(zoomControl && zoomControl.value) || 100;
+    if (zoomValue) zoomValue.value = zoom + "%";
+    [originalImage, resultImage].forEach(image => {
+      image.style.width = zoom + "%";
+      image.style.maxWidth = "none";
+    });
   }
 
   function setStage(title, note) {
@@ -130,7 +143,8 @@
 
   // Lightweight browser fallback restored from the earlier implementation.
   // Deterministic correction only; this is not neural AI restoration.
-  function makeCanvasCopy(file, token) {
+  function makeCanvasCopy(file, token, quality) {
+    const strength = Math.max(0, Math.min(100, Number(quality) || 0)) / 100;
     return new Promise((resolve, reject) => {
       const image = new Image();
       const imageUrl = URL.createObjectURL(file);
@@ -153,7 +167,7 @@
             const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
             for (let c = 0; c < 3; c++) {
               const value = pixels[i + c];
-              pixels[i + c] = Math.max(0, Math.min(255, (l + (value - l) * 1.045 - 128) * 1.055 + 128));
+              pixels[i + c] = Math.max(0, Math.min(255, (l + (value - l) * (1 + 0.10 * strength) - 128) * (1 + 0.12 * strength) + 128));
             }
           }
           context.putImageData(frame, 0, 0);
@@ -164,7 +178,7 @@
             const p = (y * width + x) * 4;
             for (let c = 0; c < 3; c++) {
               const n = source[p - 4 + c] + source[p + 4 + c] + source[p - width * 4 + c] + source[p + width * 4 + c];
-              target[p + c] = Math.max(0, Math.min(255, source[p + c] * 1.28 - n * 0.07));
+              target[p + c] = Math.max(0, Math.min(255, source[p + c] * (1 + 0.30 * strength) - n * (0.075 * strength)));
             }
           }
           context.putImageData(sharpened, 0, 0);
@@ -191,6 +205,7 @@
     if (token !== generation) return;
     resultFile = file;
     resultUrl = URL.createObjectURL(file);
+    applyZoom();
     resultEmpty.hidden = true;
     if (file.type.startsWith("video/")) {
       resultVideo.src = resultUrl;
@@ -237,7 +252,7 @@
         setStage("Локальная коррекция фотографии", "Цвет · контраст · умеренная резкость · без нейросетевой генерации");
         mode.textContent = "ЛОКАЛЬНАЯ ОБРАБОТКА";
         status.textContent = "Создаётся отдельная копия в браузере. Это облегчённый алгоритм, не Real-ESRGAN. Оригинал не изменяется.";
-        const enhanced = await makeCanvasCopy(file, token);
+        const enhanced = await makeCanvasCopy(file, token, qualityControl ? qualityControl.value : 65);
         if (token !== generation) return;
         const sourceHashAfter = await sha256(file);
         if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
@@ -293,6 +308,24 @@
   });
 
   reset.addEventListener("click", clearWorkspace);
+
+  if (qualityControl) {
+    if (qualityValue) qualityValue.value = qualityControl.value + "%";
+    qualityControl.addEventListener("change", () => {
+      if (!sourceFile || !sourceFile.type.startsWith("image/")) return;
+      if (qualityValue) qualityValue.value = qualityControl.value + "%";
+      generation += 1;
+      const token = generation;
+      clearResult();
+      setStage("Повторная обработка фотографии", "Применяется выбранная сила улучшения");
+      void processSelected(sourceFile, token);
+    });
+  }
+  if (zoomControl) {
+    zoomControl.addEventListener("input", applyZoom);
+    applyZoom();
+  }
+
   exportButton.disabled = true;
   preview.hidden = true;
   mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
