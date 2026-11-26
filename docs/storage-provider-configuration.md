@@ -34,6 +34,7 @@ The initial provider set is:
 | `google_drive` | Google Drive | Optional external copy of family archive objects | Designed; not connected |
 | `yandex_disk` | Yandex Disk | Optional external copy of family archive objects | Designed; not connected |
 | `local_private` | Private local/server storage | Development and staging storage adapter; not a durable production guarantee | Implemented in current archive intake, deployment-dependent |
+| `supabase_storage` | Supabase Storage + PostgreSQL metadata | Candidate private media target for the current web archive | Client and SQL schema prepared; project credentials, RLS, upload/read-back and restore tests still pending |
 
 Microsoft Outlook/Hotmail, Gmail, and Yandex Mail are mail services, not file-storage destinations. Mail integration is a separate connector with separate consent and scopes. This storage configuration covers OneDrive, Google Drive, and Yandex Disk only.
 
@@ -180,3 +181,15 @@ A GitHub Actions success for the static Pages workflow is not evidence of cloud 
 6. Only then mark any provider as verified or operational.
 
 No real family data is to be used in public development tests.
+
+## 12. Supabase integration boundary
+
+Supabase is being prepared as the private media-storage target for the web archive. The first integration is deliberately isolated from the existing Neon identity/database configuration.
+
+- Browser configuration may contain only the project URL and public anon/publishable key. The service_role key must never be placed in GitHub Pages, JavaScript, HTML, or a browser field.
+- The media bucket komarova_core_private must remain private. Row Level Security is required for both public.archive_items and storage.objects.
+- The initial client policy is owner-scoped: an authenticated user can list and upload only objects under their own Supabase Auth user ID. Family-wide shared access requires a separately reviewed membership/role model.
+- The first web release stores original files and metadata references only. It does not claim ClamAV scanning, AI enhancement, shared family permissions, full archive export, or verified off-site backup.
+- Do not migrate the authoritative people/events/places registry or disable Neon Auth merely because a Supabase project exists. A database/auth migration requires a separately tested identity mapping, complete export, checksum comparison, restore test, and explicit approval.
+- Supabase is considered connected only after project health, Auth login, private bucket verification, upload, authenticated read-back, SHA-256 comparison, and backup/restore checks pass.
+
