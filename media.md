@@ -23,7 +23,7 @@ description: Закрытый семейный архив фотографий, 
     <div><p class="eyebrow">ФИЗИЧЕСКОЕ ХРАНЕНИЕ</p><h2 id="archive-storage-title">Подключение Supabase</h2></div>
     <span id="cloud-connection-state" class="media-status">Ожидается подключение проекта</span>
   </div>
-  <p>Используется публичный anon/publishable key с обязательными RLS-политиками. Секретный service_role key сюда вводить запрещено. URL и публичный ключ остаются только в памяти открытой вкладки и не записываются в браузерное хранилище.</p>
+  <p>Project URL и публичный publishable key существующего проекта KOMAROVA_CORE заданы в клиентской конфигурации сайта и проверяются автоматически при открытии страницы. Публичный ключ предназначен для браузерного клиента; доступ к данным должен ограничиваться RLS-политиками. Секретный service_role key в публичный код не добавляется.</p>
   <form id="supabase-connect-form" class="cloud-auth-form">
     <label>Project URL
       <input id="supabase-project-url" type="url" inputmode="url" autocomplete="off" placeholder="https://ваш-проект.supabase.co" required>
