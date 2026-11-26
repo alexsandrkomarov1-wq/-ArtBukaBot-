@@ -94,7 +94,7 @@ The backend now contains:
 - resumable Drive upload, application metadata for idempotency, read-back download and SHA-256/size verification;
 - bounded exponential retry, sanitized error codes and expired-lease recovery.
 
-The worker is disabled unless GOOGLE_DRIVE_SYNC_ENABLED=true and GOOGLE_DRIVE_FOLDER_ID are configured. Required hosting secrets are GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_DRIVE_REFRESH_TOKEN. Keep them in the private backend host's secret settings, never in Git or the browser. The local token file is not automatically available to the hosted backend.
+The worker is disabled unless GOOGLE_DRIVE_SYNC_ENABLED=true and GOOGLE_DRIVE_FOLDER_ID are configured. The worker accepts either the three hosting secrets GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_DRIVE_REFRESH_TOKEN, or GOOGLE_DRIVE_TOKEN_FILE pointing to an existing authorized-user token file. Keep credentials in private host secret settings or a protected secret-file mount, never in Git or the browser. The local file at C:\\Users\\KomarovA\\KOMAROVA_CORE\\google_drive_token.json is not automatically available to a hosted backend; it must not be copied into the repository.
 
 The worker does not create a folder. It uses only the explicitly configured folder ID. With the current drive.file scope, a manually created folder may still be inaccessible until the owner selects/shares it through an approved Google Picker flow. Do not widen the OAuth scope or create a duplicate folder to bypass this.
 
