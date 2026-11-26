@@ -84,9 +84,9 @@
     preview.hidden = true;
     reset.disabled = true;
     mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
-    setStage("Ожидается AI worker", "ClamAV и Real-ESRGAN запускаются после подключения частного backend");
+    setStage("Ожидается AI-движок", "Автоматическая проверка и Real-ESRGAN x4 будут запускаться внутри KOMAROVA_CORE");
     info.textContent = "Файл ещё не выбран. Выберите фотографию или видео.";
-    status.textContent = "Оригинал не изменяется. После выбора выполняются локальные проверки; ClamAV и AI-обработка требуют входа в частный backend.";
+    status.textContent = "Оригинал не изменяется. После выбора выполняются локальные проверки. Серверный AI-движок пока не установлен.";
   }
 
   function showOriginal(file) {
@@ -173,15 +173,15 @@
         const sourceHashAfter = await sha256(file);
         if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
         setStage("Ожидается AI video worker", "Real-ESRGAN x2 · FFmpeg · сохранение аудио");
-        resultEmpty.textContent = "AI-обработка видео появится после подключения частного worker. Исходник не изменён, фиктивный ролик не создаётся.";
+        resultEmpty.textContent = "AI-обработка видео появится после установки внутреннего worker. Исходник не изменён, фиктивный ролик не создаётся.";
         resultEmpty.hidden = false;
-        status.textContent = "Оригинал видео выбран. Локально проверены формат, размер и SHA-256; антивирусная проверка ClamAV не запускалась. Для улучшения требуется частный backend с Real-ESRGAN, FFmpeg и моделью.";
+        status.textContent = "Оригинал видео выбран. Локально проверены формат, размер и SHA-256; антивирусная проверка ClamAV не запускалась. Для улучшения требуется установить внутренний worker с Real-ESRGAN, FFmpeg и моделью.";
         mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
         return;
       }
       setStage("Ожидается установка AI-движка", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
       mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
-      resultEmpty.textContent = "Настоящее AI-улучшение появится после подключения частного worker. Сейчас здесь не показывается поддельная копия.";
+      resultEmpty.textContent = "Настоящее AI-улучшение появится после установки внутреннего AI-движка. Сейчас здесь не показывается поддельная копия.";
       resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
