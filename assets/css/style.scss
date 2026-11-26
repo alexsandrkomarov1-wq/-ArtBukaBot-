@@ -947,3 +947,45 @@ body {
 .ai-media-engine-status strong{font:800 10px Consolas,monospace;letter-spacing:.13em;color:#9fe0cb}
 .ai-media-engine-status span{font-size:13px;line-height:1.65}
 .ai-media-engine-status small{color:#e7c58c;font-size:11px;line-height:1.5}
+
+
+/* Atmosphere studio: layered 3D scenery, desktop screensaver, audio tools */
+.ai-media-atmosphere{perspective:1100px;transform-style:preserve-3d}
+.ai-media-nature-scene{transform-style:preserve-3d;transform:translateZ(-35px) scale(1.08)}
+.ai-media-nature-scene .nature-sun{transform:translateZ(90px);filter:drop-shadow(0 16px 25px rgba(0,0,0,.18))}
+.ai-media-nature-scene .nature-mountains{transform:translateZ(35px) scale(1.04);transform-origin:center bottom}
+.ai-media-nature-scene .nature-hills{transform:translateZ(70px) scale(1.08);transform-origin:center bottom}
+.ai-media-nature-scene .nature-water{transform:translateZ(100px);background-size:100% 100%,100% 100%;animation:nature-water-shimmer 8s ease-in-out infinite alternate}
+.ai-media-nature-scene .nature-trees{transform:translateZ(145px) scale(1.12);transform-origin:center bottom}
+.ai-media-nature-scene .nature-fireflies{transform:translateZ(180px);pointer-events:none}
+.ai-media-atmosphere:fullscreen{width:100vw;height:100vh;min-height:100vh;margin:0;border:0;border-radius:0;background:#071a27}
+.ai-media-atmosphere:fullscreen .ai-media-nature-scene{transform:translateZ(-55px) scale(1.2)}
+.ai-media-atmosphere:fullscreen .ai-media-atmosphere-content{min-height:100vh;align-items:end;padding:clamp(24px,5vw,72px)}
+.ai-media-atmosphere:fullscreen .ai-media-atmosphere-content>div:first-child{align-self:start}
+.ai-media-atmosphere:fullscreen .ai-media-atmosphere-content h3{font-size:clamp(38px,6vw,76px)}
+.ai-media-atmosphere:fullscreen .ai-media-atmosphere-controls{max-width:620px}
+@keyframes nature-water-shimmer{from{filter:brightness(.88);background-position:0 0,0 0}to{filter:brightness(1.18);background-position:18px 0,0 0}}
+.media-playback-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.media-player-panel{display:grid;align-content:start;gap:12px;min-width:0;padding:20px;border:1px solid rgba(153,207,225,.24);border-radius:18px;background:linear-gradient(145deg,#102b3b,#0b1b2b);color:#edf6f6}
+.media-player-panel h4{margin:0;font-size:20px;color:#fff}
+.media-player-panel label{display:grid;gap:7px;color:#c9dce0;font-size:12px}
+.media-player-panel input[type="search"],.media-player-panel input[type="url"]{width:100%;min-width:0;padding:11px 12px;border:1px solid rgba(180,220,230,.28);border-radius:9px;background:#081725;color:#fff}
+.media-file-picker{padding:12px;border:1px dashed rgba(180,220,230,.45);border-radius:10px;cursor:pointer}
+.media-file-picker input{display:block;max-width:100%;margin-top:8px;color:#d7e9e8}
+.media-player-controls{display:flex;gap:8px;align-items:center}
+.media-player-controls button,.media-player-panel>button{padding:10px 14px;border:1px solid rgba(166,232,208,.45);border-radius:10px;background:rgba(117,212,199,.14);color:#f5ffff;cursor:pointer}
+.media-player-timeline{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center;color:#bdd3d8;font-size:11px;font-variant-numeric:tabular-nums}
+.media-player-timeline input,.media-volume-control input{width:100%;accent-color:#91d8ca}
+.media-volume-control{grid-template-columns:auto minmax(0,1fr);align-items:center}
+.media-music-playlist,.media-radio-list{display:grid;gap:6px;max-height:210px;overflow:auto}
+.media-track,.radio-station{width:100%;padding:9px 11px;border:1px solid rgba(180,220,230,.14);border-radius:8px;background:rgba(255,255,255,.045);color:#e7f2f2;text-align:left;cursor:pointer}
+.media-track.is-active{border-color:#9fe0cb;background:rgba(117,212,199,.18)}
+.media-player-empty,.media-player-status{margin:0;color:#afc5ca;font-size:11px;line-height:1.6}
+.media-radio-panel audio{width:100%}
+.ai-video-editor-open{grid-column:1/-1}
+.ai-video-editor-dialog{width:min(900px,calc(100vw - 28px));max-height:min(88vh,900px);padding:0;border:1px solid rgba(125,170,190,.45);border-radius:18px;background:#0b1b2a;color:#eaf3f7;box-shadow:0 28px 100px rgba(0,0,0,.55)}
+.ai-video-editor-dialog::backdrop{background:rgba(2,9,16,.78);backdrop-filter:blur(7px)}
+.ai-video-editor-dialog .ai-media-video-settings{display:grid;margin:0;border:0;background:transparent}
+.ai-video-editor-dialog .ai-media-video-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:760px){.media-playback-grid{grid-template-columns:1fr}.ai-video-editor-dialog .ai-media-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.ai-media-nature-scene .nature-water{animation:none}}
