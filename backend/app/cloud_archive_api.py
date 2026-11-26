@@ -19,6 +19,7 @@ from . import archive_api as legacy_archive_api
 from .models import ArchiveEntityLink, ArchiveItem, AuditEvent, Material, Person, StoredBlob, User, new_id
 from .schemas import ArchiveItemRead, ArchiveLinkCreate, ArchiveLinkRead
 from .storage import PrivateMediaStorage
+from .google_drive_outbox import enqueue_google_drive_replica
 from .ai_media_worker import restore_photo, restore_video, sha256_file
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
@@ -176,6 +177,7 @@ def build_archive_router(get_db, require_roles, storage_root: Path) -> APIRouter
                 material_role="original", output_sha256=sha256,
             )
             db.add(material)
+            enqueue_google_drive_replica(db, blob)
             if linked_person is not None:
                 link = ArchiveEntityLink(
                     archive_item_id=item.archive_item_id, target_entity_type="person",
