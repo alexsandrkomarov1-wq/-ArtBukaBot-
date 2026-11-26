@@ -124,11 +124,13 @@ a { color:var(--green); }
 .gallery-status { flex:0 0 auto; padding:8px 11px; border:1px solid var(--line); color:#77796f; font-size:8px; font-weight:800; letter-spacing:.13em; }
 .family-portrait-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; }
 .family-portrait-card { min-width:0; padding:10px; border:1px solid var(--line); background:var(--card); }
-.portrait-frame { position:relative; display:flex; min-height:225px; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(150deg,#e8e1d5,#d9d0c1); }
+.portrait-frame { position:relative; display:flex; min-height:225px; max-height:420px; aspect-ratio:4/5; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(150deg,#e8e1d5,#d9d0c1); }
+.portrait-frame:has(.portrait-preview:not([hidden])) { min-height:0; }
+.portrait-preview { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:contain; object-position:center; background:#17211f; }
 .portrait-frame-alt { background:linear-gradient(150deg,#e2e5dd,#cbd2c7); }
 .portrait-frame-warm { background:linear-gradient(150deg,#eadfd5,#d8c6b5); }
 .portrait-frame-dark { background:linear-gradient(150deg,#d9ded9,#bfc9c1); }
-.portrait-preview { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+
 .portrait-select-button { display:inline-flex; width:max-content; max-width:100%; align-items:center; justify-content:center; min-height:34px; padding:8px 11px; border:1px solid var(--green); background:var(--green); color:#fff; font-size:10px; font-weight:750; cursor:pointer; }
 .portrait-select-button:hover { background:#28483e; }
 .portrait-upload-input { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; clip-path:inset(50%); }
