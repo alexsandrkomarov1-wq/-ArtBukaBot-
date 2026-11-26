@@ -81,7 +81,7 @@
       await request("/auth/v1/settings");
       connection.textContent = "Supabase доступен · проект отвечает. Войдите в семейный аккаунт.";
       $("supabase-project-state").textContent = "Подключение проверено для этой вкладки. URL и публичный ключ остаются только в памяти страницы.";
-      $("supabase-login-email").focus();
+      $("cloud-username").focus();
     } catch (error) {
       projectUrl = "";
       anonKey = "";
