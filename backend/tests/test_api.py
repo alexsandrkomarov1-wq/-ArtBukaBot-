@@ -552,3 +552,54 @@ def test_private_registry_search_validates_query_and_requires_authentication(tmp
         assert client.get("/api/v1/search?q=a", headers=headers).status_code == 422
         assert client.get("/api/v1/search?q=   ", headers=headers).status_code == 422
         assert client.get("/api/v1/search?q=Артём").status_code == 401
+
+
+def test_neon_identity_requires_explicit_link_and_keeps_local_role(tmp_path, monkeypatch):
+    import backend.app.main as main_module
+
+    with make_client(tmp_path) as client:
+        owner = bootstrap_owner(client)
+        owner_headers = auth(owner["access_token"])
+        issuer = "https://example.neon.tech/neondb/auth"
+        monkeypatch.setenv("NEON_AUTH_JWKS_URL", "https://example.neon.tech/neondb/.well-known/jwks.json")
+        monkeypatch.setenv("NEON_AUTH_BASE_URL", issuer)
+        monkeypatch.setattr(
+            main_module,
+            "verify_neon_token",
+            lambda token, *, jwks_url, issuer: {
+                "sub": "neon-user-subject-123",
+                "iss": issuer,
+                "exp": 4102444800,
+                "email": "untrusted-email@example.test",
+            } if token == "valid-neon-token" else (_ for _ in ()).throw(ValueError("invalid")),
+        )
+
+        # An authenticated Neon identity cannot enter the private API before linking.
+        assert client.get(
+            "/api/v1/auth/me", headers=auth("valid-neon-token")
+        ).status_code == 403
+
+        linked = client.post(
+            "/api/v1/auth/neon/link",
+            headers=owner_headers,
+            json={"neon_access_token": "valid-neon-token"},
+        )
+        assert linked.status_code == 200
+        assert linked.json()["status"] == "linked"
+        assert linked.json()["user_id"] == owner["user"]["user_id"]
+
+        # Neon identity resolves to the existing local account and its server-side owner role.
+        me = client.get("/api/v1/auth/me", headers=auth("valid-neon-token"))
+        assert me.status_code == 200
+        assert me.json()["user_id"] == owner["user"]["user_id"]
+        assert me.json()["role"] == "owner"
+
+        # The same Neon identity cannot be attached to a different local account.
+        member = create_account(client, owner["access_token"], "linked_member", "family_member").json()
+        member_login = login(client, "linked_member").json()
+        conflict = client.post(
+            "/api/v1/auth/neon/link",
+            headers=auth(member_login["access_token"]),
+            json={"neon_access_token": "valid-neon-token"},
+        )
+        assert conflict.status_code == 409
