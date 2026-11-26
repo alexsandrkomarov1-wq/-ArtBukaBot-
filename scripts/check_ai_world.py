@@ -32,6 +32,12 @@ assert 'id="ai-media-enhancer"' in HOME
 assert 'data-guide-toggle' in LAYOUT
 assert 'data-guide-panel' in LAYOUT
 assert "data-world-open-guide" in NAV
+assert 'data-project-age' in HOME and 'data-project-worked' in HOME
+assert 'project-time-counter.js' in HOME
+assert 'TorusGeometry(0.48' in SCENE and 'portalTargets' in SCENE
+assert 'intersectObjects(portalTargets' in SCENE and 'portalAnchors[index].click()' in SCENE
+assert 'keyboardX' in SCENE and 'camera.position.z = Math.max' in SCENE
+assert (ROOT / "assets/js/project-time-counter.js").is_file()
 assert "WebGLRenderer" in SCENE
 assert "3D-графика недоступна" in SCENE
 assert "порталы и разделы остаются активны" in SCENE
