@@ -228,6 +228,99 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
+<script>
+(() => {
+  "use strict";
+  const cards = [...document.querySelectorAll("[data-portrait-card]")];
+  cards.forEach(card => {
+    const input = card.querySelector(".portrait-upload-input");
+    const image = card.querySelector(".portrait-preview");
+    const frame = card.querySelector(".portrait-frame");
+    const state = card.querySelector("[data-portrait-state]");
+    const clear = card.querySelector("[data-portrait-clear]");
+    let previewUrl = null;
+    if (!input || !image || !frame || !state || !clear) return;
+
+    function releasePreview() {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+
+    async function makePortraitPreview(file) {
+      if (!("createImageBitmap" in window)) throw new Error("Браузер не поддерживает безопасную обработку изображения.");
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, Math.sqrt(8000000 / (bitmap.width * bitmap.height)));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d", { alpha: false });
+      if (!context) {
+        bitmap.close();
+        throw new Error("Не удалось создать предпросмотр.");
+      }
+      context.filter = "brightness(1.06) contrast(1.08) saturate(1.12)";
+      context.drawImage(bitmap, 0, 0, width, height);
+      context.filter = "none";
+      bitmap.close();
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(value => value ? resolve(value) : reject(new Error("Не удалось создать улучшенную копию.")), "image/webp", 0.94);
+      });
+      canvas.width = 1;
+      canvas.height = 1;
+      return new File([blob], file.name.replace(/\.[^.]+$/, "") + "-portrait-preview.webp", { type: "image/webp", lastModified: Date.now() });
+    }
+
+    input.addEventListener("change", async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        state.textContent = "ОШИБКА · ВЫБЕРИТЕ ФОТОГРАФИЮ";
+        input.value = "";
+        return;
+      }
+      state.textContent = "ОБРАБОТКА ПРЕДПРОСМОТРА…";
+      clear.hidden = true;
+      try {
+        const enhanced = await makePortraitPreview(file);
+        releasePreview();
+        previewUrl = URL.createObjectURL(enhanced);
+        image.onload = () => {
+          const ratio = image.naturalWidth + "/" + image.naturalHeight;
+          frame.style.aspectRatio = ratio;
+          frame.style.minHeight = "0";
+          frame.style.maxHeight = "420px";
+        };
+        image.src = previewUrl;
+        image.hidden = false;
+        const silhouette = frame.querySelector(".portrait-silhouette");
+        if (silhouette) silhouette.hidden = true;
+        state.textContent = "ПРЕДПРОСМОТР · СВЕТ, КОНТРАСТ И ЦВЕТ СКОРРЕКТИРОВАНЫ";
+        clear.hidden = false;
+      } catch (error) {
+        state.textContent = "НЕ УДАЛОСЬ ОБРАБОТАТЬ ПРЕДПРОСМОТР · " + error.message;
+      }
+    });
+
+    clear.addEventListener("click", () => {
+      releasePreview();
+      image.removeAttribute("src");
+      image.hidden = true;
+      image.onload = null;
+      frame.style.aspectRatio = "";
+      frame.style.minHeight = "";
+      frame.style.maxHeight = "";
+      const silhouette = frame.querySelector(".portrait-silhouette");
+      if (silhouette) silhouette.hidden = false;
+      input.value = "";
+      state.textContent = "ФОТО ПОКА НЕ ДОБАВЛЕНО";
+      clear.hidden = true;
+    });
+  });
+})();
+</script>
+
 <script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-no-login-2"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261125-manual-scene-1"></script>
 
