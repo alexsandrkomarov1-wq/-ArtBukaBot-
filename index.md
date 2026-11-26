@@ -316,6 +316,6 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
 <script defer src="{{ '/assets/js/media-studio.js' | relative_url }}?v=20261126-media-studio-1"></script>
 
-<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
+<script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261126-portal-navigation-3"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
 <script defer src="{{ '/assets/js/project-time-counter.js' | relative_url }}?v=20261126-counter-1"></script>
