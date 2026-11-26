@@ -55,14 +55,16 @@ def _enhance_image(source: Path, output: Path, scale: int, timeout: int) -> None
     if not output.is_file() or output.stat().st_size == 0:
         raise RuntimeError("Real-ESRGAN did not produce an output image")
 
-def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: int = 4) -> WorkerResult:
+def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: int = 4, strength: int = 65) -> WorkerResult:
     source, output = Path(source_path).resolve(strict=True), Path(output_path).resolve()
     if source == output: raise ValueError("Refusing to overwrite the original")
     if source.suffix.lower() not in IMAGE_SUFFIXES: raise ValueError("Unsupported image extension")
     if source.stat().st_size > MAX_INPUT_BYTES: raise ValueError("Input exceeds the 100 MiB worker limit")
+    if not 0 <= int(strength) <= 100: raise ValueError("Enhancement strength must be between 0 and 100")
     scan_or_fail(source)
     output.parent.mkdir(parents=True, exist_ok=True)
     original_hash = sha256_file(source)
+    factor = int(strength) / 100.0
     with tempfile.TemporaryDirectory(prefix="core-ai-photo-") as temp_name:
         prepared = Path(temp_name) / "prepared.png"
         try:
@@ -75,51 +77,115 @@ def restore_photo(source_path: str | Path, output_path: str | Path, *, scale: in
         with Image.open(ai_output) as opened:
             opened.load()
             ai_rgb = np.asarray(ImageOps.exif_transpose(opened).convert("RGB"))
-        # OpenCV + scikit-image refine local contrast, noise and edge detail
-        # after neural upscaling. Pillow applies a restrained brightness/color finish.
+        # Neural upscaling is followed by deterministic finishing whose strength
+        # is controlled by the user's slider and affects the exported file.
         refined = Image.fromarray(_enhance_rgb(ai_rgb), mode="RGB")
-        refined = ImageEnhance.Brightness(refined).enhance(1.04)
-        refined = ImageEnhance.Color(refined).enhance(1.04)
-        refined = ImageEnhance.Contrast(refined).enhance(1.03)
+        refined = ImageEnhance.Brightness(refined).enhance(1.0 + 0.035 * factor)
+        refined = ImageEnhance.Color(refined).enhance(1.0 + 0.10 * factor)
+        refined = ImageEnhance.Contrast(refined).enhance(1.0 + 0.08 * factor)
+        refined = ImageEnhance.Sharpness(refined).enhance(1.0 + 0.25 * factor)
         refined.save(output, format="PNG")
     with Image.open(output) as enhanced:
         enhanced.load()
         width, height = enhanced.size
     return WorkerResult(str(output), "image/png", original_hash, sha256_file(output),
         source.stat().st_size, output.stat().st_size,
-        f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image", width, height)
+        f"Real-ESRGAN NCNN Vulkan x{scale} + OpenCV + scikit-image · strength {strength}%", width, height)
 
-def restore_video(source_path: str | Path, output_path: str | Path, *, scale: int = 2) -> WorkerResult:
+def restore_video(
+    source_path: str | Path,
+    output_path: str | Path,
+    *,
+    scale: int = 2,
+    strength: int = 65,
+    start_seconds: float = 0.0,
+    end_seconds: float | None = None,
+    crop_x: int | None = None,
+    crop_y: int | None = None,
+    crop_width: int | None = None,
+    crop_height: int | None = None,
+    enhance_audio: bool = True,
+) -> WorkerResult:
     source, output = Path(source_path).resolve(strict=True), Path(output_path).resolve()
     if source == output: raise ValueError("Refusing to overwrite the original")
     if source.suffix.lower() not in VIDEO_SUFFIXES: raise ValueError("Unsupported video extension")
     if source.stat().st_size > MAX_INPUT_BYTES: raise ValueError("Input exceeds the 100 MiB worker limit")
+    if scale not in (2, 3, 4): raise ValueError("Video AI scale must be 2, 3 or 4")
+    if not 0 <= int(strength) <= 100: raise ValueError("Enhancement strength must be between 0 and 100")
     ffmpeg = shutil.which(os.getenv("CORE_FFMPEG_BINARY", "ffmpeg"))
     ffprobe = shutil.which(os.getenv("CORE_FFPROBE_BINARY", "ffprobe"))
     if not ffmpeg or not ffprobe: raise RuntimeError("FFmpeg and FFprobe are required")
     scan_or_fail(source)
-    probe = _run([ffprobe, "-v", "error", "-show_entries", "format=duration",
-        "-of", "default=noprint_wrappers=1:nokey=1", str(source)], 30)
-    try: duration = float(probe.stdout.strip())
-    except ValueError as exc: raise RuntimeError("Could not determine video duration") from exc
+    probe = _run([ffprobe, "-v", "error", "-show_entries",
+        "format=duration:stream=codec_type,avg_frame_rate,width,height",
+        "-of", "json", str(source)], 30)
+    try:
+        metadata = json.loads(probe.stdout)
+        duration = float(metadata.get("format", {}).get("duration", 0))
+        video_stream = next(item for item in metadata["streams"] if item.get("codec_type") == "video")
+        rate = str(video_stream.get("avg_frame_rate") or "30/1")
+        numerator, denominator = rate.split("/", 1)
+        fps = float(numerator) / max(1.0, float(denominator))
+        has_audio = any(item.get("codec_type") == "audio" for item in metadata["streams"])
+    except (ValueError, KeyError, StopIteration, TypeError, ZeroDivisionError) as exc:
+        raise RuntimeError("Could not determine video duration, frame rate or streams") from exc
     if duration <= 0 or duration > MAX_VIDEO_SECONDS:
         raise ValueError("Video duration must be between 0 and 180 seconds")
+    start = float(start_seconds)
+    end = duration if end_seconds is None else float(end_seconds)
+    if start < 0 or end <= start or end > duration:
+        raise ValueError("Trim range must be inside the source video and have positive duration")
+    segment_duration = end - start
+    crop_values = (crop_x, crop_y, crop_width, crop_height)
+    if any(value is not None for value in crop_values):
+        if any(value is None for value in crop_values):
+            raise ValueError("All four crop values are required together")
+        x, y, width, height = (int(value) for value in crop_values)
+        source_width = int(video_stream.get("width", 0))
+        source_height = int(video_stream.get("height", 0))
+        if x < 0 or y < 0 or width < 2 or height < 2 or x + width > source_width or y + height > source_height:
+            raise ValueError("Crop rectangle is outside the source video")
+        if width % 2 or height % 2:
+            raise ValueError("Crop width and height must be even for MP4 export")
+        crop_filter = f"crop={width}:{height}:{x}:{y}"
+    else:
+        crop_filter = ""
     output.parent.mkdir(parents=True, exist_ok=True)
     original_hash = sha256_file(source)
+    fps = min(60.0, max(1.0, fps))
+    fps_arg = f"{fps:.6f}".rstrip("0").rstrip(".")
+    factor = int(strength) / 100.0
+    contrast = 1.0 + 0.16 * factor
+    saturation = 1.0 + 0.14 * factor
+    brightness = 0.025 * factor
+    sharpen = 0.65 * factor
+    video_finish = f"eq=contrast={contrast:.4f}:saturation={saturation:.4f}:brightness={brightness:.4f},unsharp=5:5:{sharpen:.4f}:3:3:0.0"
+    audio_filter = "highpass=f=70,afftdn=nf=-25,loudnorm=I=-16:TP=-1.5:LRA=11"
     with tempfile.TemporaryDirectory(prefix="core-video-restore-") as temp:
         work = Path(temp); frames = work / "frames"; enhanced = work / "enhanced"
         frames.mkdir(); enhanced.mkdir()
-        _run([ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-i", str(source),
-            "-map", "0:v:0", "-vsync", "0", str(frames / "frame-%08d.png")], 180)
+        extract = [ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin",
+            "-ss", str(start), "-t", str(segment_duration), "-i", str(source),
+            "-map", "0:v:0"]
+        if crop_filter:
+            extract += ["-vf", crop_filter]
+        extract += ["-fps_mode", "passthrough", str(frames / "frame-%08d.png")]
+        _run(extract, 300)
         frame_list = sorted(frames.glob("frame-*.png"))
         if not frame_list or len(frame_list) > 5400:
             raise RuntimeError("Frame extraction returned no frames or exceeded the safety limit")
-        for frame in frame_list: _enhance_image(frame, enhanced / frame.name, scale, 90)
-        _run([ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
-            "-framerate", "30", "-i", str(enhanced / "frame-%08d.png"), "-i", str(source),
-            "-map", "0:v:0", "-map", "1:a?", "-c:v", "libx264", "-preset", "medium",
-            "-crf", "18", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
-            "-shortest", "-movflags", "+faststart", str(output)], 900)
+        for frame in frame_list:
+            _enhance_image(frame, enhanced / frame.name, scale, timeout=90)
+        command = [ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin",
+            "-framerate", fps_arg, "-i", str(enhanced / "frame-%08d.png"),
+            "-ss", str(start), "-t", str(segment_duration), "-i", str(source),
+            "-map", "0:v:0", "-map", "1:a?", "-vf", video_finish,
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k"]
+        if has_audio and enhance_audio:
+            command += ["-af", audio_filter]
+        command += ["-shortest", "-movflags", "+faststart", str(output)]
+        _run(command, 900)
     if not output.is_file() or output.stat().st_size == 0:
         raise RuntimeError("FFmpeg did not produce a restored video")
     dimensions = _run([ffprobe, "-v", "error", "-select_streams", "v:0",
@@ -129,5 +195,7 @@ def restore_video(source_path: str | Path, output_path: str | Path, *, scale: in
         width, height = int(video_stream["width"]), int(video_stream["height"])
     except (ValueError, KeyError, IndexError, TypeError) as exc:
         raise RuntimeError("Could not verify enhanced video dimensions") from exc
+    audio_label = " + FFmpeg denoise/normalization" if has_audio and enhance_audio else ""
     return WorkerResult(str(output), "video/mp4", original_hash, sha256_file(output),
-        source.stat().st_size, output.stat().st_size, f"Real-ESRGAN x{scale} + FFmpeg", width, height)
+        source.stat().st_size, output.stat().st_size,
+        f"Real-ESRGAN NCNN Vulkan x{scale} + FFmpeg · strength {strength}%{audio_label}", width, height)
