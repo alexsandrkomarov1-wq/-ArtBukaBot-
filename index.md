@@ -80,7 +80,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · AI SUPER-RESOLUTION</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
-    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>СЕРВЕРНАЯ ОБРАБОТКА И СОХРАНЕНИЕ</strong><span>После подключения защищённой сессии оригинал загружается в приватный архив, проходит ClamAV, затем сервер создаёт отдельную производную копию. Ползунок меняет параметры именно сохраняемого файла.</span><small>Серверная среда пока не подключена к сайту. Без неё сохранённая AI-копия не создаётся.</small></div>
+    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>АВТОМАТИЧЕСКОЕ AI-УЛУЧШЕНИЕ · СЕРВЕРНОЕ СОХРАНЕНИЕ</strong><span>После подключения защищённой сессии оригинал загружается в приватный архив, проходит ClamAV, затем сервер создаёт отдельную производную копию. Ползунок меняет параметры именно сохраняемого файла.</span><small>Серверная среда пока не подключена к сайту. Без неё сохранённая AI-копия не создаётся.</small></div>
 
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
