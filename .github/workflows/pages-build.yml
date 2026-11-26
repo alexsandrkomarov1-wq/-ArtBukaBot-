@@ -42,6 +42,7 @@ jobs:
           node --check assets/js/family-board-map.js
           node --check assets/js/ai-media-enhancer.js
           node --check assets/js/media-atmosphere.js
+          node --check assets/js/media-studio.js
           node --check assets/js/cloud-archive.js
           node --check assets/js/supabase-archive.js
           node --check neon/functions/aistatus/index.mjs
