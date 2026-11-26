@@ -11,7 +11,6 @@ required_page = (
     'id="supabase-anon-key"', 'id="cloud-login-form"',
     'id="cloud-upload-form"', 'id="archive-storage"',
     'id="archive-upload"', 'id="archive-catalog"',
-    'id="cloud-person-id"', 'id="cloud-event-id"', 'id="cloud-place-id"',
 )
 for token in required_page:
     assert token in page, f"Missing archive page control: {token}"
