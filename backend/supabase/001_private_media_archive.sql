@@ -34,6 +34,7 @@ create index if not exists archive_items_sha256_idx
   on public.archive_items (sha256);
 
 alter table public.archive_items enable row level security;
+grant select, insert on table public.archive_items to authenticated;
 
 drop policy if exists "archive_items_select_own" on public.archive_items;
 create policy "archive_items_select_own"
