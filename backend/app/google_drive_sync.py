@@ -4,13 +4,14 @@ import hashlib
 import io
 import os
 import tempfile
+import time
 from datetime import timedelta
 from pathlib import Path
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from .database import build_engine, build_session_factory
 from .models import GoogleDriveOutbox, GoogleDriveReplica, StoredBlob, utc_now
@@ -78,7 +79,7 @@ def process_one(session_factory, storage, service, folder_id: str) -> bool:
     with session_factory() as db:
         job = db.scalar(
             select(GoogleDriveOutbox)
-            .where(GoogleDriveOutbox.state.in_(("pending", "retryable_error")), GoogleDriveOutbox.available_at <= now)
+            .where(or_(\n                (GoogleDriveOutbox.state.in_(("pending", "retryable_error")) & (GoogleDriveOutbox.available_at <= now)),\n                (GoogleDriveOutbox.state == "uploading") & (GoogleDriveOutbox.lease_until < now),\n            ))
             .order_by(GoogleDriveOutbox.available_at, GoogleDriveOutbox.created_at)
             .with_for_update(skip_locked=True).limit(1)
         )
@@ -159,8 +160,9 @@ def main():
     storage = PrivateMediaStorage(Path(os.getenv("CORE_MEDIA_ROOT", "./private_media")))
     service = _service()
     try:
-        while process_one(session_factory, storage, service, folder_id):
-            pass
+        while True:
+            if not process_one(session_factory, storage, service, folder_id):
+                time.sleep(10)
     finally:
         engine.dispose()
 
