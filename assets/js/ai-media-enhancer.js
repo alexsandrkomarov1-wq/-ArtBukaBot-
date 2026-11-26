@@ -128,6 +128,60 @@
     }
   }
 
+  // Lightweight browser fallback restored from the earlier implementation.
+  // Deterministic correction only; this is not neural AI restoration.
+  function makeCanvasCopy(file, token) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const imageUrl = URL.createObjectURL(file);
+      image.onload = () => {
+        URL.revokeObjectURL(imageUrl);
+        try {
+          if (token !== generation) return reject(new Error("Выбран другой файл."));
+          const width = image.naturalWidth, height = image.naturalHeight;
+          if (!width || !height || width * height > 12000000) {
+            throw new Error("Для локальной обработки доступно до 12 мегапикселей. Большие файлы требуют серверного AI-worker.");
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          const context = canvas.getContext("2d", { willReadFrequently: true });
+          if (!context) throw new Error("Canvas 2D недоступен.");
+          context.drawImage(image, 0, 0);
+          const frame = context.getImageData(0, 0, width, height), pixels = frame.data;
+          for (let i = 0; i < pixels.length; i += 4) {
+            const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+            const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            for (let c = 0; c < 3; c++) {
+              const value = pixels[i + c];
+              pixels[i + c] = Math.max(0, Math.min(255, (l + (value - l) * 1.045 - 128) * 1.055 + 128));
+            }
+          }
+          context.putImageData(frame, 0, 0);
+          const source = context.getImageData(0, 0, width, height).data;
+          const sharpened = context.createImageData(width, height), target = sharpened.data;
+          target.set(source);
+          for (let y = 1; y < height - 1; y++) for (let x = 1; x < width - 1; x++) {
+            const p = (y * width + x) * 4;
+            for (let c = 0; c < 3; c++) {
+              const n = source[p - 4 + c] + source[p + 4 + c] + source[p - width * 4 + c] + source[p + width * 4 + c];
+              target[p + c] = Math.max(0, Math.min(255, source[p + c] * 1.28 - n * 0.07));
+            }
+          }
+          context.putImageData(sharpened, 0, 0);
+          const mime = file.type === "image/png" ? "image/png" : "image/webp";
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error("Не удалось создать файл результата."));
+            const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+            resolve(new File([blob], file.name.replace(/\\.[^.]+$/, "") + "-enhanced." + ext,
+              { type: blob.type || mime, lastModified: Date.now() }));
+          }, mime, 0.94);
+        } catch (error) { reject(error); }
+      };
+      image.onerror = () => { URL.revokeObjectURL(imageUrl); reject(new Error("Не удалось декодировать изображение.")); };
+      image.src = imageUrl;
+    });
+  }
+
   async function runPrivateWorker() {
     // No browser-side credentials or manual backend connection. A deployed first-party worker will be invoked by the site service.
     return null;
@@ -179,13 +233,25 @@
         mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
         return;
       }
+      if (file.type.startsWith("image/")) {
+        setStage("Локальная коррекция фотографии", "Цвет · контраст · умеренная резкость · без нейросетевой генерации");
+        mode.textContent = "ЛОКАЛЬНАЯ ОБРАБОТКА";
+        status.textContent = "Создаётся отдельная копия в браузере. Это облегчённый алгоритм, не Real-ESRGAN. Оригинал не изменяется.";
+        const enhanced = await makeCanvasCopy(file, token);
+        if (token !== generation) return;
+        const sourceHashAfter = await sha256(file);
+        if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
+        await displayResult(enhanced, token, null);
+        status.textContent = "Создана отдельная локальная копия (" + formatBytes(enhanced.size) + "). Оригинал не изменён. Это алгоритмическая коррекция, не нейросетевая реставрация; архивный MATERIAL-ID не присвоен.";
+        return;
+      }
       setStage("Ожидается установка AI-движка", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
       mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
-      resultEmpty.textContent = "Настоящее AI-улучшение появится после установки внутреннего AI-движка. Сейчас здесь не показывается поддельная копия.";
+      resultEmpty.textContent = "Настоящее AI-улучшение видео и нейросетевая реставрация появятся после установки внутреннего AI-worker.";
       resultEmpty.hidden = false;
       const sourceHashAfter = await sha256(file);
       if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-      status.textContent = "Оригинал сохранён без изменений. Формат, размер и SHA-256 проверены локально. Внутренний AI-движок ещё не установлен, поэтому настоящая нейросетевая обработка не запускалась.";
+      status.textContent = "Оригинал сохранён без изменений. Внутренний AI-worker ещё не установлен; видеообработка не запускалась.";
       exportButton.disabled = true;
     } catch (error) {
       if (token !== generation) return;
