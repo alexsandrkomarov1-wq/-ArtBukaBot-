@@ -80,7 +80,18 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · AI SUPER-RESOLUTION</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
-    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>АВТОМАТИЧЕСКОЕ AI-УЛУЧШЕНИЕ</strong><span>Выберите фото или видео. После установки внутреннего AI-движка обработка будет запускаться автоматически. Адрес API, логин, пароль и регистрация для редактирования не потребуются.</span><small>Сейчас движок ещё не установлен на сервере. Поэтому настоящая AI-копия пока не создаётся.</small></div>
+    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>СЕРВЕРНАЯ ОБРАБОТКА И СОХРАНЕНИЕ</strong><span>После входа оригинал загружается в приватный архив, проходит ClamAV, затем сервер создаёт отдельную производную копию. Ползунок меняет параметры именно сохраняемого файла.</span><small>Серверная среда пока не подключена к сайту. Без неё сохранённая AI-копия не создаётся.</small></div>
+    <form class="ai-media-login" data-ai-login-form hidden>
+      <label>Логин
+        <input type="text" data-ai-login-user autocomplete="username" required>
+      </label>
+      <label>Пароль
+        <input type="password" data-ai-login-password autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="ai-media-button">Войти в приватный архив</button>
+      <button type="button" class="ai-media-button" data-ai-logout hidden>Выйти</button>
+      <p data-ai-login-status role="status" aria-live="polite">Пароль вводится вручную и не сохраняется в браузере.</p>
+    </form>
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
@@ -105,12 +116,37 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       </button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
-    <p class="ai-media-storage-note">Рабочая область запоминает выбранный оригинал и готовую копию в памяти этого браузера. При следующем открытии они восстановятся, если данные сайта не были очищены. Между телефоном и компьютером эта локальная память не синхронизируется.</p>
+    <p class="ai-media-storage-note">Оригинал и обработанная копия должны храниться в приватном архиве с отдельными MATERIAL-ID. Локальная память браузера используется только для временного предпросмотра и не заменяет архив.</p>
     <div class="ai-media-adjustments" data-ai-adjustments aria-label="Настройки фотографии">
       <label class="ai-media-range-control" for="ai-quality-range"><span><strong>Сила улучшения</strong><output data-ai-quality-value>65%</output></span>
         <input id="ai-quality-range" data-ai-quality type="range" min="0" max="100" step="5" value="65">
-        <small>Меняет контраст, насыщенность и резкость создаваемой копии. После изменения ползунка фотография обрабатывается заново.</small>
+        <small>Меняет силу обработки в экспортируемом файле. После изменения ползунка сервер повторно создаёт отдельную копию; оригинал не перезаписывается.</small>
       </label>
+      <div class="ai-media-video-settings" aria-label="Монтаж видео">
+        <strong>МОНТАЖ ВИДЕО · ПРИМЕНЯЕТСЯ К ЭКСПОРТУ</strong>
+        <div class="ai-media-video-grid">
+          <label>Обрезать с, сек
+            <input type="number" min="0" step="0.1" value="0" data-ai-trim-start>
+          </label>
+          <label>Обрезать до, сек
+            <input type="number" min="0" step="0.1" placeholder="До конца видео" data-ai-trim-end>
+          </label>
+          <label>Кадрирование X, px
+            <input type="number" min="0" step="2" data-ai-crop-x>
+          </label>
+          <label>Кадрирование Y, px
+            <input type="number" min="0" step="2" data-ai-crop-y>
+          </label>
+          <label>Ширина кадра, px
+            <input type="number" min="2" step="2" data-ai-crop-width>
+          </label>
+          <label>Высота кадра, px
+            <input type="number" min="2" step="2" data-ai-crop-height>
+          </label>
+        </div>
+        <label class="ai-media-audio-option"><input type="checkbox" data-ai-audio-enhance checked> Уменьшить шум и выровнять громкость звука при экспорте</label>
+        <small>Обрезка и кадрирование применяются к новому MP4. Звуковая обработка сейчас использует FFmpeg-фильтры, это не нейросетевая реставрация голоса.</small>
+      </div>
       <label class="ai-media-range-control" for="ai-zoom-range"><span><strong>Масштаб просмотра</strong><output data-ai-zoom-value>100%</output></span>
         <input id="ai-zoom-range" data-ai-zoom type="range" min="100" max="300" step="25" value="100">
         <small>Увеличивает обе фотографии для детального просмотра. Масштаб не меняет исходный файл и не влияет на экспорт.</small>
@@ -125,7 +161,17 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       .ai-media-range-control small{color:#a9becb;font-size:.78rem;line-height:1.5}
       .ai-media-live-frame{overflow:auto}
       .ai-media-live-frame img[data-ai-original-preview],.ai-media-live-frame img[data-ai-result-preview]{display:block;max-width:none;height:auto;margin-inline:auto}
-      @media(max-width:650px){.ai-media-adjustments{grid-template-columns:1fr}}
+      .ai-media-login{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:16px;border:1px solid rgba(125,170,190,.28);border-radius:12px;background:rgba(12,28,43,.72);color:#eaf3f7}
+      .ai-media-login label,.ai-media-video-grid label{display:grid;gap:6px;font-size:.82rem}
+      .ai-media-login input,.ai-media-video-grid input{width:100%;min-width:0;padding:10px;border:1px solid rgba(125,170,190,.35);border-radius:8px;background:#0b1b2a;color:#eaf3f7}
+      .ai-media-login button{min-height:40px}
+      .ai-media-login p{grid-column:1/-1;margin:0;color:#a9becb;font-size:.8rem}
+      .ai-media-video-settings{display:grid;gap:12px;margin:16px 0;padding:18px;border:1px solid rgba(125,170,190,.28);border-radius:14px;background:rgba(12,28,43,.72);color:#eaf3f7}
+      .ai-media-video-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+      .ai-media-audio-option{display:flex;align-items:center;gap:10px;color:#c8dbe4}
+      .ai-media-audio-option input{accent-color:#76c7d5}
+      .ai-media-video-settings small{color:#a9becb;font-size:.78rem;line-height:1.5}
+      @media(max-width:650px){.ai-media-adjustments,.ai-media-login{grid-template-columns:1fr}.ai-media-video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     </style>
     <div class="ai-media-live-preview" data-ai-preview hidden>
       <figure><figcaption>ИСХОДНЫЙ ФАЙЛ · ОРИГИНАЛ</figcaption><div class="ai-media-live-frame">
@@ -176,12 +222,12 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
   <div class="ai-media-tools">
     <article><span>PHOTO ENHANCEMENT · NEURAL AI</span><h3>Фотографии</h3><p>Pillow подготавливает оригинал; Real-ESRGAN NCNN Vulkan восстанавливает детали и увеличивает разрешение до 4×; OpenCV и scikit-image уточняют контраст, шум и резкость. Pillow завершает коррекцию яркости и цвета. Требуются частный backend и веса модели; без них сайт не показывает фальшивый результат.</p></article>
-    <article><span>VIDEO ENHANCEMENT · NEURAL AI</span><h3>Видео</h3><p>Real-ESRGAN обрабатывает кадры с увеличением до 2×, FFmpeg собирает отдельный MP4 и сохраняет аудиодорожку оригинала. Результат проверяется до регистрации отдельного MATERIAL-ID.</p></article>
+    <article><span>VIDEO ENHANCEMENT · NEURAL AI</span><h3>Видео</h3><p>Real-ESRGAN обрабатывает кадры с увеличением до 2×. FFmpeg применяет обрезку, кадрирование, коррекцию изображения, шумоподавление и нормализацию звука, затем собирает отдельный MP4. Нейросетевое улучшение звука пока не подключено.</p></article>
     <article><span>ARCHIVE PROTECTION · ОБЯЗАТЕЛЬНО</span><h3>Защита архива</h3><p>Каждый оригинал и результат получают отдельный MATERIAL-ID. Производная запись хранит ссылку на исходный MATERIAL-ID, контрольные суммы и сведения о применённом конвейере.</p></article>
   </div>
 
   <div class="ai-media-principle"><strong>Оригинал сохраняем. Результат проверяем. Производные версии учитываем отдельно.</strong><span>ОРИГИНАЛ ЗАЩИЩЁН · КОПИЯ УЧИТЫВАЕТСЯ ОТДЕЛЬНО</span></div>
-  <p class="ai-media-footnote">Оригинал никогда не изменяется. Результат проходит проверку, получает отдельный MATERIAL-ID и связь с оригиналом. Внутренний AI-движок пока не установлен на сервере. До его установки автоматическая обработка недоступна.</p>
+  <p class="ai-media-footnote">Оригинал никогда не изменяется. Результат проходит проверку, получает отдельный MATERIAL-ID и связь с оригиналом. Приватный backend и AI-worker пока не подключены к опубликованному сайту. До подключения серверная обработка и постоянное сохранение недоступны.</p>
 </section>
 
 <section class="section-intro" id="archive-directions">
@@ -228,7 +274,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
-<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-no-login-2"></script>
+<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-1"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261125-manual-scene-1"></script>
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
