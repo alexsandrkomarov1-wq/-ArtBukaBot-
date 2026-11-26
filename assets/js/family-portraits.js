@@ -194,10 +194,10 @@
     try {
       const saved = await readSavedSlots();
       if (saved && Array.isArray(saved.slots)) {
-        saved.slots.forEach((slot) => {
-          if (!slot || !Number.isInteger(slot.index) || !cards[slot.index] || !slot.file) return;
+        for (const slot of saved.slots) {
+          if (!slot || !Number.isInteger(slot.index) || !cards[slot.index] || !slot.file) continue;
           await showFile(cards[slot.index], slot.file);
-        });
+        }
         const count = selectedFiles.size;
         if (count) {
           setNote("Восстановлено портретов: " + count + " из 4. Они сохранены только в памяти этого браузера на этом устройстве. Это ещё не семейный облачный архив.");
