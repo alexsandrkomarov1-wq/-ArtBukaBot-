@@ -105,6 +105,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       </button>
     </div>
     <div class="ai-media-file-info" data-ai-file-info role="status" aria-live="polite">Файл ещё не выбран. Выберите фотографию или видео для локального просмотра.</div>
+    <p class="ai-media-storage-note">Рабочая область запоминает выбранный оригинал и готовую копию в памяти этого браузера. При следующем открытии они восстановятся, если данные сайта не были очищены. Между телефоном и компьютером эта локальная память не синхронизируется.</p>
     <div class="ai-media-adjustments" data-ai-adjustments aria-label="Настройки фотографии">
       <label class="ai-media-range-control" for="ai-quality-range"><span><strong>Сила улучшения</strong><output data-ai-quality-value>65%</output></span>
         <input id="ai-quality-range" data-ai-quality type="range" min="0" max="100" step="5" value="65">
