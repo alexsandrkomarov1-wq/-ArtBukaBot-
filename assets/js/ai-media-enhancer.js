@@ -129,6 +129,10 @@
         ? saved.original
         : new File([saved.original], saved.originalName || "saved-original", { type: saved.originalType || saved.original.type || "", lastModified: saved.originalLastModified || Date.now() });
       sourceFile = original;
+      const restoredVideo = original.type.startsWith("video/");
+      if (videoSettings) videoSettings.hidden = !restoredVideo;
+      if (openVideoEditor) openVideoEditor.disabled = !restoredVideo;
+      if (reprocessButton) reprocessButton.disabled = !restoredVideo;
       archiveOriginal = saved.archiveOriginal || null;
       archiveResult = saved.archiveResult || null;
       sourceUrl = URL.createObjectURL(original);
