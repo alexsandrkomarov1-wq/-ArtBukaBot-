@@ -107,6 +107,8 @@
       result: resultFile || null,
       resultName: resultFile ? resultFile.name : "",
       resultType: resultFile ? resultFile.type : "",
+      archiveOriginal: archiveOriginal || null,
+      archiveResult: archiveResult || null,
       quality: qualityControl ? qualityControl.value : "65",
       zoom: zoomControl ? zoomControl.value : "100"
     };
@@ -126,6 +128,8 @@
         ? saved.original
         : new File([saved.original], saved.originalName || "saved-original", { type: saved.originalType || saved.original.type || "", lastModified: saved.originalLastModified || Date.now() });
       sourceFile = original;
+      archiveOriginal = saved.archiveOriginal || null;
+      archiveResult = saved.archiveResult || null;
       sourceUrl = URL.createObjectURL(original);
       preview.hidden = false;
       originalEmpty.hidden = true;
@@ -155,8 +159,8 @@
           resultImage.hidden = true;
         }
         exportButton.disabled = false;
-        setStage("Сохранённая копия восстановлена", "Локальный результат · не является архивной записью MATERIAL-ID");
-        mode.textContent = "РАБОЧАЯ ОБЛАСТЬ ВОССТАНОВЛЕНА";
+        setStage("Сохранённая копия восстановлена", archiveResult ? "MATERIAL-ID: " + archiveResult.material_id : "Локальная копия · архивная запись не подтверждена");
+        mode.textContent = archiveResult ? "КОПИЯ ЗАРЕГИСТРИРОВАНА В АРХИВЕ" : "ЛОКАЛЬНАЯ РАБОЧАЯ ОБЛАСТЬ";
       } else {
         setStage("Оригинал восстановлен", "Выберите обработку или замените исходный файл");
         mode.textContent = "ОРИГИНАЛ ВОССТАНОВЛЕН";
@@ -166,7 +170,9 @@
       if (zoomControl && saved.zoom) zoomControl.value = saved.zoom;
       applyZoom();
       info.textContent = original.name + " · " + formatBytes(original.size) + " · восстановлено из памяти этого браузера";
-      status.textContent = "Рабочая область восстановлена. Файлы хранятся только в памяти этого браузера и не синхронизируются автоматически между телефоном и компьютером.";
+      status.textContent = archiveResult
+        ? "Копия восстановлена. MATERIAL-ID " + archiveResult.material_id + " · оригинал " + archiveResult.original_material_id + ". Серверная запись остаётся в приватном архиве."
+        : "Локальная рабочая область восстановлена. Это не заменяет постоянное хранение в приватном архиве.";
       reset.disabled = false;
     } catch (error) {
       status.textContent = "Не удалось восстановить локальную рабочую область. Возможно, браузер очистил данные или не поддерживает сохранение больших файлов.";
@@ -240,6 +246,7 @@
     releaseUrl(sourceUrl);
     sourceUrl = null;
     sourceFile = null;
+    archiveOriginal = null;
     input.value = "";
     originalImage.removeAttribute("src");
     originalImage.hidden = true;
@@ -547,6 +554,7 @@
       loginForm.hidden = true;
       if (loginStatus) loginStatus.textContent = "Серверный адрес не настроен. Вход и сохранение результата недоступны.";
     } else {
+      loginForm.hidden = false;
       loginForm.addEventListener("submit", async event => {
         event.preventDefault();
         const username = loginForm.querySelector("[data-ai-login-user]");
@@ -611,7 +619,7 @@
   exportButton.disabled = true;
   preview.hidden = true;
   mode.textContent = "AI-ДВИЖОК НЕ УСТАНОВЛЕН";
-  setStage("Ожидается AI-движок", "Real-ESRGAN NCNN Vulkan · автоматическое улучшение x4");
+  setStage("Ожидается серверная среда", "После подключения API ползунок будет менять параметры сохранённой копии");
   void restoreWorkspace();
   window.addEventListener("pagehide", () => {
     releaseUrl(sourceUrl);
