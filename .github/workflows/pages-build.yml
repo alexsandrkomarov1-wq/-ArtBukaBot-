@@ -43,6 +43,7 @@ jobs:
           node --check assets/js/ai-media-enhancer.js
           node --check assets/js/media-atmosphere.js
           node --check assets/js/cloud-archive.js
+          node --check assets/js/supabase-archive.js
           node --check neon/functions/aistatus/index.mjs
       - name: Compile AI media worker and API syntax
         run: python3 -m py_compile backend/app/ai_media_worker.py backend/app/cloud_archive_api.py
