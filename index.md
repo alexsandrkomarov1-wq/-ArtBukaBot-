@@ -215,7 +215,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
       <div class="media-playback-grid" aria-label="Музыкальная коллекция и интернет-радио">
         <section class="media-player-panel" aria-labelledby="music-archive-title">
-          <span class="ai-media-kicker">ЛИЧНАЯ МУЗЫКАЛЬНАЯ КОЛЛЕКЦИЯ</span>
+          <span class="ai-media-kicker">ЛОКАЛЬНАЯ МУЗЫКАЛЬНАЯ КОЛЛЕКЦИЯ · ДО ПОДКЛЮЧЕНИЯ АРХИВА</span>
           <h4 id="music-archive-title">MP3-плеер и список воспроизведения</h4>
           <label class="media-file-picker">Добавить аудиофайлы с устройства
             <input type="file" data-music-files accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple>
@@ -244,7 +244,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
           </label>
           <button type="button" data-radio-connect>Подключить поток</button>
           <audio data-radio-audio controls preload="none"></audio>
-          <p class="media-player-status" data-radio-status role="status" aria-live="polite">Список станций загружается из открытого каталога Radio Browser. Доступность потоков зависит от станции и сети.</p>
+          <p class="media-player-status" data-radio-status role="status" aria-live="polite">Нажмите «Найти интернет-радио», чтобы открыть каталог Radio Browser. Доступность потоков зависит от станции и сети.</p>
         </section>
       </div>
     <div class="ai-media-internal-engine" role="status" aria-live="polite"><strong>ВНУТРЕННИЙ AI-КОНВЕЙЕР KOMAROVA_CORE</strong><span>Файлы будут автоматически обрабатываться внутренним AI-движком KOMAROVA_CORE. Внешние сайты, ручная повторная загрузка, адрес API, логин и пароль не нужны. Сейчас движок ещё не установлен на сервере.</span></div>
@@ -305,7 +305,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
-<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-4"></script>
+<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-video-dialog-1"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261126-atmosphere-controls-2"></script>
 
 <script defer src="{{ '/assets/js/media-studio.js' | relative_url }}?v=20261126-media-studio-1"></script>
