@@ -10,6 +10,8 @@ create table if not exists public.archive_items (
   bucket_id text not null default 'komarova_core_private',
   original_filename text not null,
   title text,
+  description text,
+  captured_at timestamptz,
   item_type text not null check (item_type in ('photo', 'video', 'audio', 'document')),
   mime_type text not null,
   size_bytes bigint not null check (size_bytes > 0),
@@ -32,6 +34,8 @@ create index if not exists archive_items_place_idx
   on public.archive_items (place_id);
 create index if not exists archive_items_sha256_idx
   on public.archive_items (sha256);
+create unique index if not exists archive_items_user_sha256_unique
+  on public.archive_items (user_id, sha256);
 
 alter table public.archive_items enable row level security;
 grant select, insert on table public.archive_items to authenticated;
