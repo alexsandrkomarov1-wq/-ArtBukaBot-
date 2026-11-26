@@ -137,3 +137,12 @@ description: Проверяемое состояние модулей KOMAROVA_C
   <p class="status-evidence">Проверки: scripts/check_ai_media_lab.py, JavaScript syntax, backend tests и GitHub Pages build/deploy. Статус жёлтый до реального развёртывания и runtime-теста ClamAV/Real-ESRGAN.</p>
 </article>
 
+
+
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-yellow">ЖЁЛТЫЙ</span><span class="status-index">14</span></div>
+  <h2>Supabase · закрытый архив фото и видео</h2>
+  <p>В рабочую ветку добавлены клиент Supabase Auth/Storage, интерфейс подключения Project URL и публичного anon/publishable key, приватный bucket <code>komarova_core_private</code>, SQL-схема реестра <code>public.archive_items</code>, SHA-256 и связи-указатели PERSON-ID/EVENT-ID/PLACE-ID. Навигация архива разделена на загрузку, каталог, места хранения и локальный просмотр.</p>
+  <p class="status-evidence">Проверка реального проекта ещё не завершена: URL и публичный ключ не внесены в конфигурацию страницы, SQL-скрипт не подтверждён запуском в Supabase, Auth login и тестовая загрузка/чтение не выполнялись. До этого Supabase не считается подключённым к сайту, а семейные файлы не следует загружать.</p>
+  <p class="status-links"><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/backend/supabase/001_private_media_archive.sql">SQL-схема Supabase</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/assets/js/supabase-archive.js">Клиент архива</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/storage-provider-configuration.md">Границы интеграции и безопасности</a></p>
+</article>
