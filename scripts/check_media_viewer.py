@@ -19,9 +19,11 @@ assert "URL.revokeObjectURL" in script
 assert "video.load()" in script
 assert "requestFullscreen()" in script
 assert "setInterval" in script
-assert "Локальный просмотр не отправляет файлы на сервер" in page
+assert "Этот режим не загружает их в архив" in page
 assert 'for="media-file-input"' in page
-assert 'id="cloud-archive"' in page
+assert 'id="archive-catalog"' in page and 'id="archive-storage"' in page
+assert 'id="supabase-connect-form"' in page and 'id="cloud-upload-form"' in page
+assert "supabase-archive.js" in page
 assert "не загружены на сервер" in script
-assert "/media/" in layout and "Медиатека" in layout
+assert "/media/" in layout and "Архив фото и видео" in layout
 print("Media viewer contract checks passed.")
