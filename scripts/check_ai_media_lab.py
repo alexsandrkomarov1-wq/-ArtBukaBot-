@@ -36,7 +36,7 @@ for route in ('@router.post("/items/{archive_item_id}/scan")', '@router.post("/i
     require(route in api, "backend worker route is missing: " + route)
 require("MAX_BYTES = 100 * 1024 * 1024" in ai_js and "MAX_PIXELS = 30000000" in ai_js, "local file safety limits are missing")
 require("Проверка SHA-256" in ai_js and "sourceHashBefore !== sourceHashAfter" in ai_js, "original integrity check is missing")
-require("ClamAV не запускался" in ai_js and "поддельная копия" in ai_js, "disconnected worker must be reported honestly")
+require("ClamAV не запускался" in ai_js and "фиктивный ролик не создаётся" in ai_js and "AI-ДВИЖОК НЕ УСТАНОВЛЕН" in ai_js, "disconnected worker must be reported honestly")
 for route in ('@router.post("/items/{archive_item_id}/scan")', '@router.post("/items/{archive_item_id}/enhance")', '@router.get("/items/{archive_item_id}/content")'):
     require(route in api, "backend route missing: " + route)
 require('Depends(require_roles("owner", "moderator"))' in api, "scan/enhancement privilege checks are missing")
