@@ -13,12 +13,18 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <a class="text-link" href="{{ '/status/' | relative_url }}">Проверить состояние системы ↗</a>
     </div>
   </div>
-  <div class="hero-art" aria-label="Интерактивный трёхмерный мир KOMAROVA_CORE">
+  <div class="hero-art" tabindex="0" aria-label="Интерактивный трёхмерный мир KOMAROVA_CORE. Клавиши WASD или стрелки вращают сцену, плюс и минус меняют масштаб, клавиши 1–8 открывают порталы.">
     <div class="world-interface">
       <div class="world-hud">
         <span class="world-hud-kicker">KOMAROVA_CORE / AI WORLD</span>
         <strong>ЦЕНТРАЛЬНОЕ ЯДРО</strong>
         <span class="world-render-status" data-world-render-status role="status" aria-live="polite">Проверка графического режима…</span>
+        <div class="world-time-counter" aria-label="Счётчик времени проекта">
+          <span class="world-time-label">ПРОЕКТ · С 23 НОЯБРЯ 2026</span>
+          <strong>Календарное время <time data-project-age>Загрузка…</time></strong>
+          <span>Учтённая активная работа <b data-project-worked>00:01:08</b></span>
+          <small>До запуска журнала активные часы не учитывались</small>
+        </div>
       </div>
       <nav class="world-portals" id="world-portals" aria-label="Активные порталы проектов">
         <a class="world-portal" href="{{ '/generations/' | relative_url }}"><span class="world-portal-index">01 / PEOPLE</span><strong>Поколения</strong><small>Люди · PERSON-ID</small></a>
@@ -312,3 +318,4 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
+<script defer src="{{ '/assets/js/project-time-counter.js' | relative_url }}?v=20261126-counter-1"></script>
