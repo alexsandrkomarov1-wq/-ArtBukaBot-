@@ -5,6 +5,10 @@
   const form = $("supabase-connect-form");
   if (!form) return;
 
+  // Public client configuration for the existing KOMAROVA_CORE Supabase project.
+  // Publishable keys are designed for browser use; never place service_role/secret keys here.
+  const SUPABASE_PROJECT_URL = "https://bcotusztvddzbnwefnrq.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_OOJ5nZYn0rT8yJvcBjuWww_rfz0c-Rp";
   const bucket = "komarova_core_private";
   const status = $("cloud-archive-status");
   const connection = $("cloud-connection-state");
@@ -314,7 +318,15 @@
     connection.textContent = "Сессия завершена. Данные доступа очищены из памяти страницы.";
   }
 
+  const projectUrlInput = $("supabase-project-url");
+  const publishableKeyInput = $("supabase-anon-key");
+  projectUrlInput.value = SUPABASE_PROJECT_URL;
+  publishableKeyInput.value = SUPABASE_PUBLISHABLE_KEY;
+  projectUrlInput.readOnly = true;
+  publishableKeyInput.readOnly = true;
   form.addEventListener("submit", connectProject);
+  // Verify the permanent project configuration whenever the archive page opens.
+  connectProject({ preventDefault() {} });
   $("cloud-login-form").addEventListener("submit", login);
   $("cloud-upload-form").addEventListener("submit", uploadFile);
   $("cloud-logout").addEventListener("click", logout);
