@@ -20,7 +20,7 @@ class PrivateMediaStorage:
         self.local_root.mkdir(parents=True, exist_ok=True)
         self.client = None
         self.bucket = ""
-        if self.provider in {"s3", "neon"}:
+        if self.provider in {"s3", "neon", "cloudflare-r2"}:
             endpoint = os.getenv("CORE_S3_ENDPOINT_URL", "").strip()
             region = os.getenv("CORE_S3_REGION", "").strip()
             self.bucket = os.getenv("CORE_S3_BUCKET", "uploads").strip()
@@ -40,7 +40,13 @@ class PrivateMediaStorage:
             parsed = urlparse(endpoint)
             if parsed.scheme != "https" or not parsed.netloc:
                 raise RuntimeError("CORE_S3_ENDPOINT_URL must be a valid HTTPS endpoint")
-            self.provider = "s3-compatible"
+            if self.provider == "cloudflare-r2":
+                if not (parsed.hostname or "").lower().endswith(".r2.cloudflarestorage.com"):
+                    raise RuntimeError("Cloudflare R2 endpoint must end with .r2.cloudflarestorage.com")
+                if region.lower() != "auto":
+                    raise RuntimeError("Cloudflare R2 requires CORE_S3_REGION=auto")
+            else:
+                self.provider = "s3-compatible"
             self.client = boto3.client(
                 "s3",
                 endpoint_url=endpoint,
@@ -104,7 +110,11 @@ class PrivateMediaStorage:
 
     def health_check(self) -> dict[str, str]:
         """Verify read/write/delete capability without exposing credentials."""
-        backend = "s3-compatible" if self.client is not None else "local-private"
+        backend = (
+            "cloudflare-r2" if self.client is not None and self.provider == "cloudflare-r2"
+            else "s3-compatible" if self.client is not None
+            else "local-private"
+        )
         payload = b"KOMAROVA_CORE_STORAGE_HEALTH_V1"
         probe_key = f".health-check/{os.urandom(16).hex()}"
         probe_path: Path | None = None
