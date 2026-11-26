@@ -84,9 +84,14 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
-        <span class="ai-media-step">01 <span aria-hidden="true">/</span> UPLOAD</span>
-        <strong class="ai-media-action-title">Загрузить фото или видео</strong>
-        <small class="ai-media-action-note">Выбор файла · проверка формата · автоматическое AI-улучшение · до 100 МБ</small>
+        <span class="ai-media-step">01 <span aria-hidden="true">/</span> PHOTO UPLOAD</span>
+        <strong class="ai-media-action-title">Загрузить фотографию</strong>
+        <small class="ai-media-action-note">Выберите фото для просмотра и доступной обработки · до 100 МБ</small>
+      </button>
+      <button class="ai-media-button" type="button" data-ai-upload-video>
+        <span class="ai-media-step">01 <span aria-hidden="true">/</span> VIDEO UPLOAD</span>
+        <strong class="ai-media-action-title">Загрузить видео</strong>
+        <small class="ai-media-action-note">Видео появится в плеере слева. AI-конвейер видео пока не подключён · до 100 МБ</small>
       </button>
       <div class="ai-media-button ai-media-stage" data-ai-view role="status" aria-live="polite">
         <span class="ai-media-step">02 <span aria-hidden="true">/</span> VIEW</span>
