@@ -38,7 +38,7 @@
   const audioEnhance = root.querySelector("[data-ai-audio-enhance]");
   const videoSettings = root.querySelector("[data-ai-video-settings]");
   const reprocessButton = root.querySelector("[data-ai-reprocess]");
-  const apiBase = String(window.KOMAROVA_API_BASE || root.dataset.apiBase || "").replace(/\\/$/, "");
+  const apiBase = String(window.KOMAROVA_API_BASE || root.dataset.apiBase || "").replace(/\/$/, "");
   const viewTitle = viewStage.querySelector(".ai-media-action-title");
   const viewNote = viewStage.querySelector(".ai-media-action-note");
 
@@ -357,7 +357,7 @@
           canvas.toBlob(blob => {
             if (!blob) return reject(new Error("Не удалось создать файл результата."));
             const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
-            resolve(new File([blob], file.name.replace(/\\.[^.]+$/, "") + "-enhanced." + ext,
+            resolve(new File([blob], file.name.replace(/\.[^.]+$/, "") + "-enhanced." + ext,
               { type: blob.type || mime, lastModified: Date.now() }));
           }, mime, 0.94);
         } catch (error) { reject(error); }
@@ -434,7 +434,7 @@
     if (!response.ok) throw new Error("Сервер создал запись, но не удалось получить файл результата (HTTP " + response.status + ").");
     const blob = await response.blob();
     const extension = file.type.startsWith("video/") ? "mp4" : "png";
-    const name = file.name.replace(/\\.[^.]+$/, "") + "-enhanced." + extension;
+    const name = file.name.replace(/\.[^.]+$/, "") + "-enhanced." + extension;
     return { file: new File([blob], name, { type: blob.type || (extension === "mp4" ? "video/mp4" : "image/png"), lastModified: Date.now() }), material: derivative };
   }
 
