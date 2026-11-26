@@ -21,7 +21,10 @@
   const update = () => {
     ageNode.textContent = format((Date.now() - start) / 1000);
     ageNode.dateTime = new Date(start).toISOString();
-    workNode.textContent = "00:01:08";
+    const hours = Math.floor(loggedActiveSeconds / 3600);
+    const minutes = Math.floor((loggedActiveSeconds % 3600) / 60);
+    const seconds = loggedActiveSeconds % 60;
+    workNode.textContent = pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
     if (stampNode) stampNode.textContent = new Intl.DateTimeFormat("ru-RU", {
       day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
       timeZone: "Europe/Amsterdam"
