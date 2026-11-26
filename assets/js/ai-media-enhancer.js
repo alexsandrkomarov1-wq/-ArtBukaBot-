@@ -204,6 +204,25 @@
       image.style.objectFit = "contain";
       image.style.imageRendering = "auto";
     });
+    [originalVideo, resultVideo].forEach(video => {
+      if (!video || video.hidden || !video.videoWidth || !video.videoHeight) return;
+      const frame = video.parentElement;
+      if (!frame) return;
+      const availableWidth = Math.max(1, frame.clientWidth || frame.getBoundingClientRect().width);
+      const fitScale = Math.min(availableWidth / video.videoWidth, 360 / video.videoHeight, 1);
+      const displayWidth = Math.max(1, Math.round(video.videoWidth * fitScale * zoom / 100));
+      frame.style.display = "block";
+      frame.style.width = "100%";
+      frame.style.overflow = "auto";
+      frame.style.maxHeight = "360px";
+      video.style.display = "block";
+      video.style.width = displayWidth + "px";
+      video.style.maxWidth = "none";
+      video.style.maxHeight = "none";
+      video.style.height = "auto";
+      video.style.marginInline = "auto";
+      video.style.objectFit = "contain";
+    });
   }
 
   function setStage(title, note) {
@@ -559,6 +578,8 @@
   }
   originalImage.addEventListener("load", applyZoom);
   resultImage.addEventListener("load", applyZoom);
+  originalVideo.addEventListener("loadedmetadata", applyZoom);
+  resultVideo.addEventListener("loadedmetadata", applyZoom);
   if (zoomControl) {
     zoomControl.addEventListener("input", () => {
       applyZoom();
