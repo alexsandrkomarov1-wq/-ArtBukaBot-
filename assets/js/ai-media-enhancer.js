@@ -8,6 +8,7 @@
   const MAX_PIXELS = 30000000;
   const input = root.querySelector("[data-ai-file-input]");
   const upload = root.querySelector("[data-ai-upload]");
+  const videoUpload = root.querySelector("[data-ai-upload-video]");
   const viewStage = root.querySelector("[data-ai-view]");
   const exportButton = root.querySelector("[data-ai-export]");
   const reset = root.querySelector("[data-ai-reset]");
@@ -43,20 +44,22 @@
     const zoom = Math.max(100, Math.min(300, Number(zoomControl && zoomControl.value) || 100));
     if (zoomValue) zoomValue.value = zoom + "%";
     [originalImage, resultImage].forEach(image => {
-      if (!image) return;
+      if (!image || image.hidden || !image.naturalWidth || !image.naturalHeight) return;
       const frame = image.parentElement;
-      if (frame) {
-        frame.style.display = "block";
-        frame.style.overflow = "auto";
-        frame.style.maxHeight = "360px";
-        frame.style.maxWidth = "100%";
-      }
+      if (!frame) return;
+      const availableWidth = Math.max(1, frame.clientWidth || frame.getBoundingClientRect().width);
+      const fitScale = Math.min(availableWidth / image.naturalWidth, 360 / image.naturalHeight, 1);
+      const displayWidth = Math.max(1, Math.round(image.naturalWidth * fitScale * zoom / 100));
+      frame.style.display = "block";
+      frame.style.width = "100%";
+      frame.style.overflow = "auto";
+      frame.style.maxHeight = "360px";
       image.style.display = "block";
-      image.style.width = zoom + "%";
+      image.style.width = displayWidth + "px";
       image.style.maxWidth = "none";
       image.style.maxHeight = "none";
       image.style.height = "auto";
-      image.style.flex = "0 0 auto";
+      image.style.marginInline = "auto";
       image.style.objectFit = "contain";
       image.style.imageRendering = "auto";
     });
@@ -128,11 +131,12 @@
     if (file.type.startsWith("image/")) {
       originalImage.src = sourceUrl;
       originalImage.hidden = false;
+      applyZoom();
       mode.textContent = "ЛОКАЛЬНАЯ ПРОВЕРКА ОРИГИНАЛА";
     } else {
       originalVideo.src = sourceUrl;
       originalVideo.hidden = false;
-      mode.textContent = "ЛОКАЛЬНАЯ ПРОВЕРКА ОРИГИНАЛА";
+      mode.textContent = "ВИДЕО · ПРОСМОТР ОРИГИНАЛА";
     }
     info.textContent = file.name + " · " + formatBytes(file.size) + " · " + (file.type || "тип не определён");
     reset.disabled = false;
@@ -229,6 +233,7 @@
       resultImage.src = resultUrl;
       resultImage.hidden = false;
       resultVideo.hidden = true;
+      applyZoom();
     }
     archiveResult = material || null;
     exportButton.disabled = false;
@@ -290,7 +295,16 @@
     }
   }
 
-  upload.addEventListener("click", () => input.click());
+  upload.addEventListener("click", () => {
+    input.accept = "image/*";
+    input.value = "";
+    input.click();
+  });
+  if (videoUpload) videoUpload.addEventListener("click", () => {
+    input.accept = "video/*";
+    input.value = "";
+    input.click();
+  });
   input.addEventListener("change", () => {
     const file = input.files && input.files[0];
     if (!file) return;
@@ -335,6 +349,8 @@
       void processSelected(sourceFile, token);
     });
   }
+  originalImage.addEventListener("load", applyZoom);
+  resultImage.addEventListener("load", applyZoom);
   if (zoomControl) {
     zoomControl.addEventListener("input", applyZoom);
     applyZoom();
