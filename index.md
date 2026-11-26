@@ -80,18 +80,8 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
       <div><span class="ai-media-kicker">РАБОЧАЯ ОБЛАСТЬ · AI SUPER-RESOLUTION</span><h3>Работа с вашим материалом</h3></div>
       <span class="ai-media-mode" data-ai-mode>ОЖИДАЕТ ФАЙЛ</span>
     </div>
-    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>СЕРВЕРНАЯ ОБРАБОТКА И СОХРАНЕНИЕ</strong><span>После входа оригинал загружается в приватный архив, проходит ClamAV, затем сервер создаёт отдельную производную копию. Ползунок меняет параметры именно сохраняемого файла.</span><small>Серверная среда пока не подключена к сайту. Без неё сохранённая AI-копия не создаётся.</small></div>
-    <form class="ai-media-login" data-ai-login-form hidden>
-      <label>Логин
-        <input type="text" data-ai-login-user autocomplete="username" required>
-      </label>
-      <label>Пароль
-        <input type="password" data-ai-login-password autocomplete="current-password" required>
-      </label>
-      <button type="submit" class="ai-media-button">Войти в приватный архив</button>
-      <button type="button" class="ai-media-button" data-ai-logout hidden>Выйти</button>
-      <p data-ai-login-status role="status" aria-live="polite">Пароль вводится вручную и не сохраняется в браузере.</p>
-    </form>
+    <div class="ai-media-engine-status" role="status" aria-live="polite"><strong>СЕРВЕРНАЯ ОБРАБОТКА И СОХРАНЕНИЕ</strong><span>После подключения защищённой сессии оригинал загружается в приватный архив, проходит ClamAV, затем сервер создаёт отдельную производную копию. Ползунок меняет параметры именно сохраняемого файла.</span><small>Серверная среда пока не подключена к сайту. Без неё сохранённая AI-копия не создаётся.</small></div>
+
     <input class="ai-media-file-input" data-ai-file-input type="file" accept="image/*,video/*">
     <div class="ai-media-controls" aria-label="Этапы работы с материалом">
       <button class="ai-media-button ai-media-button-primary" type="button" data-ai-upload>
@@ -276,7 +266,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 <section class="privacy-strip"><span class="privacy-icon" aria-hidden="true">✳</span><div><h2>Открытость без потери приватности</h2><p>Публичная витрина содержит только одобренные материалы. Личные документы, адреса, переписки и оригиналы закрытого архива останутся в отдельной защищённой системе.</p></div><a href="{{ '/about/' | relative_url }}" aria-label="Подробнее о принципах проекта">↗</a></section>
 <section class="status-teaser"><div><p class="eyebrow">ПРОЗРАЧНОСТЬ И ДОВЕРИЕ</p><h2>Разработка без выдуманных функций</h2><p>Показываем, что уже реализовано, что проверено и что ещё находится в планах.</p></div><a class="primary-link" href="{{ '/status/' | relative_url }}">Состояние проекта <span aria-hidden="true">↗</span></a></section>
 
-<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-2"></script>
+<script defer src="{{ '/assets/js/ai-media-enhancer.js' | relative_url }}?v=20261126-ai-editor-server-edit-3"></script>
 <script defer src="{{ '/assets/js/media-atmosphere.js' | relative_url }}?v=20261125-manual-scene-1"></script>
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261125-gpu-recovery-2"></script>
