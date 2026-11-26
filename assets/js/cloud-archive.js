@@ -58,15 +58,6 @@
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = "";
   }
-  async function loadPeople() {
-    const people = await request("/api/v1/people?limit=100");
-    const select = $("cloud-person-id");
-    select.replaceChildren(new Option("Без привязки к человеку", ""));
-    people.forEach(person => {
-      const option = new Option(person.display_name + " · " + person.person_id, person.person_id);
-      select.add(option);
-    });
-  }
   function renderArchive() {
     const list = $("cloud-archive-list");
     list.replaceChildren();
@@ -158,7 +149,7 @@
       token = result.access_token;
       showSession(result.user);
       await checkStorage();
-      await loadPeople(); await loadArchive();
+      await loadArchive();
       $("cloud-password").value = "";
     } catch (error) {
       token = "";
@@ -199,7 +190,6 @@
     const form = new FormData();
     form.append("file", file);
     form.append("title", $("cloud-upload-title").value);
-    if ($("cloud-person-id").value) form.append("person_id", $("cloud-person-id").value);
     try {
       setStatus("Загружаю файл в закрытое хранилище…");
       await request("/api/v1/archive/items", { method: "POST", body: form });
