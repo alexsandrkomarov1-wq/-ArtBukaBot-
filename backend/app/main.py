@@ -18,7 +18,8 @@ from sqlalchemy.orm import Session
 from .database import build_engine, build_session_factory, session_dependency, verify_migrations_current
 from .cloud_archive_api import build_archive_router
 from .registry_api import build_registry_router
-from .models import AuditEvent, AuthSession, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
+from .models import AuditEvent, AuthSession, ExternalIdentity, LoginAttempt, Person, RelationshipRecord, SystemState, User, utc_now
+from .neon_auth import verify_neon_token
 from .navigation import build_navigation
 from .schemas import (
     BootstrapCreate, LoginRequest, PasswordChange, PersonCreate, PersonRead, PersonUpdate,
@@ -66,25 +67,48 @@ def create_app(
         authorization: str | None = Header(default=None, alias="Authorization"),
         db: Session = Depends(get_db),
     ) -> User:
-        if not configured_jwt_secret:
-            raise HTTPException(status_code=503, detail="Authentication is locked: CORE_JWT_SECRET must contain at least 32 characters")
         if not authorization or not authorization.startswith("Bearer "):
             raise HTTPException(status_code=401, detail="Bearer access token required")
-        try:
-            claims = decode_access_token(authorization[7:].strip(), configured_jwt_secret)
-        except jwt.InvalidTokenError:
+        token = authorization[7:].strip()
+
+        # Transitional mode: keep existing KOMAROVA_CORE JWT sessions working.
+        # Neon Auth identities are accepted only after an explicit owner/user link.
+        if configured_jwt_secret:
+            try:
+                claims = decode_access_token(token, configured_jwt_secret)
+            except jwt.InvalidTokenError:
+                claims = None
+            if claims is not None:
+                user = db.get(User, claims["sub"])
+                if user is None or user.status != "active":
+                    raise HTTPException(status_code=401, detail="Account is unavailable")
+                session = db.scalar(select(AuthSession).where(
+                    AuthSession.token_jti == claims["jti"],
+                    AuthSession.user_id == user.user_id,
+                    AuthSession.revoked_at.is_(None),
+                    AuthSession.expires_at > utc_now(),
+                ))
+                if session is None:
+                    raise HTTPException(status_code=401, detail="Session is expired or revoked")
+                return user
+
+        jwks_url = os.getenv("NEON_AUTH_JWKS_URL", "").strip()
+        issuer = os.getenv("NEON_AUTH_BASE_URL", "").strip().rstrip("/")
+        if not jwks_url or not issuer:
             raise HTTPException(status_code=401, detail="Invalid or expired access token")
-        user = db.get(User, claims["sub"])
+        try:
+            neon_claims = verify_neon_token(token, jwks_url=jwks_url, issuer=issuer)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid or expired Neon Auth token")
+        identity = db.scalar(select(ExternalIdentity).where(
+            ExternalIdentity.provider == "neon",
+            ExternalIdentity.subject == neon_claims["sub"],
+        ))
+        if identity is None:
+            raise HTTPException(status_code=403, detail="Neon identity is not linked to a KOMAROVA_CORE account")
+        user = db.get(User, identity.user_id)
         if user is None or user.status != "active":
             raise HTTPException(status_code=401, detail="Account is unavailable")
-        session = db.scalar(select(AuthSession).where(
-            AuthSession.token_jti == claims["jti"],
-            AuthSession.user_id == user.user_id,
-            AuthSession.revoked_at.is_(None),
-            AuthSession.expires_at > utc_now(),
-        ))
-        if session is None:
-            raise HTTPException(status_code=401, detail="Session is expired or revoked")
         return user
 
     def require_roles(*allowed_roles: str):
@@ -205,6 +229,39 @@ def create_app(
         audit(db, "auth.session_created", "user", user.user_id, user.user_id, {"session_id": session.session_id})
         db.commit()
         return TokenRead(access_token=token, expires_in=ACCESS_TOKEN_SECONDS, user=user)
+
+    @app.post("/api/v1/auth/neon/link")
+    def link_neon_identity(
+        payload: dict,
+        user: User = Depends(require_current_user),
+        db: Session = Depends(get_db),
+    ):
+        # Link requires an already authenticated KOMAROVA_CORE account.
+        # The Neon token is verified server-side; email/username claims are never used for linking.
+        neon_token = payload.get("neon_access_token") if isinstance(payload, dict) else None
+        if not isinstance(neon_token, str) or not neon_token.strip():
+            raise HTTPException(status_code=422, detail="neon_access_token is required")
+        jwks_url = os.getenv("NEON_AUTH_JWKS_URL", "").strip()
+        issuer = os.getenv("NEON_AUTH_BASE_URL", "").strip().rstrip("/")
+        if not jwks_url or not issuer:
+            raise HTTPException(status_code=503, detail="Neon Auth verification is not configured")
+        try:
+            claims = verify_neon_token(neon_token.strip(), jwks_url=jwks_url, issuer=issuer)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid Neon Auth token")
+        subject = claims["sub"]
+        existing = db.scalar(select(ExternalIdentity).where(
+            ExternalIdentity.provider == "neon",
+            ExternalIdentity.subject == subject,
+        ))
+        if existing is not None:
+            if existing.user_id != user.user_id:
+                raise HTTPException(status_code=409, detail="Neon identity is already linked to another account")
+            return {"status": "already_linked", "user_id": user.user_id}
+        db.add(ExternalIdentity(provider="neon", subject=subject, user_id=user.user_id))
+        audit(db, "auth.neon_identity_linked", "user", user.user_id, user.user_id, {"provider": "neon"})
+        db.commit()
+        return {"status": "linked", "user_id": user.user_id}
 
     @app.get("/api/v1/auth/me", response_model=UserRead)
     def get_me(user: User = Depends(require_current_user)):
