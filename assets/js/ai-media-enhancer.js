@@ -26,6 +26,17 @@
   const qualityValue = root.querySelector("[data-ai-quality-value]");
   const zoomControl = root.querySelector("[data-ai-zoom]");
   const zoomValue = root.querySelector("[data-ai-zoom-value]");
+  const loginForm = root.querySelector("[data-ai-login-form]");
+  const loginStatus = root.querySelector("[data-ai-login-status]");
+  const logoutButton = root.querySelector("[data-ai-logout]");
+  const trimStart = root.querySelector("[data-ai-trim-start]");
+  const trimEnd = root.querySelector("[data-ai-trim-end]");
+  const cropX = root.querySelector("[data-ai-crop-x]");
+  const cropY = root.querySelector("[data-ai-crop-y]");
+  const cropWidth = root.querySelector("[data-ai-crop-width]");
+  const cropHeight = root.querySelector("[data-ai-crop-height]");
+  const audioEnhance = root.querySelector("[data-ai-audio-enhance]");
+  const apiBase = String(window.KOMAROVA_API_BASE || root.dataset.apiBase || "").replace(/\\/$/, "");
   const viewTitle = viewStage.querySelector(".ai-media-action-title");
   const viewNote = viewStage.querySelector(".ai-media-action-note");
 
@@ -35,6 +46,8 @@
   let resultUrl = null;
   let generation = 0;
   let archiveResult = null;
+  let archiveOriginal = null;
+  let apiToken = "";
   const STORAGE_DB = "komarova-core-ai-media";
   const STORAGE_STORE = "workspace";
   const STORAGE_KEY = "current";
@@ -247,6 +260,7 @@
   function showOriginal(file) {
     releaseUrl(sourceUrl);
     sourceFile = file;
+    archiveOriginal = null;
     sourceUrl = URL.createObjectURL(file);
     clearResult();
     preview.hidden = false;
@@ -340,9 +354,73 @@
     });
   }
 
-  async function runPrivateWorker() {
-    // No browser-side credentials or manual backend connection. A deployed first-party worker will be invoked by the site service.
-    return null;
+  async function privateApiRequest(path, options = {}) {
+    const response = await fetch(apiBase + path, {
+      ...options,
+      headers: { ...(apiToken ? { Authorization: "Bearer " + apiToken } : {}), ...(options.headers || {}) }
+    });
+    const contentType = response.headers.get("content-type") || "";
+    const payload = contentType.includes("application/json") ? await response.json() : await response.text();
+    if (!response.ok) {
+      const detail = payload && payload.detail;
+      throw new Error(typeof detail === "string" ? detail : detail && detail.message ? detail.message : "HTTP " + response.status);
+    }
+    return payload;
+  }
+
+  async function runPrivateWorker(file, token) {
+    if (!apiBase || !apiToken) return null;
+    if (!archiveOriginal) {
+      const uploadForm = new FormData();
+      uploadForm.append("file", file, file.name);
+      uploadForm.append("title", file.name);
+      setStage("Сохранение оригинала в архив", "Оригинал отправляется в приватное хранилище без преобразования");
+      archiveOriginal = await privateApiRequest("/api/v1/archive/items", { method: "POST", body: uploadForm });
+    }
+    if (archiveOriginal.record_status === "quarantined" || archiveOriginal.storage_state === "quarantined") {
+      setStage("Антивирусная проверка", "Оригинал остаётся в карантине до подтверждения ClamAV");
+      const scan = await privateApiRequest("/api/v1/archive/items/" + encodeURIComponent(archiveOriginal.archive_item_id) + "/scan", { method: "POST" });
+      if (scan.scan_status !== "clean" || scan.record_status !== "available") {
+        throw new Error("Оригинал не прошёл проверку ClamAV. Обработка не запускалась.");
+      }
+      archiveOriginal.record_status = scan.record_status;
+      archiveOriginal.storage_state = scan.storage_state;
+    }
+    if (archiveOriginal.record_status !== "available" || archiveOriginal.storage_state !== "verified") {
+      throw new Error("Оригинал ещё не подтверждён сервером и не может быть обработан.");
+    }
+
+    const settings = new FormData();
+    settings.append("strength", qualityControl ? qualityControl.value : "65");
+    if (file.type.startsWith("video/")) {
+      if (trimStart && trimStart.value !== "") settings.append("start_seconds", trimStart.value);
+      if (trimEnd && trimEnd.value !== "") settings.append("end_seconds", trimEnd.value);
+      const cropValues = [cropX, cropY, cropWidth, cropHeight];
+      const filled = cropValues.filter(control => control && control.value !== "").length;
+      if (filled !== 0 && filled !== 4) throw new Error("Для кадрирования заполните X, Y, ширину и высоту.");
+      if (filled === 4) {
+        settings.append("crop_x", cropX.value);
+        settings.append("crop_y", cropY.value);
+        settings.append("crop_width", cropWidth.value);
+        settings.append("crop_height", cropHeight.value);
+      }
+      settings.append("enhance_audio", audioEnhance && audioEnhance.checked ? "true" : "false");
+    }
+
+    setStage("Серверная обработка", file.type.startsWith("video/") ? "Real-ESRGAN по кадрам · обрезка · обработка звука · новый MP4" : "Real-ESRGAN · коррекция выбранной силы · отдельный файл");
+    const derivative = await privateApiRequest(
+      "/api/v1/archive/items/" + encodeURIComponent(archiveOriginal.archive_item_id) + "/enhance",
+      { method: "POST", body: settings }
+    );
+    const response = await fetch(apiBase + "/api/v1/archive/items/" + encodeURIComponent(derivative.archive_item_id) + "/content", {
+      headers: { Authorization: "Bearer " + apiToken },
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Сервер создал запись, но не удалось получить файл результата (HTTP " + response.status + ").");
+    const blob = await response.blob();
+    const extension = file.type.startsWith("video/") ? "mp4" : "png";
+    const name = file.name.replace(/\\.[^.]+$/, "") + "-enhanced." + extension;
+    return { file: new File([blob], name, { type: blob.type || (extension === "mp4" ? "video/mp4" : "image/png"), lastModified: Date.now() }), material: derivative };
   }
 
   async function displayResult(file, token, material) {
@@ -387,23 +465,23 @@
       if (file.type.startsWith("video/")) {
         const sourceHashAfter = await sha256(file);
         if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-        setStage("Ожидается AI video worker", "Real-ESRGAN x2 · FFmpeg · сохранение аудио");
-        resultEmpty.textContent = "AI-обработка видео появится после установки внутреннего worker. Исходник не изменён, фиктивный ролик не создаётся.";
+        setStage("Серверная студия не подключена", "Видео не будет имитировать обработку в окне предпросмотра");
+        resultEmpty.textContent = "Для создания сохранённого MP4 требуется авторизация и доступный приватный backend. Оригинал не изменён.";
         resultEmpty.hidden = false;
-        status.textContent = "Оригинал видео выбран. Локально проверены формат, размер и SHA-256; антивирусная проверка ClamAV не запускалась. Для улучшения требуется установить внутренний worker с Real-ESRGAN, FFmpeg и моделью.";
-        mode.textContent = "AI VIDEO WORKER НЕ ПОДКЛЮЧЁН";
+        status.textContent = apiBase
+          ? "Войдите в приватный архив выше. После проверки ClamAV сервер создаст отдельный MP4 с применёнными настройками."
+          : "Адрес серверной среды не настроен. Видео можно просматривать, но обрезка, ИИ-обработка и экспорт пока не запускаются.";
+        mode.textContent = "ОЖИДАЕТСЯ ПРИВАТНЫЙ BACKEND";
         return;
       }
       if (file.type.startsWith("image/")) {
-        setStage("Локальная коррекция фотографии", "Цвет · контраст · умеренная резкость · без нейросетевой генерации");
-        mode.textContent = "ЛОКАЛЬНАЯ ОБРАБОТКА";
-        status.textContent = "Создаётся отдельная копия в браузере. Это облегчённый алгоритм, не Real-ESRGAN. Оригинал не изменяется.";
-        const enhanced = await makeCanvasCopy(file, token, qualityControl ? qualityControl.value : 65);
-        if (token !== generation) return;
-        const sourceHashAfter = await sha256(file);
-        if (sourceHashBefore !== sourceHashAfter) throw new Error("Контрольная сумма оригинала изменилась.");
-        await displayResult(enhanced, token, null);
-        status.textContent = "Создана отдельная локальная копия (" + formatBytes(enhanced.size) + "). Оригинал не изменён. Это алгоритмическая коррекция, не нейросетевая реставрация; архивный MATERIAL-ID не присвоен.";
+        setStage("Серверная студия не подключена", "Не создаём фиктивную копию предпросмотра");
+        resultEmpty.textContent = "Для сохранённой производной копии требуется авторизация и доступный приватный backend.";
+        resultEmpty.hidden = false;
+        status.textContent = apiBase
+          ? "Войдите в приватный архив выше. Сервер применит силу улучшения к отдельному файлу и присвоит ему MATERIAL-ID."
+          : "Адрес серверной среды не настроен. Локальный предпросмотр доступен, но постоянная обработанная копия не создаётся.";
+        mode.textContent = "ОЖИДАЕТСЯ ПРИВАТНЫЙ BACKEND";
         return;
       }
       setStage("Ожидается установка AI-движка", "Real-ESRGAN NCNN Vulkan · суперразрешение x4");
@@ -464,15 +542,59 @@
 
   reset.addEventListener("click", clearWorkspace);
 
+  if (loginForm) {
+    if (!apiBase) {
+      loginForm.hidden = true;
+      if (loginStatus) loginStatus.textContent = "Серверный адрес не настроен. Вход и сохранение результата недоступны.";
+    } else {
+      loginForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        const username = loginForm.querySelector("[data-ai-login-user]");
+        const password = loginForm.querySelector("[data-ai-login-password]");
+        try {
+          if (loginStatus) loginStatus.textContent = "Проверяем доступ к приватному архиву…";
+          const response = await fetch(apiBase + "/api/v1/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username.value.trim(), password: password.value })
+          });
+          const body = await response.json();
+          if (!response.ok) throw new Error(body.detail || "Ошибка входа");
+          apiToken = body.access_token;
+          password.value = "";
+          if (loginStatus) loginStatus.textContent = "Вход выполнен · " + body.user.role + ". Токен хранится только в памяти этой вкладки.";
+          if (logoutButton) logoutButton.hidden = false;
+          if (sourceFile) {
+            generation += 1;
+            const token = generation;
+            clearResult();
+            void processSelected(sourceFile, token);
+          }
+        } catch (error) {
+          apiToken = "";
+          password.value = "";
+          if (loginStatus) loginStatus.textContent = "Вход не выполнен: " + (error.message || "backend недоступен");
+        }
+      });
+    }
+  }
+  if (logoutButton) logoutButton.addEventListener("click", () => {
+    apiToken = "";
+    archiveOriginal = null;
+    logoutButton.hidden = true;
+    if (loginStatus) loginStatus.textContent = "Сессия завершена. Для сохранения результата войдите снова.";
+    clearResult();
+  });
+
   if (qualityControl) {
     if (qualityValue) qualityValue.value = qualityControl.value + "%";
     qualityControl.addEventListener("change", () => {
-      if (!sourceFile || !sourceFile.type.startsWith("image/")) return;
+      if (!sourceFile) return;
       if (qualityValue) qualityValue.value = qualityControl.value + "%";
       generation += 1;
       const token = generation;
       clearResult();
-      setStage("Повторная обработка фотографии", "Применяется выбранная сила улучшения");
+      setStage("Повторная обработка", "Новая сила улучшения будет применена к отдельной серверной копии");
       void processSelected(sourceFile, token);
     });
   }
