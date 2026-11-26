@@ -80,37 +80,102 @@
     return saveQueue;
   }
 
-  function showFile(card, file) {
+  const previewGeneration = new Map();
+
+  async function makePortraitPreview(file) {
+    if (file.type === "image/gif" || typeof createImageBitmap !== "function") return file;
+    let bitmap = null;
+    try {
+      bitmap = await createImageBitmap(file);
+      const pixels = bitmap.width * bitmap.height;
+      const scale = Math.min(1, Math.sqrt(8000000 / pixels));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d", { alpha: false });
+      if (!context) return file;
+      if ("filter" in context) {
+        context.filter = "brightness(1.06) contrast(1.08) saturate(1.12)";
+      }
+      context.drawImage(bitmap, 0, 0, width, height);
+      context.filter = "none";
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(
+          value => value ? resolve(value) : reject(new Error("Не удалось создать копию предпросмотра.")),
+          "image/webp",
+          0.94
+        );
+      });
+      canvas.width = 1;
+      canvas.height = 1;
+      return new File(
+        [blob],
+        file.name.replace(/\\.[^.]+$/, "") + "-portrait-preview.webp",
+        { type: "image/webp", lastModified: Date.now() }
+      );
+    } catch (_) {
+      return file;
+    } finally {
+      if (bitmap) bitmap.close();
+    }
+  }
+
+  async function showFile(card, file) {
     const input = card.querySelector(".portrait-upload-input");
     const image = card.querySelector(".portrait-preview");
+    const frame = card.querySelector(".portrait-frame");
     const silhouette = card.querySelector(".portrait-silhouette");
     const state = card.querySelector("[data-portrait-state]");
     const clearButton = card.querySelector("[data-portrait-clear]");
+    const token = (previewGeneration.get(card) || 0) + 1;
+    previewGeneration.set(card, token);
     const previousUrl = previews.get(card);
     if (previousUrl) URL.revokeObjectURL(previousUrl);
-    const url = URL.createObjectURL(file);
-    previews.set(card, url);
+    previews.delete(card);
     selectedFiles.set(card, file);
+    input.value = "";
+    state.textContent = "ОБРАБОТКА ПРЕДПРОСМОТРА…";
+    clearButton.hidden = true;
+
+    const previewFile = await makePortraitPreview(file);
+    if (previewGeneration.get(card) !== token) return;
+    const url = URL.createObjectURL(previewFile);
+    previews.set(card, url);
+    image.onload = () => {
+      if (previewGeneration.get(card) !== token) return;
+      frame.style.aspectRatio = image.naturalWidth + " / " + image.naturalHeight;
+      frame.style.minHeight = "0";
+      frame.style.maxHeight = "420px";
+    };
     image.src = url;
     image.hidden = false;
     silhouette.hidden = true;
-    state.textContent = "ПРЕДПРОСМОТР · " + file.name;
+    state.textContent = previewFile === file
+      ? "ПРЕДПРОСМОТР · " + file.name
+      : "ПРЕДПРОСМОТР · СВЕТ, КОНТРАСТ И ЦВЕТ СКОРРЕКТИРОВАНЫ";
     clearButton.hidden = false;
-    input.value = "";
   }
 
   function clearCard(card) {
     const input = card.querySelector(".portrait-upload-input");
     const image = card.querySelector(".portrait-preview");
+    const frame = card.querySelector(".portrait-frame");
     const silhouette = card.querySelector(".portrait-silhouette");
     const state = card.querySelector("[data-portrait-state]");
     const clearButton = card.querySelector("[data-portrait-clear]");
+    previewGeneration.set(card, (previewGeneration.get(card) || 0) + 1);
     const previousUrl = previews.get(card);
     if (previousUrl) URL.revokeObjectURL(previousUrl);
     previews.delete(card);
     selectedFiles.delete(card);
     image.removeAttribute("src");
+    image.onload = null;
     image.hidden = true;
+    frame.style.aspectRatio = "";
+    frame.style.minHeight = "";
+    frame.style.maxHeight = "";
     silhouette.hidden = false;
     state.textContent = "ФОТО ПОКА НЕ ДОБАВЛЕНО";
     clearButton.hidden = true;
@@ -131,7 +196,7 @@
       if (saved && Array.isArray(saved.slots)) {
         saved.slots.forEach((slot) => {
           if (!slot || !Number.isInteger(slot.index) || !cards[slot.index] || !slot.file) return;
-          showFile(cards[slot.index], slot.file);
+          await showFile(cards[slot.index], slot.file);
         });
         const count = selectedFiles.size;
         if (count) {
@@ -164,8 +229,8 @@
         input.value = "";
         return;
       }
-      showFile(card, file);
-      setNote("Сохраняем выбранные портреты в локальной памяти браузера…");
+      void showFile(card, file);
+      setNote("Сохраняем оригинал портрета в локальной памяти браузера…");
       try {
         await queueSave();
         setNote("Портрет сохранён в памяти этого браузера. Он восстановится после повторного открытия сайта, пока данные сайта не очищены. В облачный архив файл пока не отправлен.");
@@ -180,7 +245,7 @@
       setNote("Обновляем локальное сохранение портретов…");
       try {
         await queueSave();
-        setNote("Предпросмотр удалён из этого окна и из локальной памяти браузера. Другие портреты сохранены.");
+        setNote("Предпросмотр и его локальная запись удалены. Оригиналы остальных портретов сохранены.");
       } catch (error) {
         setNote("Окно очищено, но обновить локальное сохранение не удалось: " + error.message);
       }
