@@ -27,3 +27,13 @@ __pycache__/
 .venv/
 venv/
 *.sqlite
+
+# AI network local configuration and channel credentials
+config/ai-network.local.json
+client_secret.json
+google_drive_token.json
+gmail_token.json
+token.json
+credentials.json
+*.pem
+*.p12
