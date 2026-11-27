@@ -2,9 +2,6 @@
   "use strict";
 
   const $ = (id) => document.getElementById(id);
-  const form = $("supabase-connect-form");
-  if (!form) return;
-
   // Public client configuration for the existing KOMAROVA_CORE Supabase project.
   // Publishable keys are designed for browser use; never place service_role/secret keys here.
   const SUPABASE_PROJECT_URL = "https://bcotusztvddzbnwefnrq.supabase.co";
@@ -12,10 +9,11 @@
   const bucket = "komarova_core_private";
   const status = $("cloud-archive-status");
   const connection = $("cloud-connection-state");
+  if (!connection) return;
   const auth = $("cloud-auth");
   const panel = $("cloud-private-panel");
-  let projectUrl = "";
-  let anonKey = "";
+  let projectUrl = SUPABASE_PROJECT_URL;
+  let anonKey = SUPABASE_PUBLISHABLE_KEY;
   let accessToken = "";
   let currentUser = null;
   let items = [];
@@ -71,27 +69,15 @@
     return safeJson(response);
   }
 
-  async function connectProject(event) {
-    event.preventDefault();
-    const urlInput = $("supabase-project-url");
-    const keyInput = $("supabase-anon-key");
+  async function connectProject() {
     try {
-      const parsed = new URL(urlInput.value.trim());
-      if (parsed.protocol !== "https:" || !/\.supabase\.co$/.test(parsed.hostname)) {
-        throw new Error("Укажите HTTPS Project URL вашего проекта Supabase.");
-      }
-      if (!keyInput.value.trim()) throw new Error("Введите публичный anon/publishable key. Service role key сюда вводить нельзя.");
-      projectUrl = parsed.origin;
-      anonKey = keyInput.value.trim();
-      connection.textContent = "Проверка Supabase…";
+      connection.textContent = "Проверяем существующий проект KOMAROVA_CORE…";
       await request("/auth/v1/settings");
-      connection.textContent = "Supabase доступен · проект отвечает. Войдите в семейный аккаунт.";
-      $("supabase-project-state").textContent = "Подключение проверено для этой вкладки. URL и публичный ключ остаются только в памяти страницы.";
-      $("cloud-username").focus();
+      connection.textContent = "Supabase API отвечает · используется существующий проект KOMAROVA_CORE.";
+      $("supabase-project-state").textContent = "Соединение с API подтверждено. Приватный bucket и таблица архива пока не созданы; пароль нужен только в папке участника.";
     } catch (error) {
-      projectUrl = "";
-      anonKey = "";
-      connection.textContent = "Supabase не подключён: " + error.message;
+      connection.textContent = "Supabase сейчас недоступен: " + error.message;
+      $("supabase-project-state").textContent = "Проверка не пройдена. Файлы не загружались.";
     }
   }
 
@@ -354,15 +340,8 @@
     connection.textContent = "Сессия завершена. Данные доступа очищены из памяти страницы.";
   }
 
-  const projectUrlInput = $("supabase-project-url");
-  const publishableKeyInput = $("supabase-anon-key");
-  projectUrlInput.value = SUPABASE_PROJECT_URL;
-  publishableKeyInput.value = SUPABASE_PUBLISHABLE_KEY;
-  projectUrlInput.readOnly = true;
-  publishableKeyInput.readOnly = true;
-  form.addEventListener("submit", connectProject);
-  // Verify the permanent project configuration whenever the archive page opens.
-  connectProject({ preventDefault() {} });
+  // Проверяем существующий проект автоматически; форму подключения не показываем.
+  connectProject();
   $("cloud-login-form").addEventListener("submit", login);
   $("cloud-upload-form").addEventListener("submit", uploadFile);
   $("cloud-logout").addEventListener("click", logout);
