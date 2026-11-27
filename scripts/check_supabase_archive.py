@@ -7,11 +7,13 @@ schema = (root / "backend/supabase/001_private_media_archive.sql").read_text(enc
 layout = (root / "_layouts/default.html").read_text(encoding="utf-8")
 
 required_page = (
-    'id="supabase-connect-form"', 'id="supabase-project-url"',
-    'id="supabase-anon-key"', 'id="cloud-login-form"',
-    'id="cloud-upload-form"', 'id="archive-storage"',
-    'id="archive-upload"', 'id="archive-catalog"',
+    'id="cloud-connection-state"', 'id="supabase-project-state"',
+    'id="cloud-login-form"', 'id="cloud-upload-form"',
+    'id="archive-storage"', 'id="archive-upload"',
+    'id="archive-catalog"',
 )
+for token in ('id="supabase-connect-form"', 'id="supabase-project-url"', 'id="supabase-anon-key"'):
+    assert token not in page, f"Supabase setup fields must stay out of the public archive UI: {token}"
 for token in required_page:
     assert token in page, f"Missing archive page control: {token}"
 
@@ -24,6 +26,7 @@ for token in (
     'accessToken = result.access_token',
     'storageUploaded',
     'MATERIAL-ID',
+    'connectProject();',
 ):
     assert token in client or token in page, f"Missing Supabase client contract: {token}"
 
