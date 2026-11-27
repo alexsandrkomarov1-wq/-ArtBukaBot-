@@ -18,7 +18,7 @@
 .kc-menu-list{display:grid;gap:7px}
 .kc-menu-item{display:flex;align-items:center;gap:12px;padding:12px 11px;border:1px solid rgba(126,177,197,.16);border-radius:12px;background:rgba(255,255,255,.035);color:#e8f3f8;text-decoration:none;min-height:48px}
 .kc-menu-item:hover,.kc-menu-item:focus-visible{background:rgba(83,157,181,.16);border-color:rgba(126,206,225,.55);outline:none}
-.kc-menu-item[aria-disabled=true]{opacity:.64;cursor:not-allowed}
+.kc-menu-item[aria-disabled=true]{opacity:.64;cursor:not-allowed;pointer-events:none}
 .kc-menu-icon{width:30px;text-align:center;font-size:1.2rem}
 .kc-menu-copy{display:grid;gap:3px;flex:1;min-width:0}
 .kc-menu-copy strong{font-size:.91rem;font-weight:650}
