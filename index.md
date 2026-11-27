@@ -35,6 +35,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <button class="world-portal world-portal-button" type="button" data-world-open-guide><span class="world-portal-index">06 / AI GUIDE</span><strong>ИИ-помощник</strong><small>Подсказки и навигация</small></button>
         <a class="world-portal" href="{{ '/account/' | relative_url }}"><span class="world-portal-index">07 / PRIVATE</span><strong>Личный кабинет</strong><small>Защищённый доступ</small></a>
         <a class="world-portal" href="{{ '/status/' | relative_url }}"><span class="world-portal-index">08 / SYSTEM</span><strong>Состояние проекта</strong><small>Проверки · готовность</small></a>
+        <a class="world-portal" href="{{ '/cloud-network/' | relative_url }}"><span class="world-portal-index">09 / CLOUD NETWORK</span><strong>Облачная сеть</strong><small>7 хранилищ · единый каталог</small></a>
       </nav>
       <div class="world-footer"><span>МЫШЬ · КЛАВИАТУРА · TOUCH</span><span>ПОРТАЛЫ ОТКРЫВАЮТ РЕАЛЬНЫЕ РАЗДЕЛЫ</span></div>
     </div>
