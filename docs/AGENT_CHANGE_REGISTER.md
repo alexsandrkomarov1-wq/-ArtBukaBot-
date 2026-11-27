@@ -25,3 +25,5 @@
 | CHG-0002 | 2026-11-27 | assistant workflow | AG-000 | EXECUTED | Добавлены постоянный регламент автономного помощника, первичная очередь задач и формат реестра изменений | Commit, создавший эти три файла | Ожидает CI и проверки |
 
 | CHG-0003 | 2026-11-27 | assistant workflow | AG-011 | EXECUTED | Добавлена спецификация единого управления несколькими проектами, командной шины, ролей ИИ и цифрового учёта времени | Commit `d67fed172491cdf377d0ababedbef97e3d7b337d`, файл `docs/AI_CONTROL_AND_TIME_ACCOUNTING.md` | Документ записан в рабочую ветку; реализация и CI ещё не проверены |
+
+| CHG-0004 | 2026-11-27 | assistant workflow | AG-001/AG-005/AG-012 | EXECUTED | Добавлены безопасный шаблон сетевых настроек, пошаговая настройка модели/Telegram/WhatsApp/Gmail, изолированный PowerShell self-test и GitHub Actions workflow | Файлы `config/ai-network.example.json`, `docs/AI_NETWORK_SETUP.md`, `tools/test-komarova-core.ps1`, `.github/workflows/agent-self-test.yml` | Конфигурация и тесты записаны; CI ожидает запуска; реальные внешние каналы выключены до ввода секретов и завершения авторизации |
