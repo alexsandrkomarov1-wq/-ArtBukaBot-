@@ -21,17 +21,17 @@ function Invoke-Logger([string[]]$Arguments) {
 }
 
 try {
-    $null = Invoke-Logger @("-Command", "init")
-    $null = Invoke-Logger @("-Command", "start", "-Task", "Автоматический изолированный тест")
-    $status = Invoke-Logger @("-Command", "status")
+    $null = Invoke-Logger @("init")
+    $null = Invoke-Logger @("start", "-Task", "Автоматический изолированный тест")
+    $status = Invoke-Logger @("status")
     if ($status -notmatch "АКТИВНА") { throw "Статус не показывает активную сессию." }
 
-    $null = Invoke-Logger @("-Command", "pause")
-    $paused = Invoke-Logger @("-Command", "status")
+    $null = Invoke-Logger @("pause")
+    $paused = Invoke-Logger @("status")
     if ($paused -notmatch "ПАУЗА") { throw "Пауза не отражена в статусе." }
 
-    $null = Invoke-Logger @("-Command", "resume")
-    $null = Invoke-Logger @("-Command", "stop")
+    $null = Invoke-Logger @("resume")
+    $null = Invoke-Logger @("stop")
 
     $dataRoot = Join-Path $tempRoot "data\project_time"
     $sessionsFile = Join-Path $dataRoot "sessions.jsonl"
