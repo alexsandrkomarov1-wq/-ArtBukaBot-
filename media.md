@@ -7,7 +7,7 @@ description: Закрытый семейный архив фотографий, 
 <section class="media-heading">
   <p class="eyebrow">KOMAROVA_CORE · ЕДИНЫЙ СЕМЕЙНЫЙ АРХИВ</p>
   <h1>Архив <em>памяти.</em></h1>
-  <p class="media-lead">Фотографии, видео, аудио и документы хранятся в закрытом Supabase Storage. PostgreSQL ведёт реестр материалов и связи с людьми, событиями и местами. Оригиналы загружаются отдельно, не перезаписываются и не публикуются на открытой витрине.</p>
+  <p class="media-lead">Фотографии, видео, аудио и документы хранятся в закрытом семейном хранилище. PostgreSQL ведёт реестр материалов и связи с людьми, событиями и местами. Оригиналы загружаются отдельно, не перезаписываются и не публикуются на открытой витрине.</p>
   <nav class="media-entry-actions" aria-label="Навигация по архиву">
     <a class="media-button" href="#archive-upload">Загрузить материалы</a>
     <a class="media-button" href="#archive-catalog">Каталог архива</a>
@@ -36,22 +36,23 @@ description: Закрытый семейный архив фотографий, 
   <p id="supabase-project-state" class="media-status" role="status" aria-live="polite">Проект ещё не проверен. Не вводите service_role key.</p>
   <div class="storage-location-card">
     <strong>Место хранения файлов</strong>
-    <span id="cloud-storage-location">Supabase Storage · приватный bucket: komarova_core_private · ожидается настройка</span>
+    <span id="cloud-storage-location">Закрытое хранилище KOMAROVA_CORE · годовые каталоги</span>
     <small>Реестр: Supabase PostgreSQL · таблица public.archive_items. Доступ к объектам ограничивается идентификатором вошедшего пользователя.</small>
   </div>
   <details class="cloud-bootstrap">
     <summary>Первичная настройка структуры архива в Supabase</summary>
     <p>Откройте SQL Editor в проекте Supabase и выполните подготовленный SQL-файл. Он создаёт приватный bucket, таблицу реестра и политики Row Level Security. Скрипт не переносит и не удаляет существующие данные.</p>
     <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/backend/supabase/001_private_media_archive.sql">Открыть SQL-настройку KOMAROVA_CORE ↗</a></p>
-    <p>Учётная запись требуется только для входа в закрытый семейный архив. В редакторе фотографий вход по почте не используется.</p>
+    <p>Учётная запись участника используется для доступа к его личной папке. Страница событий не запрашивает пароль.</p>
   </details>
 </section>
 
 <section class="cloud-archive" id="archive-upload" aria-labelledby="archive-upload-title">
   <div class="media-library-heading">
-    <div><p class="eyebrow">ЗАКРЫТЫЙ ДОСТУП</p><h2 id="archive-upload-title">Семейный кабинет</h2></div>
-    <span class="media-status">Supabase Auth</span>
+    <div><p class="eyebrow">ЗАКРЫТЫЙ ДОСТУП</p><h2 id="archive-upload-title">Папка участника</h2></div>
+    <span class="media-status">Личный доступ участника</span>
   </div>
+  <p class="participant-folder-note">Вход и пароль относятся только к личной папке участника. Здесь участник связывает свой архив с контактами и каналами общения; пароль не запрашивается на странице событий или в общей хронологии.</p>
   <div id="cloud-auth">
     <form id="cloud-login-form" class="cloud-auth-form">
       <label>Электронная почта
@@ -99,7 +100,7 @@ description: Закрытый семейный архив фотографий, 
     <button type="button" class="media-filter" data-cloud-filter="audio" aria-pressed="false">Аудио</button>
     <button type="button" class="media-filter" data-cloud-filter="document" aria-pressed="false">Документы</button>
   </div>
-  <div id="cloud-archive-list" class="media-list"><p class="media-list-empty">Войдите в архив, чтобы загрузить каталог.</p></div>
+  <div id="cloud-archive-list" class="media-list"><p class="media-list-empty">Войдите в свою папку участника, чтобы открыть личные материалы.</p></div>
   <div id="cloud-preview" class="cloud-preview" hidden>
     <div class="cloud-preview-head"><strong id="cloud-preview-name"></strong><button type="button" id="cloud-preview-close" class="media-button">Закрыть просмотр</button></div>
     <img id="cloud-preview-image" alt="" hidden>
@@ -121,13 +122,13 @@ description: Закрытый семейный архив фотографий, 
     </div>
   </div>
   <p id="media-status" class="media-status" role="status" aria-live="polite">Выберите файлы для локального просмотра. Этот режим не загружает их в архив.</p>
-  <div class="media-viewer" id="media-viewer">
+  <div class="media-viewer media-cinema-viewer" id="media-viewer">
     <div class="media-empty" id="media-empty">
       <span class="media-empty-symbol" aria-hidden="true">▧</span>
       <h2>Предпросмотр материалов</h2>
       <p>Фото, видео и аудио открываются в браузере. Документы можно открыть в отдельной вкладке, если формат поддерживается.</p>
     </div>
-    <div class="media-stage" id="media-stage" hidden>
+    <div class="media-stage media-cinema-stage" id="media-stage" hidden>
       <img id="media-image" alt="" hidden>
       <video id="media-video" controls playsinline preload="metadata" hidden></video>
       <audio id="media-audio" controls preload="metadata" hidden></audio>
