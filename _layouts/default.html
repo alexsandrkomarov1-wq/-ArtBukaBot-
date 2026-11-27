@@ -27,6 +27,46 @@
 </div>
 </header>
 <main class="wrapper page-content">{{ content }}</main>
+{% if page.url == '/' %}
+<style>
+.home-cloud-panel{--hcp-line:rgba(127,174,197,.22);color:#eaf4fb;background:radial-gradient(circle at 85% 5%,rgba(38,121,151,.22),transparent 34%),linear-gradient(145deg,#101d2a,#172c3c 60%,#101b28);border:1px solid var(--hcp-line);border-radius:24px;padding:clamp(20px,4vw,42px);margin:28px 0 42px;box-shadow:0 24px 70px rgba(0,0,0,.2)}
+.home-cloud-panel *{box-sizing:border-box}.home-cloud-panel .hcp-eyebrow{font-size:.72rem;letter-spacing:.18em;color:#8dc8dc;font-weight:700}.home-cloud-panel h2{font-size:clamp(1.8rem,4vw,3rem);line-height:1.08;color:#f5fbff;margin:14px 0}.home-cloud-panel h2 em{color:#8ed8e8;font-style:normal}.home-cloud-panel .hcp-lead{max-width:780px;color:#c0d0dc;font-size:1rem;line-height:1.7}.home-cloud-panel .hcp-state{display:inline-flex;gap:9px;align-items:center;border:1px solid rgba(241,190,103,.4);border-radius:999px;padding:8px 13px;color:#f6d69d;font-size:.74rem;letter-spacing:.05em;margin:12px 0 24px}.home-cloud-panel .hcp-dot{width:8px;height:8px;border-radius:50%;background:#e8b65f;box-shadow:0 0 12px #e8b65f}.home-cloud-panel .hcp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px;margin:22px 0}.home-cloud-panel .hcp-card{border:1px solid var(--hcp-line);border-radius:16px;background:rgba(255,255,255,.045);padding:17px;min-height:130px}.home-cloud-panel .hcp-card strong{display:block;color:#f1f8fc;font-size:1rem;margin:6px 0 8px}.home-cloud-panel .hcp-card p{color:#b5c6d3;font-size:.86rem;line-height:1.55;margin:0}.home-cloud-panel .hcp-tag{font-size:.67rem;letter-spacing:.1em;color:#8dc8dc}.home-cloud-panel .hcp-pending{color:#f0c77f}.home-cloud-panel .hcp-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}.home-cloud-panel .hcp-links a{color:#eafaff;border:1px solid rgba(142,216,232,.4);border-radius:999px;padding:10px 15px;text-decoration:none}.home-cloud-panel .hcp-links a:hover{background:rgba(142,216,232,.12)}.home-cloud-panel .hcp-foot{color:#91a9b8;font-size:.8rem;margin-top:18px}
+</style>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  const hero=document.querySelector(".hero");
+  if(!hero||document.querySelector(".home-cloud-panel"))return;
+  const panel=document.createElement("section");
+  panel.className="home-cloud-panel";
+  panel.setAttribute("aria-labelledby","home-cloud-title");
+  panel.innerHTML=`
+    <p class="hcp-eyebrow">KOMAROVA_CORE / PRIVATE ARCHIVE INFRASTRUCTURE</p>
+    <h2 id="home-cloud-title">Единая <em>облачная сеть</em></h2>
+    <p class="hcp-lead">Здесь будет единая панель хранения для главного портала и AI MEDIA: один каталог материалов, несколько независимых облачных копий и прозрачный контроль синхронизации.</p>
+    <div class="hcp-state"><span class="hcp-dot"></span> РАЗРАБОТКА ИНТЕРФЕЙСА · ПОДКЛЮЧЕНИЯ ЕЩЁ НЕ АКТИВНЫ</div>
+    <div class="hcp-grid" aria-label="Состав облачной системы">
+      <article class="hcp-card"><span class="hcp-tag">01 / REGISTRY</span><strong>Единый каталог</strong><p>PERSON-ID, EVENT-ID, PLACE-ID и MATERIAL-ID связывают файлы с семейной историей. Оригиналы и производные версии учитываются отдельно.</p></article>
+      <article class="hcp-card"><span class="hcp-tag">02 / STORAGE</span><strong>Несколько хранилищ</strong><p>Провайдеры подключаются отдельными серверными адаптерами. Сбой одного облака не должен останавливать остальные.</p></article>
+      <article class="hcp-card"><span class="hcp-tag">03 / INTEGRITY</span><strong>Проверка копий</strong><p>Для каждой копии фиксируются удалённый ID, размер, SHA-256 и состояние. Успех подтверждается проверочным чтением.</p></article>
+      <article class="hcp-card"><span class="hcp-tag">04 / SAFETY</span><strong>Защита оригинала</strong><p>Оригинал не перезаписывается. Любая улучшенная или преобразованная версия получает собственный MATERIAL-ID.</p></article>
+    </div>
+    <h3>Провайдеры и статус подключения</h3>
+    <div class="hcp-grid" aria-label="Статусы семи облачных провайдеров">
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ВРЕМЕННОЕ ПОДКЛЮЧЕНИЕ</span><strong>Google Drive</strong><p>Тестовая интеграция. Не считается постоянным провайдером до отдельного решения.</p></article>
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ОЦЕНКА API</span><strong>MEGA</strong><p>Проверить официальные возможности API, OAuth/ключи и условия бесплатного тарифа.</p></article>
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ОЦЕНКА API</span><strong>pCloud</strong><p>Проверить серверную авторизацию и ограничения API.</p></article>
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ОЦЕНКА API</span><strong>Яндекс Диск</strong><p>Проверить OAuth, WebDAV/API и лимиты.</p></article>
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ОЦЕНКА API</span><strong>OneDrive</strong><p>Проверить Microsoft Graph и разрешения приложения.</p></article>
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ОЦЕНКА API</span><strong>Dropbox</strong><p>Проверить API, квоты и модель доступа.</p></article>
+      <article class="hcp-card"><span class="hcp-tag hcp-pending">ОЦЕНКА API</span><strong>TeraBox</strong><p>Не считать доступным для интеграции, пока не подтверждены официальный API и условия автоматизации.</p></article>
+    </div>
+    <div class="hcp-links"><a href="{{ '/cloud-network/' | relative_url }}">Открыть полную панель облачной сети ↗</a><a href="{{ '/media/' | relative_url }}">Перейти в AI MEDIA и архив ↗</a></div>
+    <p class="hcp-foot">Панель отображает архитектуру и текущую оценку интеграций. Реальные подключения, синхронизация и проверочное чтение ещё не активированы.</p>
+  `;
+  hero.insertAdjacentElement("afterend",panel);
+});
+</script>
+{% endif %}
 <footer class="site-footer"><div class="wrapper footer-inner">
 <span>KOMAROVA_CORE</span><span>Публичная версия · {{ site.time | date: '%Y' }}</span><a href="mailto:alexsandr.komarov@outlook.com">alexsandr.komarov@outlook.com</a>
 </div></footer>
