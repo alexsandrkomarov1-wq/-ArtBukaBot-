@@ -76,6 +76,7 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   <div class="pr-links">
     <a href="{{ '/cloud-network/' | relative_url }}">Открыть совместимость с облаками и Supabase ↗</a>
     <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/plugin-support-registry.md">Полный технический реестр ↗</a>
+    <a href="https://colab.research.google.com/github/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/notebooks/KOMAROVA_CORE_Plugin_Support_Registry.ipynb">Открыть реестр в Google Colab ↗</a>
   </div>
   <p class="pr-lead">Текущий статус: список и архитектура описаны. Большинство внешних интеграций ещё не подключены к production backend; наличие в реестре не означает действующую авторизацию или готовый плагин.</p>
 </section>
