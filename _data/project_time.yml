@@ -1,0 +1,7 @@
+# Public counters configuration for the KOMAROVA_CORE homepage.
+# Calendar start is approximate; confirmed active work is the sum of closed log sessions.
+started_at_utc: "2026-11-23T02:42:00Z"
+timezone: "Europe/Amsterdam"
+confirmed_active_seconds: 136
+confirmed_active_hms: "00:02:16"
+active_time_updated_at: "2026-11-27T20:59:46+01:00"

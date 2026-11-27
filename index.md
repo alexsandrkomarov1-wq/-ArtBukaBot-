@@ -19,11 +19,16 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
         <span class="world-hud-kicker">KOMAROVA_CORE / AI WORLD</span>
         <strong>ЦЕНТРАЛЬНОЕ ЯДРО</strong>
         <span class="world-render-status" data-world-render-status role="status" aria-live="polite">Проверка графического режима…</span>
-        <div class="world-time-counter" aria-label="Счётчик времени проекта">
-          <span class="world-time-label">ПРОЕКТ · С 23 НОЯБРЯ 2026</span>
-          <strong>Календарное время <time data-project-age>Загрузка…</time></strong>
-          <span>Учтённая активная работа <b data-project-worked>00:01:08</b></span>
-          <small>До запуска журнала активные часы не учитывались</small>
+        <div class="world-time-counter" data-project-time-counter
+             data-project-start-utc="{{ site.data.project_time.started_at_utc }}"
+             data-project-worked-seconds="{{ site.data.project_time.confirmed_active_seconds }}"
+             data-project-timezone="{{ site.data.project_time.timezone }}"
+             aria-label="Календарный возраст проекта и подтверждённое активное время">
+          <span class="world-time-label">ХРОНОМЕТРАЖ KOMAROVA_CORE</span>
+          <strong>Календарный возраст <time data-project-age>Загрузка…</time></strong>
+          <span>Подтверждённая активная работа <b data-project-worked>Загрузка…</b></span>
+          <small>Начало календарного отсчёта: <time data-project-start>Загрузка…</time> · ориентировочно</small>
+          <small>В активные часы входят только закрытые сессии журнала. Неучтённое время не добавляется.</small>
         </div>
       </div>
       <nav class="world-portals" id="world-portals" aria-label="Активные порталы проектов">
@@ -358,4 +363,4 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
 
 <script defer src="{{ '/assets/js/site-3d.js' | relative_url }}?v=20261126-portal-navigation-3"></script>
 <script defer src="{{ '/assets/js/ai-world-navigation.js' | relative_url }}?v=20261125-world-1"></script>
-<script defer src="{{ '/assets/js/project-time-counter.js' | relative_url }}?v=20261126-counter-1"></script>
+<script defer src="{{ '/assets/js/project-time-counter.js' | relative_url }}?v=20261127-ledger-source-2"></script>

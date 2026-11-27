@@ -10,9 +10,15 @@ description: Хронология проверенных изменений пу
   <p class="lead">Здесь фиксируются изменения публичного сайта, их GitHub-основание и фактический статус публикации. Коммит, объединение и работающая функция — разные вещи.</p>
 </div>
 <section class="status-summary">
-  <h2>Последняя проверка: 25 ноября 2026</h2>
-  <p>Опубликованные страницы главной, событий, семейной доски с картой, медиатеки и состояния проекта прочитаны напрямую с GitHub Pages. Это подтверждает доступность и содержимое страниц, но не заменяет проверку каждого действия нажатием в браузере.</p>
+  <h2>Последняя проверка: 27 ноября 2026</h2>
+  <p>Проверка хронометража зафиксирована в рабочей ветке; публикация и live-проверка текущей версии счётчика должны подтверждаться отдельным успешным запуском GitHub Pages.</p>
 </section>
+<article class="status-card">
+  <div class="status-card-heading"><span class="status-pill status-yellow">КОД ОБНОВЛЁН</span><span class="status-index">27.11.2026</span></div>
+  <h2>Хронометраж проекта и активная работа</h2>
+  <p>Календарный возраст KOMAROVA_CORE считается от исходной отметки 23 ноября 2026 года и обновляется каждую секунду. Подтверждённая активная работа берётся только из закрытых сессий журнала: сейчас 00:02:16. Неучтённые интервалы, ожидание CI и количество коммитов не превращаются в рабочие часы.</p>
+  <p class="status-links"><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/PROJECT_TIME_LOG.md">Журнал рабочего времени</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/_data/project_time.yml">Источник конфигурации счётчика</a></p>
+</article>
 <section class="status-list" aria-label="История изменений">
   <article class="status-card">
     <div class="status-card-heading"><span class="status-pill status-green">ОПУБЛИКОВАНО</span><span class="status-index">25.11.2026</span></div>
