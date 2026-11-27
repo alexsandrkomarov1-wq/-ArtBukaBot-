@@ -8,7 +8,7 @@ description: Проверяемое состояние модулей KOMAROVA_C
 <p class="eyebrow">КОНТРОЛЬ РАЗРАБОТКИ</p>
 <h1>Состояние <span>проекта.</span></h1>
 <p class="lead">Снимок состояния ветки <code>core-backend-foundation</code>. Цвет показывает подтверждённый статус реализации, а ссылки ведут к коду и проверкам.</p>
-<p class="status-links"><a href="{{ '/changes/' | relative_url }}">Журнал изменений сайта ↗</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/SITE_CHANGELOG.md">Полный технический журнал</a></p>
+<p class="status-links"><a href="{{ '/changes/' | relative_url }}">Журнал изменений сайта ↗</a> · <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/SITE_CHANGELOG.md">Полный технический журнал</a> · <a href="{{ '/ai-control/' | relative_url }}">Центр управления ИИ ↗</a></p>
 
 </div>
 <div class="status-legend">
