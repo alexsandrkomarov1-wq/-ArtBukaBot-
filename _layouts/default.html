@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v=20261126-world-counter-portals-1">
 <link rel="stylesheet" href="{{ '/assets/css/family-board.css' | relative_url }}">
 {% feed_meta %}
+<link rel="stylesheet" href="{{ '/assets/css/assistant-menu.css' | relative_url }}?v=20261127-menu-1">
 </head>
 <body>
 <header class="site-header">
@@ -68,7 +69,31 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 </script>
 {% endif %}
-<footer class="site-footer"><div class="wrapper footer-inner">
+
+<div class="kc-menu-root">
+  <button class="kc-menu-toggle" type="button" data-kc-menu-toggle aria-expanded="false" aria-controls="kc-assistant-menu"><span class="kc-menu-glyph" aria-hidden="true">☰</span><span>МЕНЮ</span></button>
+  <div class="kc-menu-backdrop" data-kc-menu-backdrop hidden></div>
+  <aside class="kc-menu-drawer" id="kc-assistant-menu" data-kc-menu-drawer aria-hidden="true" aria-label="Общее меню KOMAROVA_CORE">
+    <div class="kc-menu-head"><div><div class="kc-menu-brand">KOMAROVA_CORE / CONTROL</div><h2>Общее меню</h2><p class="kc-menu-subtitle">Для владельца и ИИ-помощника. Голос и визуальная панель дополняют друг друга.</p></div><button class="kc-menu-close" type="button" data-kc-menu-close aria-label="Закрыть меню">×</button></div>
+    <div class="kc-menu-search"><label for="kc-menu-search-input">Поиск в меню</label><input id="kc-menu-search-input" data-kc-menu-search type="search" placeholder="Найти раздел…" autocomplete="off"></div>
+    <div class="kc-menu-section">НАВИГАЦИЯ И ПАМЯТЬ</div>
+    <nav class="kc-menu-list" aria-label="Разделы семейного архива">
+      <a class="kc-menu-item" data-kc-menu-item data-search="история хронология журнал действий изменения" href="{{ '/status/' | relative_url }}"><span class="kc-menu-icon" aria-hidden="true">⌁</span><span class="kc-menu-copy"><strong>История</strong><small>Состояние и зафиксированные изменения проекта</small></span><span class="kc-menu-state">ЧАСТИЧНО</span></a>
+      <a class="kc-menu-item" data-kc-menu-item data-search="заметки личные записи" href="#" aria-disabled="true" tabindex="-1"><span class="kc-menu-icon" aria-hidden="true">✎</span><span class="kc-menu-copy"><strong>Заметки</strong><small>Общее защищённое хранилище заметок ещё не подключено</small></span><span class="kc-menu-state">В РАБОТЕ</span></a>
+      <a class="kc-menu-item" data-kc-menu-item data-search="общение чат координатор модели сообщения" href="{{ '/ai-control/' | relative_url }}"><span class="kc-menu-icon" aria-hidden="true">◉</span><span class="kc-menu-copy"><strong>Общение и управление ИИ</strong><small>Иерархия, поручения и фактическое состояние соединений</small></span><span class="kc-menu-state">ПАНЕЛЬ</span></a>
+      <a class="kc-menu-item" data-kc-menu-item data-search="события календарь дни рождения годовщины" href="{{ '/events/' | relative_url }}"><span class="kc-menu-icon" aria-hidden="true">▦</span><span class="kc-menu-copy"><strong>События и календарь</strong><small>Семейный реестр событий; сервер пока не подключён</small></span><span class="kc-menu-state">ИНТЕРФЕЙС</span></a>
+      <a class="kc-menu-item" data-kc-menu-item data-search="воспоминания фотографии видео архив материалы" href="{{ '/media/' | relative_url }}"><span class="kc-menu-icon" aria-hidden="true">◈</span><span class="kc-menu-copy"><strong>Воспоминания и архив</strong><small>Каталог фото, видео, аудио и документов</small></span><span class="kc-menu-state">АРХИВ</span></a>
+    </nav>
+    <div class="kc-menu-section">МЕДИА-МАСТЕРСКАЯ</div>
+    <nav class="kc-menu-list" aria-label="Создание и публикация медиа">
+      <a class="kc-menu-item" data-kc-menu-item data-search="создать фото видео монтаж заставка музыка редактор" href="#" aria-disabled="true" tabindex="-1"><span class="kc-menu-icon" aria-hidden="true">＋</span><span class="kc-menu-copy"><strong>Создать фото-видео</strong><small>Мастер монтажа, заставки и музыки ещё не подключён</small></span><span class="kc-menu-state">ПЛАН</span></a>
+      <a class="kc-menu-item" data-kc-menu-item data-search="опубликовать фото видео публикация разрешения" href="#" aria-disabled="true" tabindex="-1"><span class="kc-menu-icon" aria-hidden="true">↗</span><span class="kc-menu-copy"><strong>Опубликовать фото-видео</strong><small>Проверка разрешений и подтверждение владельца</small></span><span class="kc-menu-state">ПЛАН</span></a>
+    </nav>
+    <div class="kc-menu-foot">Статус пункта отражает реальное состояние интерфейса. Наличие раздела не означает, что его серверная функция подключена. Оригиналы не изменяются; публикация требует подтверждения владельца.</div>
+    <div class="kc-menu-empty" data-kc-menu-empty hidden>По этому запросу разделы не найдены.</div>
+  </aside>
+</div>
+\n<footer class="site-footer"><div class="wrapper footer-inner">
 <span>KOMAROVA_CORE</span><span>Публичная версия · {{ site.time | date: '%Y' }}</span><a href="mailto:alexsandr.komarov@outlook.com">alexsandr.komarov@outlook.com</a>
 </div></footer>
 <div id="site-guide" class="site-guide">
@@ -87,5 +112,6 @@ document.addEventListener("DOMContentLoaded",function(){
 <script src="{{ '/assets/js/site-guide.js' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" defer></script>
 <script src="{{ '/assets/js/places-gallery.js' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" defer></script>
 <script src="{{ '/assets/js/family-portraits.js' | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M' }}" defer></script>
+<script src="{{ '/assets/js/assistant-menu.js' | relative_url }}?v=20261127-menu-1" defer></script>
 </body>
 </html>
