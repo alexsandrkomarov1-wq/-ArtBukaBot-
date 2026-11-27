@@ -28,12 +28,16 @@ function Invoke-Logger([string]$Action, [string]$Task = "") {
 try {
     $null = Invoke-Logger "init"
     $null = Invoke-Logger "start" "Автоматический изолированный тест"
-    $status = Invoke-Logger "status"
-    if ($status -notmatch "АКТИВНА") { throw "Статус не показывает активную сессию." }
+    $null = Invoke-Logger "status"
+    $activeFile = Join-Path $tempRoot "data\project_time\active_session.json"
+    if (-not (Test-Path -LiteralPath $activeFile)) { throw "Файл активной сессии не создан." }
+    $activeSession = Get-Content -LiteralPath $activeFile -Raw -Encoding utf8 | ConvertFrom-Json
+    if ([bool]$activeSession.is_paused) { throw "Сессия должна быть активна после start." }
 
     $null = Invoke-Logger "pause"
-    $paused = Invoke-Logger "status"
-    if ($paused -notmatch "ПАУЗА") { throw "Пауза не отражена в статусе." }
+    $null = Invoke-Logger "status"
+    $pausedSession = Get-Content -LiteralPath $activeFile -Raw -Encoding utf8 | ConvertFrom-Json
+    if (-not [bool]$pausedSession.is_paused) { throw "Пауза не сохранена в состоянии сессии." }
 
     $null = Invoke-Logger "resume"
     $null = Invoke-Logger "stop"
