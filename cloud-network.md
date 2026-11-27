@@ -19,15 +19,16 @@ permalink: /cloud-network/
     <article class="cn-card"><span class="cn-tag">03 / INTEGRITY</span><strong>Проверка копий</strong><p>Для каждой копии фиксируются удалённый ID, размер, SHA-256 и состояние. Успех подтверждается проверочным чтением.</p></article>
     <article class="cn-card"><span class="cn-tag">04 / SAFETY</span><strong>Защита оригинала</strong><p>Оригинал не перезаписывается. Любая улучшенная или преобразованная версия получает собственный MATERIAL-ID.</p></article>
   </div>
-  <h2>Провайдеры и статус подключения</h2>
-  <div class="cn-grid">
-    <article class="cn-card"><span class="cn-tag pending">ВРЕМЕННОЕ ПОДКЛЮЧЕНИЕ</span><strong>Google Drive</strong><p>Тестовая интеграция. Не считается постоянным провайдером до отдельного решения.</p></article>
-    <article class="cn-card"><span class="cn-tag pending">ОЦЕНКА API</span><strong>MEGA</strong><p>Проверить официальные возможности API, OAuth/ключи и условия бесплатного тарифа.</p></article>
-    <article class="cn-card"><span class="cn-tag pending">ОЦЕНКА API</span><strong>pCloud</strong><p>Проверить серверную авторизацию и ограничения API.</p></article>
-    <article class="cn-card"><span class="cn-tag pending">ОЦЕНКА API</span><strong>Яндекс Диск</strong><p>Проверить OAuth, WebDAV/API и лимиты.</p></article>
-    <article class="cn-card"><span class="cn-tag pending">ОЦЕНКА API</span><strong>OneDrive</strong><p>Проверить Microsoft Graph и разрешения приложения.</p></article>
-    <article class="cn-card"><span class="cn-tag pending">ОЦЕНКА API</span><strong>Dropbox</strong><p>Проверить API, квоты и модель доступа.</p></article>
-    <article class="cn-card"><span class="cn-tag pending">ОЦЕНКА API</span><strong>TeraBox</strong><p>Не считать доступным для интеграции, пока не подтверждены официальный API и условия автоматизации.</p></article>
+  <h2>Семь облачных хранилищ KOMAROVA_CORE</h2>
+  <p class="cn-lead">Все семь провайдеров входят в целевую сеть. Объёмы ниже показывают заявленные бесплатные квоты; фактическая квота зависит от аккаунта и условий провайдера.</p>
+  <div class="cn-grid" aria-label="Семь облачных хранилищ и статусы подключения">
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН</span><strong>MEGA</strong><p><b>20 GB</b><br>Ожидает настройки официальной серверной интеграции и авторизации аккаунта.</p></article>
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН · ВРЕМЕННЫЙ ТЕСТ</span><strong>Google Drive</strong><p><b>15 GB</b><br>Есть локальная OAuth-настройка для теста. Постоянным провайдером пока не считается; сайт не подтверждал серверную запись.</p></article>
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН</span><strong>pCloud</strong><p><b>До 10 GB</b><br>Ожидает настройки официальной серверной интеграции и авторизации аккаунта.</p></article>
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН</span><strong>Яндекс Диск</strong><p><b>5 GB</b><br>Ожидает настройки OAuth/API и проверки доступа к файлам.</p></article>
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН</span><strong>OneDrive</strong><p><b>5 GB</b><br>Ожидает настройки Microsoft Graph и авторизации аккаунта.</p></article>
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН</span><strong>Dropbox</strong><p><b>2 GB</b><br>Ожидает настройки официального API и авторизации аккаунта.</p></article>
+    <article class="cn-card"><span class="cn-tag pending">НЕ ПОДКЛЮЧЁН</span><strong>TeraBox</strong><p><b>1 TB</b><br>Подключение не планировать до подтверждения поддерживаемого официального API и безопасного серверного доступа.</p></article>
   </div>
   <h2>Как материал проходит систему</h2>
   <div class="cn-flow" aria-label="Путь материала через облачную сеть">
