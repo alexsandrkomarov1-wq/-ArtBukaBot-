@@ -114,6 +114,7 @@ permalink: /cloud-network/
   <div class="pr-links">
     <a href="{{ '/' | relative_url }}">Вернуться на главный портал ↗</a>
     <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/plugin-support-registry.md">Полный реестр и технические контракты ↗</a>
+    <a href="https://colab.research.google.com/github/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/notebooks/KOMAROVA_CORE_Plugin_Support_Registry.ipynb">Открыть реестр в Google Colab ↗</a>
     <a href="https://supabase.com/dashboard/organizations?featurePreviewModal=preview-explorer">Supabase Dashboard Explorer ↗</a>
   </div>
 </section>
