@@ -1,0 +1,28 @@
+name: KOMAROVA_CORE agent self-test
+
+on:
+  push:
+    branches:
+      - core-backend-foundation
+  pull_request:
+    branches:
+      - core-backend-foundation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  powershell-self-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout working branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      - name: Show PowerShell version
+        shell: pwsh
+        run: '$PSVersionTable.PSVersion.ToString()'
+      - name: Test local time logger in isolated temporary directory
+        shell: pwsh
+        run: ./tools/test-komarova-core.ps1
