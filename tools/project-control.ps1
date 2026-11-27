@@ -162,7 +162,7 @@ function Get-GitSnapshot([object]$Project) {
     }
     $branchName = (& git -C $path branch --show-current 2>$null | Select-Object -First 1)
     $head = (& git -C $path rev-parse HEAD 2>$null | Select-Object -First 1)
-    $last = (& git -C $path log -1 --format=%cI"|" %H"|" %s 2>$null | Select-Object -First 1)
+    $last = (& git -C $path log -1 '--format=%cI|%H|%s' 2>$null | Select-Object -First 1)
     $changes = @(& git -C $path status --short 2>$null)
     return [ordered]@{
         available = $true
@@ -287,6 +287,20 @@ switch ($Command) {
                 if ($url -notmatch '^https?://') {
                     Write-Host "Пропуск некорректного URL: $url" -ForegroundColor Yellow
                     continue
+                }
+                if ($url -eq [string]$p.local_url) {
+                    try {
+                        $probe = Invoke-WebRequest -Uri $url -Method Get -TimeoutSec 3 -SkipHttpErrorCheck
+                        if ([int]$probe.StatusCode -lt 200 -or [int]$probe.StatusCode -ge 400) {
+                            Write-Host "Локальный сервер не готов ($($probe.StatusCode)): $url" -ForegroundColor Yellow
+                            Write-Event ([string]$p.project_id) "local_site_not_ready" "Локальный адрес не ответил успешно: $url (HTTP $($probe.StatusCode)). Сервер автоматически не запускался." "worker"
+                            continue
+                        }
+                    } catch {
+                        Write-Host "Локальный сервер недоступен: $url" -ForegroundColor Yellow
+                        Write-Event ([string]$p.project_id) "local_site_not_ready" "Локальный адрес недоступен: $url. Сервер автоматически не запускался." "worker"
+                        continue
+                    }
                 }
                 Start-Process $url
                 Write-Event ([string]$p.project_id) "browser_open_requested" "PowerShell передал URL браузеру: $url" "owner" @{ url=$url }
