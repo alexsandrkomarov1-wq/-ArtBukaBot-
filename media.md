@@ -24,6 +24,7 @@ description: Закрытый семейный архив фотографий, 
     <span id="cloud-connection-state" class="media-status">Проверяем существующий проект KOMAROVA_CORE…</span>
   </div>
   <p>Фото, видео и документы хранятся в закрытом Supabase Storage. Каталог по годам ведётся в реестре материалов. Новый проект создавать не нужно: используется существующий KOMAROVA_CORE.</p>
+  <p class="year-archive-note">Секретный service_role key никогда не вводится в браузер и не публикуется. Публичный ключ клиента используется только внутри кода сайта; поля с ключами посетителю не показываются.</p>
   <div class="storage-location-card">
     <strong>Папки архива</strong>
     <span id="cloud-storage-location">Семья → поколение → участник → год → MATERIAL-ID</span>
