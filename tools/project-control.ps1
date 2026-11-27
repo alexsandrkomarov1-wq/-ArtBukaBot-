@@ -368,8 +368,8 @@ switch ($Command) {
         $total = Get-ActiveSeconds $session
         $session.accumulated_active_seconds = $total
         $session.is_paused = $true
-        $session.ended_at_utc = [DateTimeOffset]::UtcNow.ToString("o")
-        $session.duration_hms = Format-Duration $total
+        Add-Member -InputObject $session -NotePropertyName ended_at_utc -NotePropertyValue ([DateTimeOffset]::UtcNow.ToString("o")) -Force
+        Add-Member -InputObject $session -NotePropertyName duration_hms -NotePropertyValue (Format-Duration $total) -Force
         $sessionsFile = Join-Path (Get-ProjectDir $ProjectId) "sessions.jsonl"
         $line = ConvertTo-Json -InputObject $session -Depth 10 -Compress
         [System.IO.File]::AppendAllText($sessionsFile,$line + [Environment]::NewLine,[System.Text.UTF8Encoding]::new($false))
