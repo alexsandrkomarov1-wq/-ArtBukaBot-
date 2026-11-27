@@ -15,23 +15,28 @@ New-Item -ItemType Directory -Path $toolsDir -Force | Out-Null
 $testScript = Join-Path $toolsDir "komarova-core.ps1"
 Copy-Item -LiteralPath $sourceScript -Destination $testScript
 
-function Invoke-Logger([string[]]$Arguments) {
-    $output = & $testScript @Arguments 2>&1
+function Invoke-Logger([string]$Action, [string]$Task = "") {
+    if ([string]::IsNullOrWhiteSpace($Task)) {
+        $output = & $testScript $Action 2>&1
+    }
+    else {
+        $output = & $testScript $Action -Task $Task 2>&1
+    }
     return ($output -join [Environment]::NewLine)
 }
 
 try {
-    $null = Invoke-Logger -Arguments @("init")
-    $null = Invoke-Logger -Arguments @("start", "-Task", "Автоматический изолированный тест")
-    $status = Invoke-Logger -Arguments @("status")
+    $null = Invoke-Logger "init"
+    $null = Invoke-Logger "start" "Автоматический изолированный тест"
+    $status = Invoke-Logger "status"
     if ($status -notmatch "АКТИВНА") { throw "Статус не показывает активную сессию." }
 
-    $null = Invoke-Logger -Arguments @("pause")
-    $paused = Invoke-Logger -Arguments @("status")
+    $null = Invoke-Logger "pause"
+    $paused = Invoke-Logger "status"
     if ($paused -notmatch "ПАУЗА") { throw "Пауза не отражена в статусе." }
 
-    $null = Invoke-Logger -Arguments @("resume")
-    $null = Invoke-Logger -Arguments @("stop")
+    $null = Invoke-Logger "resume"
+    $null = Invoke-Logger "stop"
 
     $dataRoot = Join-Path $tempRoot "data\project_time"
     $sessionsFile = Join-Path $dataRoot "sessions.jsonl"
