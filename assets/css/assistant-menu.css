@@ -1,0 +1,32 @@
+/* KOMAROVA_CORE shared left navigation */
+.kc-menu-toggle{position:fixed;z-index:1200;left:14px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:10px;padding:13px 15px;border:1px solid rgba(126,199,218,.42);border-radius:0 14px 14px 0;background:rgba(13,29,43,.96);color:#eaf7fc;box-shadow:0 8px 30px rgba(0,0,0,.28);font:600 .82rem/1.2 inherit;cursor:pointer;writing-mode:vertical-rl;letter-spacing:.08em}
+.kc-menu-toggle:hover,.kc-menu-toggle:focus-visible{background:#1b4052;outline:2px solid #8ed8e8;outline-offset:3px}
+.kc-menu-toggle .kc-menu-glyph{font-size:1.25rem;writing-mode:horizontal-tb}
+.kc-menu-backdrop{position:fixed;inset:0;z-index:1201;background:rgba(2,8,15,.64);backdrop-filter:blur(3px)}
+.kc-menu-drawer{position:fixed;z-index:1202;inset:0 auto 0 0;width:min(390px,92vw);padding:22px 18px 26px;background:linear-gradient(160deg,#102334,#0b1724 72%);border-right:1px solid rgba(129,191,211,.28);box-shadow:18px 0 55px rgba(0,0,0,.38);color:#eaf4fb;overflow-y:auto;transform:translateX(-105%);visibility:hidden;transition:transform .24s ease,visibility .24s}
+.kc-menu-drawer.is-open{transform:translateX(0);visibility:visible}
+.kc-menu-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+.kc-menu-brand{font-size:.72rem;letter-spacing:.16em;color:#8ed8e8;font-weight:800}
+.kc-menu-head h2{font-size:1.45rem;color:#f5fbff;margin:6px 0}
+.kc-menu-subtitle{color:#a9bfcc;font-size:.82rem;line-height:1.5;margin:0}
+.kc-menu-close{width:38px;height:38px;border:1px solid rgba(140,193,211,.35);border-radius:10px;background:rgba(255,255,255,.05);color:#eaf4fb;font-size:1.5rem;cursor:pointer}
+.kc-menu-search{display:block;margin:18px 0 14px}
+.kc-menu-search label{display:block;font-size:.74rem;color:#a8c7d5;margin-bottom:7px}
+.kc-menu-search input{width:100%;box-sizing:border-box;border:1px solid rgba(137,194,214,.35);border-radius:11px;background:#081521;color:#f4fbff;padding:12px 13px;font:inherit}
+.kc-menu-search input:focus{outline:2px solid #75c9df;outline-offset:2px}
+.kc-menu-section{font-size:.66rem;letter-spacing:.15em;color:#76b9cc;margin:18px 4px 8px}
+.kc-menu-list{display:grid;gap:7px}
+.kc-menu-item{display:flex;align-items:center;gap:12px;padding:12px 11px;border:1px solid rgba(126,177,197,.16);border-radius:12px;background:rgba(255,255,255,.035);color:#e8f3f8;text-decoration:none;min-height:48px}
+.kc-menu-item:hover,.kc-menu-item:focus-visible{background:rgba(83,157,181,.16);border-color:rgba(126,206,225,.55);outline:none}
+.kc-menu-item[aria-disabled=true]{opacity:.64;cursor:not-allowed}
+.kc-menu-icon{width:30px;text-align:center;font-size:1.2rem}
+.kc-menu-copy{display:grid;gap:3px;flex:1;min-width:0}
+.kc-menu-copy strong{font-size:.91rem;font-weight:650}
+.kc-menu-copy small{font-size:.72rem;color:#9eb4c2;line-height:1.35}
+.kc-menu-state{font-size:.61rem;letter-spacing:.04em;border:1px solid rgba(226,181,111,.35);border-radius:999px;padding:4px 6px;color:#edcc91;white-space:nowrap}
+.kc-menu-state.is-ready{border-color:rgba(105,199,150,.4);color:#8ed9ad}
+.kc-menu-empty{padding:16px;border:1px dashed rgba(139,187,205,.28);border-radius:10px;color:#a9bfcc;font-size:.84rem}
+.kc-menu-foot{border-top:1px solid rgba(126,177,197,.18);margin-top:20px;padding-top:14px;color:#8fa9b8;font-size:.72rem;line-height:1.55}
+body.kc-menu-lock{overflow:hidden}
+@media(max-width:640px){.kc-menu-toggle{top:14px;left:10px;transform:none;writing-mode:horizontal-tb;padding:11px 13px;border-radius:12px}.kc-menu-drawer{width:min(420px,94vw);padding:18px 15px 24px}.kc-menu-item{min-height:52px}}
+@media(prefers-reduced-motion:reduce){.kc-menu-drawer{transition:none}}
