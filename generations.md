@@ -1,45 +1,41 @@
 ---
 layout: default
-title: Поколения и семейное дерево
+title: Поколения и семейные папки
 permalink: /generations/
-description: Семейное дерево KOMAROVA_CORE на основе защищённого реестра PERSON-ID.
+description: Простая навигация по семейным линиям, поколениям и папкам семейного архива KOMAROVA_CORE.
 ---
 <section class="page-heading">
-  <p class="eyebrow">KOMAROVA_CORE · РЕЕСТР ЛЮДЕЙ</p>
-  <h1>Поколения и <em>семейные связи.</em></h1>
-  <p class="lead">Единый список людей с постоянными PERSON-ID и связями между ними. Записи загружаются только из авторизованного серверного реестра.</p>
+  <p class="eyebrow">KOMAROVA_CORE · СЕМЕЙНЫЙ АРХИВ</p>
+  <h1>Поколения и <em>семейные папки.</em></h1>
+  <p class="lead">Здесь будет простая структура семейных линий и поколений. Никаких общих паролей, API-форм и демонстрационных людей.</p>
 </section>
-<section class="registry-shell" data-generation-app>
-  <div class="registry-panel">
-    <h2>Подключение к семейному серверу</h2>
-    <p class="registry-muted">Сервер KOMAROVA_CORE пока не размещён в публичной инфраструктуре. Укажите адрес API только после его отдельной настройки. Пароль и токен не сохраняются в браузере; токен действует только до перезагрузки этой страницы.</p>
-    <form class="registry-connect" data-connect-form>
-      <label>Адрес API<input name="api" type="url" placeholder="https://адрес-вашего-api" required></label>
-      <label>Логин<input name="username" autocomplete="username" required></label>
-      <label>Пароль<input name="password" type="password" autocomplete="off" required></label>
-      <button class="registry-button" type="submit">Подключиться</button>
-    </form>
-    <p class="registry-status" data-status role="status" aria-live="polite">Сервер не подключён. Демонстрационные люди не подставляются.</p>
+
+<section class="year-archive-intro" aria-labelledby="family-folders-title">
+  <div class="year-archive-copy">
+    <p class="eyebrow">СТРУКТУРА ПАПОК</p>
+    <h2 id="family-folders-title">Семья → поколение → участник → год</h2>
+    <p>Фото, видео и документы хранятся в закрытом архиве. Папки распределяются по реальным участникам и годам материалов. Если дата неизвестна, материал остаётся в папке «Без даты».</p>
+    <p class="year-archive-note">На этой странице нет входа и пароля. Личный вход участника находится только в разделе его папки в семейном архиве.</p>
+    <a class="year-archive-open" href="{{ '/media/#archive-catalog' | relative_url }}">Открыть семейный архив <span aria-hidden="true">↗</span></a>
   </div>
-  <div class="registry-panel registry-hidden" data-workspace>
-    <div class="registry-toolbar"><div><h2>Реестр людей</h2><p class="registry-muted" data-user-label></p></div><button class="registry-button" type="button" data-refresh>Обновить реестр</button></div>
-    <form class="registry-form" data-person-form>
-      <label>Имя человека<input name="display_name" maxlength="200" required placeholder="Имя и фамилия"></label>
-      <button class="registry-button" type="submit">Создать запись и PERSON-ID</button>
-    </form>
-    <div class="registry-grid" data-people-list><div class="registry-empty">Записи ещё не загружены.</div></div>
-  </div>
-  <div class="registry-panel registry-hidden" data-links-panel>
-    <h2>Связи между людьми</h2>
-    <form class="registry-form" data-link-form>
-      <label>От кого<select name="from_person_id" required></select></label>
-      <label>К кому<select name="to_person_id" required></select></label>
-      <label>Тип связи<input name="relationship_type" maxlength="60" placeholder="например: parent, child, sibling" required></label>
-      <button class="registry-button" type="submit">Сохранить связь</button>
-    </form>
-    <p class="registry-muted">Связи записываются на сервер. Одна и та же связь не должна дублироваться; двунаправленность при необходимости задаётся отдельной записью.</p>
+  <div class="year-archive-visual" aria-hidden="true">
+    <div class="year-orbit year-orbit-one"></div>
+    <div class="year-orbit year-orbit-two"></div>
+    <div class="year-folder-stack"><span>СЕМЬЯ</span><strong>ФАМИЛИЯ</strong><strong>ПОКОЛЕНИЕ</strong><strong>ГОД</strong></div>
+    <div class="year-archive-caption">PERSON · MATERIAL</div>
   </div>
 </section>
-<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-private-api-errors-2">
-<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
-<script src="{{ '/assets/js/generations.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
+
+<section class="year-archive-rules" aria-label="Разделы семейных папок">
+  <article><span>01</span><h3>Семейные линии</h3><p>Папки распределяются по существующим фамилиям и подтверждённым семейным связям. Пустые и выдуманные записи не создаются.</p></article>
+  <article><span>02</span><h3>Поколения и участники</h3><p>У каждого участника будет своя папка. Личный доступ открывается только в папке участника.</p></article>
+  <article><span>03</span><h3>Годы и материалы</h3><p>Внутри папки участника материалы раскладываются по годам. Оригиналы не изменяются и не перезаписываются.</p></article>
+</section>
+
+<section class="cloud-archive">
+  <div class="media-library-heading">
+    <div><p class="eyebrow">РЕЕСТР ЛЮДЕЙ</p><h2>Семейные связи</h2></div>
+    <span class="media-status">Без входа на этой странице</span>
+  </div>
+  <p>Подтверждённый список людей появится после подключения и заполнения серверного реестра PERSON. Сейчас в базе ещё нет семейных записей, поэтому страница не подставляет примеры и не просит пароль.</p>
+</section>
