@@ -97,9 +97,9 @@ function Get-ActiveSeconds([object]$Session) {
 }
 
 function Format-Duration([long]$Seconds) {
-    $hours = [Math]::Floor($Seconds / 3600)
-    $minutes = [Math]::Floor(($Seconds % 3600) / 60)
-    $rest = $Seconds % 60
+    [long]$hours = [Math]::Floor($Seconds / 3600)
+    [long]$minutes = [Math]::Floor(($Seconds % 3600) / 60)
+    [long]$rest = $Seconds % 60
     return ("{0:D2}:{1:D2}:{2:D2}" -f $hours, $minutes, $rest)
 }
 
