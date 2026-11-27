@@ -20,8 +20,8 @@ try {
     $sessions = Join-Path $temp "TEST_PROJECT\sessions.jsonl"
     if (-not (Test-Path $events)) { throw "events.jsonl не создан." }
     if (-not (Test-Path $sessions)) { throw "sessions.jsonl не создан." }
-    if ((Get-Content $events).Count -lt 5) { throw "Недостаточно событий в журнале." }
-    if ((Get-Content $sessions).Count -ne 1) { throw "Закрытая сессия не записана ровно один раз." }
+    if (@(Get-Content -LiteralPath $events -Encoding utf8).Count -lt 5) { throw "Недостаточно событий в журнале." }
+    if (@(Get-Content -LiteralPath $sessions -Encoding utf8).Count -ne 1) { throw "Закрытая сессия не записана ровно один раз." }
     Write-Host "PROJECT CONTROL SELF-TEST: PASS" -ForegroundColor Green
 }
 finally {
