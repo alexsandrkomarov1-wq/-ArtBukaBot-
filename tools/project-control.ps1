@@ -306,6 +306,12 @@ switch ($Command) {
                 Write-Event ([string]$p.project_id) "browser_open_requested" "PowerShell передал URL браузеру: $url" "owner" @{ url=$url }
                 Write-Host "Открыт запрос браузеру: $url" -ForegroundColor Green
             }
+            if ($p.repository -and $p.branch) {
+                $repoUrl = "https://github.com/$($p.repository)/tree/$($p.branch)"
+                Start-Process $repoUrl
+                Write-Event ([string]$p.project_id) "repository_open_requested" "Открыта рабочая ветка проекта в браузере: $repoUrl" "owner" @{ url=$repoUrl }
+                Write-Host "Открыта рабочая ветка GitHub: $repoUrl" -ForegroundColor Green
+            }
         }
     }
 
