@@ -20,33 +20,21 @@ description: Закрытый семейный архив фотографий, 
 
 <section class="cloud-archive" id="archive-storage" aria-labelledby="archive-storage-title">
   <div class="media-library-heading">
-    <div><p class="eyebrow">ФИЗИЧЕСКОЕ ХРАНЕНИЕ</p><h2 id="archive-storage-title">Подключение Supabase</h2></div>
-    <span id="cloud-connection-state" class="media-status">Ожидается подключение проекта</span>
+    <div><p class="eyebrow">ФИЗИЧЕСКОЕ ХРАНЕНИЕ</p><h2 id="archive-storage-title">Семейный архив</h2></div>
+    <span id="cloud-connection-state" class="media-status">Проверяем существующий проект KOMAROVA_CORE…</span>
   </div>
-  <p>Project URL и публичный publishable key существующего проекта KOMAROVA_CORE заданы в клиентской конфигурации сайта и проверяются автоматически при открытии страницы. Публичный ключ предназначен для браузерного клиента; доступ к данным должен ограничиваться RLS-политиками. Секретный service_role key в публичный код не добавляется.</p>
-  <form id="supabase-connect-form" class="cloud-auth-form">
-    <label>Project URL
-      <input id="supabase-project-url" type="url" inputmode="url" autocomplete="off" placeholder="https://ваш-проект.supabase.co" required>
-    </label>
-    <label>Публичный anon / publishable key
-      <textarea id="supabase-anon-key" rows="2" autocomplete="off" spellcheck="false" placeholder="Вставьте публичный ключ из Settings → API" required></textarea>
-    </label>
-    <button type="submit" class="media-open-button">Проверить подключение Supabase</button>
-  </form>
-  <p id="supabase-project-state" class="media-status" role="status" aria-live="polite">Проект ещё не проверен. Не вводите service_role key.</p>
+  <p>Фото, видео и документы хранятся в закрытом Supabase Storage. Каталог по годам ведётся в реестре материалов. Новый проект создавать не нужно: используется существующий KOMAROVA_CORE.</p>
   <div class="storage-location-card">
-    <strong>Место хранения файлов</strong>
-    <span id="cloud-storage-location">Закрытое хранилище KOMAROVA_CORE · годовые каталоги</span>
-    <small>Реестр: Supabase PostgreSQL · таблица public.archive_items. Доступ к объектам ограничивается идентификатором вошедшего пользователя.</small>
+    <strong>Папки архива</strong>
+    <span id="cloud-storage-location">Семья → поколение → участник → год → MATERIAL-ID</span>
+    <small id="supabase-project-state" role="status" aria-live="polite">Проверяем доступность существующего хранилища. Пароль здесь не требуется.</small>
   </div>
   <details class="cloud-bootstrap">
-    <summary>Первичная настройка структуры архива в Supabase</summary>
-    <p>Откройте SQL Editor в проекте Supabase и выполните подготовленный SQL-файл. Он создаёт приватный bucket, таблицу реестра и политики Row Level Security. Скрипт не переносит и не удаляет существующие данные.</p>
-    <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/backend/supabase/001_private_media_archive.sql">Открыть SQL-настройку KOMAROVA_CORE ↗</a></p>
-    <p>Учётная запись участника используется для доступа к его личной папке. Страница событий не запрашивает пароль.</p>
+    <summary>Состояние физического хранилища</summary>
+    <p>На последней проверке в существующем проекте KOMAROVA_CORE ещё не было приватного bucket и таблицы архива. Подготовленный SQL создаёт их в этом же проекте, не создавая новый проект и не удаляя существующие данные.</p>
+    <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/backend/supabase/001_private_media_archive.sql">Открыть подготовленную настройку архива ↗</a></p>
   </details>
 </section>
-
 <section class="cloud-archive" id="archive-upload" aria-labelledby="archive-upload-title">
   <div class="media-library-heading">
     <div><p class="eyebrow">ЗАКРЫТЫЙ ДОСТУП</p><h2 id="archive-upload-title">Папка участника</h2></div>
