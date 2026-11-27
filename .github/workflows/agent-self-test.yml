@@ -26,3 +26,6 @@ jobs:
       - name: Test local time logger in isolated temporary directory
         shell: pwsh
         run: ./tools/test-komarova-core.ps1
+      - name: Test multi-project control center in isolated temporary directory
+        shell: pwsh
+        run: ./tools/test-project-control.ps1
