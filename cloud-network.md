@@ -42,6 +42,7 @@ permalink: /cloud-network/
   <div class="cn-links">
     <a href="{{ '/media/' | relative_url }}">Открыть AI MEDIA и архив ↗</a>
     <a href="{{ '/status/' | relative_url }}">Проверить состояние проекта ↗</a>
+    <a href="{{ '/ai-control/' | relative_url }}">Открыть Центр управления ИИ ↗</a>
     <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/cloud-network-implementation.md">Технический план в GitHub ↗</a>
   </div>
   <p class="cn-foot">Рабочая ветка: core-backend-foundation · Публикация: GitHub Pages после успешной проверки сборки · main и настройки Supabase не затрагиваются.</p>
