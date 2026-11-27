@@ -196,7 +196,7 @@ ai -Prompt "..."             обратиться к отдельно настр
         $session.resumed_at_utc = $null
         $session.is_paused = $true
         Add-Member -InputObject $session -NotePropertyName duration_hms -NotePropertyValue (Format-Duration ([long]$session.accumulated_active_seconds)) -Force
-        $session.status = "closed"
+        Add-Member -InputObject $session -NotePropertyName status -NotePropertyValue "closed" -Force
 
         $alreadySaved = $false
         if (Test-Path -LiteralPath $SessionsFile) {
