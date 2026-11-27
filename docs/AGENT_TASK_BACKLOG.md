@@ -19,6 +19,7 @@
 | AG-011 | P0 | READY | Внедрить единый цифровой учёт времени и project registry | Реализовать схему из `docs/AI_CONTROL_AND_TIME_ACCOUNTING.md`: раздельные HUMAN/AGENT/MODEL/CI, WAITING/IDLE/UNKNOWN_GAP, изоляция проектов и воспроизводимые счётчики; сначала тесты и локальные журналы |
 | AG-012 | P0 | READY | Подключить каналы к единому Router | Telegram Bot API long polling, Gmail readonly OAuth, WhatsApp Cloud API webhook и web inbox; секреты только локально; end-to-end тест каждого канала |
 | AG-013 | P0 | BLOCKED | Развернуть постоянную удалённую командную шину | Нужен утверждённый HTTPS backend и способ безопасного подключения ChatGPT; не менять существующий Supabase и не использовать публичный GitHub как приватную очередь без разрешения владельца |
+| AG-014 | P0 | READY | Создать общее левое меню пользователя и ИИ | Реализовать адаптивную выдвижную панель, поиск по пунктам, навигацию, доступность клавиатурой/touch и честные статусы модулей по `docs/ASSISTANT_USER_MENU_SPEC.md`; не имитировать backend-функции |
 
 ## Правила очереди
 
