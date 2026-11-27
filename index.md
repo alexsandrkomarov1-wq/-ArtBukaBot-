@@ -42,6 +42,44 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
   </div>
   <div class="hero-foot"><span>ЕДИНОЕ СЕМЕЙНОЕ ЯДРО</span><span class="hero-foot-rule"></span><span>ОДИН МИР · СВЯЗАННЫЕ ПРОЕКТЫ</span></div>
 </section>
+
+<style>
+.plugin-registry-home{margin:34px 0 46px;padding:clamp(20px,4vw,38px);border:1px solid rgba(119,176,198,.28);border-radius:24px;background:linear-gradient(145deg,#101d2a,#1b3040);color:#eaf4fb}
+.plugin-registry-home *{box-sizing:border-box}.plugin-registry-home .pr-eyebrow{font-size:.72rem;letter-spacing:.16em;color:#8dc8dc;font-weight:700}.plugin-registry-home h2{color:#f4fbff;font-size:clamp(1.7rem,4vw,2.7rem);margin:10px 0}.plugin-registry-home h2 em{font-style:normal;color:#8ed8e8}.plugin-registry-home .pr-lead{max-width:850px;color:#c0d0dc;line-height:1.7}.plugin-registry-home .pr-status{display:inline-block;border:1px solid rgba(241,190,103,.4);border-radius:999px;padding:7px 12px;color:#f6d69d;font-size:.72rem;letter-spacing:.05em;margin:8px 0 18px}.plugin-registry-home .pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:12px;margin:20px 0}.plugin-registry-home .pr-card{border:1px solid rgba(127,174,197,.22);border-radius:15px;background:rgba(255,255,255,.045);padding:16px}.plugin-registry-home .pr-card b{display:block;color:#f4fbff;margin:4px 0 8px}.plugin-registry-home .pr-card p{color:#bdced9;font-size:.88rem;line-height:1.55;margin:0}.plugin-registry-home .pr-kicker{font-size:.67rem;letter-spacing:.12em;color:#8dc8dc}.plugin-registry-home .pr-matrix{width:100%;border-collapse:collapse;margin:18px 0;font-size:.88rem}.plugin-registry-home .pr-matrix th,.plugin-registry-home .pr-matrix td{border-bottom:1px solid rgba(127,174,197,.2);padding:10px;text-align:left;vertical-align:top}.plugin-registry-home .pr-matrix th{color:#9ed7e5}.plugin-registry-home .pr-matrix td{color:#c6d5df}.plugin-registry-home .pr-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}.plugin-registry-home .pr-links a{color:#eafaff;border:1px solid rgba(142,216,232,.4);border-radius:999px;padding:10px 15px;text-decoration:none}
+@media(max-width:640px){.plugin-registry-home .pr-matrix{display:block;overflow-x:auto;white-space:normal}}
+</style>
+<section class="plugin-registry-home" aria-labelledby="plugin-registry-home-title">
+  <p class="pr-eyebrow">PLUGIN SUPPORT REGISTRY · KOMAROVA_CORE</p>
+  <h2 id="plugin-registry-home-title">Реестр <em>плагинов и интеграций</em></h2>
+  <p class="pr-lead">Единая карта совместимости редакторов, видеоплееров, ИИ-ассистентов, голосовых функций, ИИ-летописца, карт и навигации. Все инструменты работают с одним каталогом материалов, а не создают собственные разрозненные архивы.</p>
+  <span class="pr-status">РЕЕСТР ЗАПОЛНЕН · ИНТЕГРАЦИИ ПРОХОДЯТ ПРОВЕРКУ</span>
+  <div class="pr-grid">
+    <article class="pr-card"><span class="pr-kicker">01 / PHOTO & DESIGN</span><b>Графика и Photoshop</b><p>Adobe Photoshop (UXP/API), Lightroom, GIMP, Krita, Canva. Ретушь, восстановление, цветокоррекция и дизайн. Результат — отдельный MATERIAL-ID, оригинал неизменен.</p></article>
+    <article class="pr-card"><span class="pr-kicker">02 / VIDEO</span><b>Видеоплееры и монтаж</b><p>HTML5 Player, Video.js, VLC, FFmpeg/FFprobe, Shotcut, Kdenlive, DaVinci Resolve. Просмотр, извлечение кадров, таймкоды и экспорт новой версии.</p></article>
+    <article class="pr-card"><span class="pr-kicker">03 / BUILDERS & 3D</span><b>Конструкторы и визуализация</b><p>Canva, Figma, Three.js, MapLibre, Leaflet. Макеты, интерфейсы, 3D-порталы, карты и визуальные панели.</p></article>
+    <article class="pr-card"><span class="pr-kicker">04 / AI VOICE</span><b>Разговорный ИИ и звук</b><p>AI Router, текстовый и голосовой ассистент, Whisper/STT, Piper/TTS, WebRTC, RNNoise. Голос включается только по действию пользователя.</p></article>
+    <article class="pr-card"><span class="pr-kicker">05 / AI STORYTELLER</span><b>ИИ-летописец событий</b><p>Анализ видео: речь, кадры, таймкоды и сцены. Анализ прогулок: GPS-треки, остановки, фото и места. ИИ готовит черновик рассказа, человек проверяет факты.</p></article>
+    <article class="pr-card"><span class="pr-kicker">06 / MAPS & ROUTES</span><b>Карты и навигация</b><p>OpenStreetMap, Nominatim, OSRM, GraphHopper, Valhalla, Google Earth, GPX/KML/GeoJSON. Маршруты связываются с PLACE-ID и EVENT-ID.</p></article>
+  </div>
+  <h3>Совместимость двух поверхностей проекта</h3>
+  <table class="pr-matrix">
+    <thead><tr><th>Функция</th><th>Главная страница</th><th>Облачная сеть</th></tr></thead>
+    <tbody>
+      <tr><td>Фото и Photoshop</td><td>Выбор, просмотр, обработка и сравнение копий</td><td>Каталог оригинала/производной версии, облачные копии и SHA-256</td></tr>
+      <tr><td>Видео и звук</td><td>Плеер, монтажные задания, речь, субтитры и рассказ</td><td>Хранение оригинала, транскриптов, кадров и результатов</td></tr>
+      <tr><td>ИИ-летописец</td><td>Истории событий и туристических прогулок</td><td>Сохранение проверенных историй, GPS-треков и связанных материалов</td></tr>
+      <tr><td>Карты</td><td>Маршруты, остановки и места</td><td>Каталог PLACE-ID, треки и географические экспорты</td></tr>
+      <tr><td>Все интеграции</td><td>Единый пользовательский интерфейс</td><td>Единый реестр, серверные адаптеры и контроль копий</td></tr>
+    </tbody>
+  </table>
+  <p class="pr-lead"><strong>Общий принцип:</strong> главный портал и облачная сеть — две поверхности одного ядра. Инструменты обращаются к каталогу через backend; браузер не хранит ключи облаков и не перезаписывает оригиналы.</p>
+  <div class="pr-links">
+    <a href="{{ '/cloud-network/' | relative_url }}">Открыть совместимость с облаками и Supabase ↗</a>
+    <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/plugin-support-registry.md">Полный технический реестр ↗</a>
+  </div>
+  <p class="pr-lead">Текущий статус: список и архитектура описаны. Большинство внешних интеграций ещё не подключены к production backend; наличие в реестре не означает действующую авторизацию или готовый плагин.</p>
+</section>
+
 <section class="family-portraits" aria-labelledby="family-portraits-title">
   <div class="family-portraits-heading">
     <div>
