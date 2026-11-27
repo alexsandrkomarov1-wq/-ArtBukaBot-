@@ -1,47 +1,33 @@
 ---
 layout: default
-title: События и семейная хронология
+title: Время и память
 permalink: /events/
-description: Серверный реестр событий KOMAROVA_CORE с постоянными EVENT-ID.
+description: Годовые папки семейного фото- и видеоархива KOMAROVA_CORE
 ---
 <section class="page-heading events-heading">
   <p class="eyebrow">KOMAROVA_CORE · ВРЕМЯ И ПАМЯТЬ</p>
-  <h1>События и <em>хронология.</em></h1>
-  <p class="lead">События получают постоянный EVENT-ID и связываются с участниками, местами и материалами через единый граф сущностей.</p>
+  <h1>Годы, в которых <em>живёт память.</em></h1>
+  <p class="lead">Семейная хронология строится вокруг папок по годам. Внутри года находятся фотографии, видео и документы, связанные с участниками, местами и событиями. Оригиналы остаются неизменными.</p>
 </section>
-<section class="registry-shell" data-events-app>
-  <div class="registry-panel">
-    <h2>Подключение к семейному серверу</h2>
-    <p class="registry-muted">Используется защищённый API. До размещения backend реестр остаётся недоступен. Локальные демонстрационные события не создаются.</p>
-    <form class="registry-connect" data-connect-form>
-      <label>Адрес API<input name="api" type="url" placeholder="https://адрес-вашего-api" required></label>
-      <label>Логин<input name="username" autocomplete="username" required></label>
-      <label>Пароль<input name="password" type="password" autocomplete="off" required></label>
-      <button class="registry-button" type="submit">Подключиться</button>
-    </form>
-    <p class="registry-status" data-status role="status" aria-live="polite">Сервер не подключён. События не подменяются примерами.</p>
+
+<section class="year-archive-intro" aria-labelledby="year-archive-title">
+  <div class="year-archive-copy">
+    <p class="eyebrow">СТРУКТУРА ХРАНЕНИЯ</p>
+    <h2 id="year-archive-title">Сначала год. Затем история.</h2>
+    <p>Год определяется по дате съёмки или события, если она известна. Материалы без подтверждённой даты попадают в отдельную папку «Без даты», а не получают выдуманную дату.</p>
+    <p class="year-archive-note">Это не демонстрационный список: здесь не создаются фиктивные события и пустые записи. Фактическое содержимое папок загружается из закрытого семейного архива после входа в папку участника.</p>
+    <a class="year-archive-open" href="{{ '/media/#archive-catalog' | relative_url }}">Открыть семейный архив <span aria-hidden="true">↗</span></a>
   </div>
-  <div class="registry-panel registry-hidden" data-workspace>
-    <div class="registry-toolbar"><div><h2>Лента событий</h2><p class="registry-muted" data-user-label></p></div><button class="registry-button" type="button" data-refresh>Обновить</button></div>
-    <form class="registry-form" data-event-form>
-      <label>Название события<input name="title" maxlength="240" required placeholder="Например: семейная встреча"></label>
-      <label>Дата и время<input name="occurred_at" type="datetime-local"></label>
-      <label class="wide">Описание<textarea name="description" maxlength="10000" placeholder="Контекст, участники, источники…"></textarea></label>
-      <button class="registry-button" type="submit">Создать событие и EVENT-ID</button>
-    </form>
-    <div class="registry-grid" data-events-list><div class="registry-empty">События ещё не загружены.</div></div>
-    <div class="registry-panel">
-      <h3>Связать событие с человеком</h3>
-      <form class="registry-form" data-event-link-form>
-        <label>Событие<select name="event_id" required></select></label>
-        <label>Участник<select name="person_id" required></select></label>
-        <label>Тип связи<input name="relationship_type" value="participant" maxlength="48" required></label>
-        <button class="registry-button" type="submit">Сохранить связь</button>
-      </form>
-      <p class="registry-muted">Для связи с местами и материалами используется тот же API графа сущностей. Этот экран пока предлагает связь с участником.</p>
-    </div>
+  <div class="year-archive-visual" aria-hidden="true">
+    <div class="year-orbit year-orbit-one"></div>
+    <div class="year-orbit year-orbit-two"></div>
+    <div class="year-folder-stack"><span>ГОД</span><strong>19—</strong><strong>20—</strong><strong>•••</strong></div>
+    <div class="year-archive-caption">PERSON · EVENT · PLACE · MATERIAL</div>
   </div>
 </section>
-<link rel="stylesheet" href="{{ '/assets/css/registry.css' | relative_url }}?v=20261125-private-api-errors-2">
-<script src="{{ '/assets/js/registry-client.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
-<script src="{{ '/assets/js/events-registry.js' | relative_url }}?v=20261125-private-api-errors-2" defer></script>
+
+<section class="year-archive-rules">
+  <article><span>01</span><h3>Папки по годам</h3><p>Фотографии и видео группируются по подтверждённой дате материала.</p></article>
+  <article><span>02</span><h3>Связь с семьёй</h3><p>Материал может быть связан с участником, событием и местом через постоянные идентификаторы.</p></article>
+  <article><span>03</span><h3>Оригиналы защищены</h3><p>Загрузка создаёт отдельный материал. Исходный файл не перезаписывается.</p></article>
+</section>
