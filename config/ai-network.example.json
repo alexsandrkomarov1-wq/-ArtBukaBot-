@@ -1,0 +1,20 @@
+{
+  "control_tag": "KOMAROVA_CORE",
+  "protocol_version": "1.0",
+  "mode": "local_queue_only",
+  "timezone": "Europe/Amsterdam",
+  "projects": [
+    {"project_id":"komarova_core","project_name":"KOMAROVA_CORE","repository":"alexsandrkomarov1-wq/-ArtBukaBot-","working_branch":"core-backend-foundation","local_root_env":"KOMAROVA_CORE_ROOT","status":"configured"},
+    {"project_id":"project_2","project_name":"UNCONFIGURED","repository":null,"working_branch":null,"local_root_env":null,"status":"unconfigured"}
+  ],
+  "coordinator":{"role":"ChatGPT","authority":"task_planning_review_and_acceptance","background_connection":"not_available_without_authenticated_bridge"},
+  "independent_model":{"provider":"google_gemini","model":"gemini-3.1-flash-lite","enabled":false,"endpoint":"https://generativelanguage.googleapis.com/v1beta/openai/","api_key_env":"GEMINI_API_KEY","allowed_data":["public_project_docs","non_sensitive_task_summaries"],"blocked_data":["family_originals","private_photos","identity_documents","private_messages","credentials"],"max_output_tokens":2048,"monthly_spend_limit_usd":0},
+  "channels":{
+    "web":{"enabled":false,"adapter":"web_inbox"},
+    "telegram":{"enabled":false,"mode":"bot_api_long_polling","token_env":"TELEGRAM_BOT_TOKEN","allowlist_env":"TELEGRAM_ALLOWED_USER_IDS"},
+    "whatsapp":{"enabled":false,"mode":"cloud_api_webhook","access_token_env":"WHATSAPP_ACCESS_TOKEN","phone_number_id_env":"WHATSAPP_PHONE_NUMBER_ID","verify_token_env":"WHATSAPP_VERIFY_TOKEN"},
+    "email":{"enabled":false,"mode":"gmail_api_oauth","oauth_client_file_env":"GMAIL_OAUTH_CLIENT_FILE","token_file_env":"GMAIL_TOKEN_FILE","required_scopes":["https://www.googleapis.com/auth/gmail.readonly"]}
+  },
+  "command_bus":{"backend":"local_append_only_jsonl","commands_file":"data/ai_network/commands.jsonl","reports_file":"data/ai_network/reports.jsonl","events_file":"data/ai_network/events.jsonl","time_records_file":"data/ai_network/time_records.jsonl","require_control_tag":true,"require_project_id":true,"require_task_id":true,"idempotency_key":"message_id","remote_bridge_enabled":false},
+  "permissions":{"read_only_by_default":true,"allow_file_writes":false,"allow_deploy":false,"allow_secret_access":false,"allow_external_private_data":false,"allow_family_original_overwrite":false,"allow_main_branch":false}
+}
