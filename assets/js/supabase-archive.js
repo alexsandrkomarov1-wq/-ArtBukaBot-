@@ -52,8 +52,10 @@
     return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
   };
   const cleanName = (name) => name.normalize("NFKC").replace(/[^\p{L}\p{N}._ -]/gu, "_").slice(0, 180) || "file";
-  const storagePath = (userId, materialId, filename) =>
-    userId + "/" + materialId + "/" + encodeURIComponent(cleanName(filename));
+  const storagePath = (userId, capturedAt, materialId, filename) => {
+    const year = capturedAt ? String(new Date(capturedAt).getUTCFullYear()) : "Без_даты";
+    return userId + "/" + year + "/" + materialId + "/" + encodeURIComponent(cleanName(filename));
+  };
 
   async function request(path, options = {}) {
     let response;
@@ -147,35 +149,68 @@
       list.append(empty);
       return;
     }
+    const folders = new Map();
     filtered.forEach(item => {
-      const row = document.createElement("article");
-      row.className = "media-item";
-      const info = document.createElement("span");
-      info.className = "media-item-info";
-      const title = document.createElement("strong");
-      title.textContent = item.title || item.original_filename;
-      const meta = document.createElement("small");
-      const date = item.created_at ? new Date(item.created_at).toLocaleString("ru-RU") : "дата не указана";
-      meta.textContent = item.item_type + " · " + Math.ceil(item.size_bytes / 1024) + " КБ · " + date + " · " + item.material_id;
-      info.append(title, meta);
-      const actions = document.createElement("span");
-      actions.className = "cloud-item-actions";
-      if (["photo", "video"].includes(item.item_type)) {
-        const view = document.createElement("button");
-        view.type = "button";
-        view.className = "media-button";
-        view.textContent = "Просмотр";
-        view.addEventListener("click", () => preview(item));
-        actions.append(view);
-      }
-      const download = document.createElement("button");
-      download.type = "button";
-      download.className = "media-button";
-      download.textContent = "Скачать";
-      download.addEventListener("click", () => downloadItem(item));
-      actions.append(download);
-      row.append(info, actions);
-      list.append(row);
+      const pathYear = String(item.storage_path || "").match(/\/(19|20)\d{2}\//)?.[0]?.replaceAll("/", "");
+      const year = item.captured_at
+        ? String(new Date(item.captured_at).getUTCFullYear())
+        : (pathYear || "Без даты");
+      if (!folders.has(year)) folders.set(year, []);
+      folders.get(year).push(item);
+    });
+    const years = [...folders.keys()].sort((a, b) => {
+      if (a === "Без даты") return 1;
+      if (b === "Без даты") return -1;
+      return Number(b) - Number(a);
+    });
+    years.forEach(year => {
+      const folder = document.createElement("details");
+      folder.className = "archive-year-folder";
+      folder.open = true;
+      const summary = document.createElement("summary");
+      const label = document.createElement("span");
+      label.className = "archive-year-folder-label";
+      label.textContent = year === "Без даты" ? "Без подтверждённой даты" : year;
+      const count = document.createElement("small");
+      count.textContent = folders.get(year).length + " материалов";
+      summary.append(label, count);
+      folder.append(summary);
+      const contents = document.createElement("div");
+      contents.className = "archive-year-folder-items";
+      folders.get(year).forEach(item => {
+        const row = document.createElement("article");
+        row.className = "media-item";
+        const info = document.createElement("span");
+        info.className = "media-item-info";
+        const title = document.createElement("strong");
+        title.textContent = item.title || item.original_filename;
+        const meta = document.createElement("small");
+        const date = item.captured_at
+          ? new Date(item.captured_at).toLocaleDateString("ru-RU")
+          : (item.created_at ? "Добавлено " + new Date(item.created_at).toLocaleDateString("ru-RU") : "дата не указана");
+        meta.textContent = item.item_type + " · " + Math.ceil(item.size_bytes / 1024) + " КБ · " + date + " · " + item.material_id;
+        info.append(title, meta);
+        const actions = document.createElement("span");
+        actions.className = "cloud-item-actions";
+        if (["photo", "video"].includes(item.item_type)) {
+          const view = document.createElement("button");
+          view.type = "button";
+          view.className = "media-button";
+          view.textContent = "Просмотр";
+          view.addEventListener("click", () => preview(item));
+          actions.append(view);
+        }
+        const download = document.createElement("button");
+        download.type = "button";
+        download.className = "media-button";
+        download.textContent = "Скачать";
+        download.addEventListener("click", () => downloadItem(item));
+        actions.append(download);
+        row.append(info, actions);
+        contents.append(row);
+      });
+      folder.append(contents);
+      list.append(folder);
     });
   }
 
@@ -245,7 +280,8 @@
       const hash = await sha256(file);
       const duplicate = items.find(item => item.sha256 === hash);
       if (duplicate) throw new Error("Файл с таким SHA-256 уже есть в архиве: " + duplicate.material_id + ". Повторная копия не загружена.");
-      const path = storagePath(currentUser.id, materialId, file.name);
+      const capturedAt = $("cloud-captured-at").value ? new Date($("cloud-captured-at").value + "T12:00:00Z").toISOString() : null;
+      const path = storagePath(currentUser.id, capturedAt, materialId, file.name);
       uploadedPath = path;
       const uploadResponse = await fetch(api("/storage/v1/object/" + bucket + "/" + path), {
         method: "POST",
@@ -270,7 +306,7 @@
         original_filename: file.name,
         title: $("cloud-upload-title").value.trim() || file.name,
         description: $("cloud-upload-description").value.trim() || null,
-        captured_at: $("cloud-captured-at").value ? new Date($("cloud-captured-at").value + "T12:00:00Z").toISOString() : null,
+        captured_at: capturedAt,
         item_type: kindOf(file),
         mime_type: file.type || "application/octet-stream",
         size_bytes: file.size,
