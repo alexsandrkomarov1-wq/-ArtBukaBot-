@@ -13,9 +13,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
@@ -30,7 +30,7 @@ jobs:
         working-directory: desktop
         run: npm run dist:win
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: KOMAROVA_CORE-Windows-Installer
           path: desktop/dist/*.exe
