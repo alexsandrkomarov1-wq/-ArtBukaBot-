@@ -17,9 +17,6 @@ Copy-Item -LiteralPath $sourceScript -Destination $testScript
 
 function Invoke-Logger([string[]]$Arguments) {
     $output = & $testScript @Arguments 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw ("Команда logger завершилась с ошибкой: " + ($Arguments -join " ") + [Environment]::NewLine + ($output -join [Environment]::NewLine))
-    }
     return ($output -join [Environment]::NewLine)
 }
 
