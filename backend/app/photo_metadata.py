@@ -136,7 +136,7 @@ def analyze_photo_metadata(path: str | Path, *, default_timezone: str = DEFAULT_
                 timestamp_source = "location_timezone"
         except ZoneInfoNotFoundError:
             timezone_status = "timezone_database_missing"
-    elif original_dt:
+    elif original_dt and latitude is None:
         try:
             local_capture = original_dt.replace(tzinfo=ZoneInfo(default_timezone))
             if capture_utc is None:
