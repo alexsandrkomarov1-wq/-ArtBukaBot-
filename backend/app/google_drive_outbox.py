@@ -6,10 +6,9 @@ from .models import CloudReplica, GoogleDriveOutbox, GoogleDriveReplica, utc_now
 
 def enqueue_google_drive_replica(db, blob) -> None:
     """Write a durable replication request in the archive's current transaction."""
-    if os.getenv("GOOGLE_DRIVE_SYNC_ENABLED", "false").strip().lower() != "true":
-        return
+    google_enabled = os.getenv("GOOGLE_DRIVE_SYNC_ENABLED", "false").strip().lower() == "true"
     folder_id = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "").strip()
-    if folder_id:
+    if google_enabled and folder_id:
         db.add(GoogleDriveOutbox(blob_id=blob.blob_id, state="pending", available_at=utc_now()))
         db.add(GoogleDriveReplica(
             blob_id=blob.blob_id, folder_id=folder_id, expected_sha256=blob.sha256,
