@@ -103,7 +103,7 @@ permalink: /cloud-network/
       <tr><td>PostgreSQL</td><td>Метаданные PERSON/EVENT/PLACE/MATERIAL, связи и аудит</td><td>Таблица archive_items создана; RLS включён</td></tr>
       <tr><td>Auth</td><td>Пользователи, OAuth и сессии</td><td>Пока 0 пользователей; вход владельца ещё не проверен</td></tr>
       <tr><td>Storage</td><td>Приватные файлы и медиа</td><td>Приватный бакет создан; лимит 50 MiB/файл на Free; проверка загрузки ждёт первого пользователя</td></tr>
-      <tr><td>RLS</td><td>Разграничение семейных данных</td><td>Две политики каталога и две Storage-политики созданы; Security Advisor без замечаний</tr>
+      <tr><td>RLS</td><td>Разграничение семейных данных</td><td>Две политики каталога и две Storage-политики созданы; Security Advisor без замечаний</td></tr>
       <tr><td>Edge Functions</td><td>Короткие API, webhook и интеграции</td><td>Не замена длительному AI/media worker</td></tr>
       <tr><td>Realtime</td><td>Статусы загрузок и синхронизации</td><td>Не настроен/не проверен</td></tr>
       <tr><td>PostGIS</td><td>Географические точки, расстояния и маршруты</td><td>Возможное расширение, не включено</td></tr>
