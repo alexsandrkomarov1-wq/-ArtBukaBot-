@@ -111,7 +111,7 @@ permalink: /cloud-network/
       <tr><td>Explorer / Notebooks</td><td>Исследование SQL и логов в Dashboard</td><td>Инструмент администрирования; не часть публичного интерфейса</td></tr>
     </tbody>
   </table></div>
-  <div class="pr-callout"><strong>Неизменяемые ограничения:</strong> этот реестр не меняет Supabase, не создаёт buckets или таблицы, не включает OAuth и не переносит файлы. GitHub Pages не хранит секреты и семейные оригиналы. Любой плагин проходит через backend и единый каталог. Оригинал никогда не перезаписывается; производный файл получает собственный MATERIAL-ID.</div>
+  <div class="pr-callout"><strong>Неизменяемые ограничения:</strong> схема архива и приватный бакет уже созданы в Supabase KOMAROVA_CORE. Пользовательская загрузка ещё не проверена, поскольку Auth пока пуст. GitHub Pages не хранит секреты и семейные оригиналы. Остальные облака не подключены. Оригинал никогда не перезаписывается; производный файл получает собственный MATERIAL-ID.</div>
   <div class="pr-links">
     <a href="{{ '/' | relative_url }}">Вернуться на главный портал ↗</a>
     <a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/docs/plugin-support-registry.md">Полный реестр и технические контракты ↗</a>
