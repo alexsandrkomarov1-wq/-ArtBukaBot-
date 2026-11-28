@@ -363,3 +363,16 @@ The authenticated homepage includes a shared, interactive family bulletin board 
 - The prototype does not provide authentication, cross-device synchronization, server persistence, role permissions, production audit, or verified notifications.
 
 **Implementation status:** Browser prototype, pending CI and live-page verification. Production family functionality remains planned until the backend, private hosting, access control, authoritative IDs, backup/restore and integration tests are available.
+
+
+## 12. System time and timezone policy
+
+- KOMAROVA_CORE must not query public websites, third-party APIs, browser widgets or external time services to obtain or synchronize the current time.
+- Browser-facing local date/time displays and local user actions use the device's operating-system clock through the browser's native date/time facilities. The application must not hardcode the Netherlands offset or any other fixed UTC offset.
+- Backend audit and record-creation timestamps use the backend host operating-system clock and are normalized/stored as timezone-aware UTC values. UTC normalization is a representation rule; it is not an instruction to fetch time from the internet.
+- Historical event dates, photo capture dates and place-visit dates are user/source data. They must not be silently replaced with the current date or inferred from the time of upload.
+- Calendar events must preserve the timezone/all-day semantics supplied by the user or source. Display conversion uses the viewer's device timezone unless the event explicitly carries another timezone.
+- If a device/server clock is incorrect or unavailable, the application must not silently substitute an online clock. It should expose the limitation and retain source timestamps/provenance where available.
+- Automated tests must use an injected/frozen clock where deterministic behavior is required; production code must retain the operating-system clock as its time source.
+
+**Implementation note:** the current backend helper `utc_now()` uses Python `datetime.now(timezone.utc)`, which reads the host OS clock and represents that value in UTC. This is not network time synchronization. Browser `Date` APIs likewise use the device clock. No external time provider is required for these operations.
