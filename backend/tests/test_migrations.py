@@ -28,7 +28,7 @@ def test_fresh_database_upgrades_to_head(tmp_path, monkeypatch):
             "auth_sessions", "system_state", "login_attempts",
             "stored_blobs", "archive_items", "archive_entity_links", "materials",
             "events", "places", "place_visits", "entity_links", "external_identities",
-            "google_drive_replicas", "google_drive_outbox",
+            "google_drive_replicas", "google_drive_outbox", "cloud_replicas",
         }
         assert {column["name"] for column in inspector.get_columns("people")} == {
             "person_id", "display_name", "status", "created_at", "updated_at"
@@ -82,7 +82,7 @@ def test_existing_create_all_database_is_adopted_without_data_loss(tmp_path):
             version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert row.person_id == "P-1234567890AB"
         assert row.display_name == "Existing record"
-        assert version == "0009_google_drive_replication"
+        assert version == "0010_cloud_replicas"
         assert inspect(engine).has_table("auth_sessions")
     finally:
         engine.dispose()
@@ -146,7 +146,7 @@ def test_legacy_48_bit_person_id_survives_identifier_width_migration(tmp_path):
             version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         assert row.person_id == "P-1234567890AB"
         assert row.display_name == "Legacy person"
-        assert version == "0009_google_drive_replication"
+        assert version == "0010_cloud_replicas"
     finally:
         engine.dispose()
 
@@ -253,6 +253,6 @@ def test_full_legacy_identity_graph_survives_identifier_width_migration(tmp_path
             version = connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            assert version == "0009_google_drive_replication"
+            assert version == "0010_cloud_replicas"
     finally:
         engine.dispose()
