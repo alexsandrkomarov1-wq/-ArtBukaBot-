@@ -32,7 +32,7 @@ def test_sqlite_backup_restore_round_trip_on_separate_database(tmp_path):
             assert connection.execute(text(
                 "SELECT display_name FROM people WHERE person_id='P-ABCDEF123456'"
             )).scalar_one() == "Backup fixture"
-            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0009_google_drive_replication"
+            assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0010_cloud_replicas"
             people_columns = connection.execute(text("PRAGMA table_info(people)")).all()
             person_id_column = next(column for column in people_columns if column[1] == "person_id")
             assert person_id_column[2] == "VARCHAR(34)"
@@ -135,7 +135,7 @@ def test_sqlite_backup_restore_preserves_complete_identity_graph(tmp_path):
             )).scalar_one() == 2
             assert connection.execute(text(
                 "SELECT version_num FROM alembic_version"
-            )).scalar_one() == "0009_google_drive_replication"
+            )).scalar_one() == "0010_cloud_replicas"
     finally:
         restored_engine.dispose()
 
