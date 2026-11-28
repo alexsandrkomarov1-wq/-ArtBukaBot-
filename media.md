@@ -7,7 +7,7 @@ description: Закрытый семейный архив фотографий, 
 <section class="media-heading">
   <p class="eyebrow">KOMAROVA_CORE · ЕДИНЫЙ СЕМЕЙНЫЙ АРХИВ</p>
   <h1>Архив <em>памяти.</em></h1>
-  <p class="media-lead">Фотографии, видео, аудио и документы хранятся в закрытом семейном хранилище. PostgreSQL ведёт реестр материалов и связи с людьми, событиями и местами. Оригиналы загружаются отдельно, не перезаписываются и не публикуются на открытой витрине.</p>
+  <p class="media-lead">Единый семейный архив для фотографий, видео, аудио и документов. Материалы распределяются по семейным папкам и годам. Оригиналы должны храниться отдельно и никогда не перезаписываться.</p>
   <nav class="media-entry-actions" aria-label="Навигация по архиву">
     <a class="media-button" href="#archive-upload">Загрузить материалы</a>
     <a class="media-button" href="#archive-catalog">Каталог архива</a>
@@ -21,20 +21,14 @@ description: Закрытый семейный архив фотографий, 
 <section class="cloud-archive" id="archive-storage" aria-labelledby="archive-storage-title">
   <div class="media-library-heading">
     <div><p class="eyebrow">ФИЗИЧЕСКОЕ ХРАНЕНИЕ</p><h2 id="archive-storage-title">Семейный архив</h2></div>
-    <span id="cloud-connection-state" class="media-status">Проверяем существующий проект KOMAROVA_CORE…</span>
+    <span id="cloud-connection-state" class="media-status">Хранилище ещё не настроено</span>
   </div>
-  <p>Фото, видео и документы хранятся в закрытом Supabase Storage. Каталог по годам ведётся в реестре материалов. Новый проект создавать не нужно: используется существующий KOMAROVA_CORE.</p>
-  <p class="year-archive-note">Секретный service_role key никогда не вводится в браузер и не публикуется. Публичный ключ клиента используется только внутри кода сайта; поля с ключами посетителю не показываются.</p>
+  <p>Папки архива: <strong>Семья → Фамилия → Поколение → Участник → Год</strong>. Внутри года лежат фотографии, видео и документы. У каждого файла свой MATERIAL-ID. Оригиналы остаются неизменными.</p>
   <div class="storage-location-card">
-    <strong>Папки архива</strong>
-    <span id="cloud-storage-location">Семья → поколение → участник → год → MATERIAL-ID</span>
-    <small id="supabase-project-state" role="status" aria-live="polite">Проверяем доступность существующего хранилища. Пароль здесь не требуется.</small>
+    <strong>Состояние архива</strong>
+    <span id="cloud-storage-location">Существующий проект KOMAROVA_CORE</span>
+    <small id="supabase-project-state" role="status" aria-live="polite">Физическое хранилище ещё не создано. Загрузка файлов пока недоступна.</small>
   </div>
-  <details class="cloud-bootstrap">
-    <summary>Состояние физического хранилища</summary>
-    <p>На последней проверке в существующем проекте KOMAROVA_CORE ещё не было приватного bucket и таблицы архива. Подготовленный SQL создаёт их в этом же проекте, не создавая новый проект и не удаляя существующие данные.</p>
-    <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-/blob/core-backend-foundation/backend/supabase/001_private_media_archive.sql">Открыть подготовленную настройку архива ↗</a></p>
-  </details>
 </section>
 <section class="cloud-archive" id="archive-upload" aria-labelledby="archive-upload-title">
   <div class="media-library-heading">
@@ -149,13 +143,13 @@ description: Закрытый семейный архив фотографий, 
 <section class="media-limitations">
   <h2>Правила хранения и защиты</h2>
   <ul>
-    <li>Файлы находятся в приватном bucket Supabase Storage, а не в публичной папке сайта.</li>
-    <li>Доступ ограничивается Supabase Auth и Row Level Security. На первом этапе пользователь видит только собственные записи и объекты.</li>
+    <li>Физическое хранилище в существующем проекте KOMAROVA_CORE ещё не создано. До его настройки загрузка в облачный архив недоступна.</li>
+    <li>После настройки доступ к личным папкам будет ограничен учётной записью участника и политиками доступа.</li>
     <li>Оригинал загружается без преобразования. AI-результат в будущем будет отдельным объектом с новым MATERIAL-ID и ссылкой на оригинал.</li>
     <li>SHA-256 рассчитывается в браузере перед отправкой. Это контрольная сумма, а не антивирусная проверка.</li>
     <li>Автоматическое ClamAV-сканирование, AI-worker, совместные семейные права и полноценный резервный экспорт пока не подключены.</li>
     <li>Для бесплатного Supabase фактические ограничения размера файла и объёма Storage зависят от настроек и лимитов проекта. Большие видео следует проверять отдельно до массовой загрузки.</li>
   </ul>
 </section>
-<script src="{{ '/assets/js/supabase-archive.js' | relative_url }}?v=20261126-supabase-archive-2" defer></script>
+<script src="{{ '/assets/js/supabase-archive.js' | relative_url }}?v=20261128-archive-cleanup-1" defer></script>
 <script src="{{ '/assets/js/media-library.js' | relative_url }}?v=20261126-archive-navigation-1" defer></script>
