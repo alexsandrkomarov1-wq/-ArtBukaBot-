@@ -185,7 +185,9 @@ class YandexDiskProvider:
 
     def __init__(self) -> None:
         self.token = os.getenv("YANDEX_DISK_ACCESS_TOKEN", "").strip()
-        self.root = os.getenv("YANDEX_DISK_ROOT", "/KOMAROVA_CORE").strip().rstrip("/")
+        self.root = os.getenv("YANDEX_DISK_ROOT", "disk:/KOMAROVA_CORE").strip().rstrip("/")
+        if self.root.startswith("/"):
+            self.root = "disk:" + self.root
         if not self.token:
             raise CloudProviderError("yandex_disk_token_missing")
 
@@ -205,6 +207,13 @@ class YandexDiskProvider:
             raise CloudProviderError("yandex_file_size_limit_exceeded")
         # Yandex Disk's public REST upload flow provides one upload URL, not a
         # resumable chunk-session API. Retry is handled by the durable outbox.
+        root_query = urlencode({"path": self.root})
+        try:
+            _json_request(f"{self.API}/resources?{root_query}", headers=self._headers())
+        except CloudProviderError as exc:
+            if not str(exc).startswith("http_404:"):
+                raise
+            _json_request(f"{self.API}/resources?{root_query}", method="PUT", headers=self._headers())
         remote_path = f"{self.root}/{blob_id}_{Path(filename).name}"
         exists_query = urlencode({"path": remote_path})
         try:
