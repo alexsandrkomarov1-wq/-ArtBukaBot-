@@ -78,6 +78,9 @@ def process_one(session_factory, storage, provider_name: str) -> bool:
 
     try:
         provider = build_provider(provider_name)
+        max_file_bytes = getattr(provider, "MAX_FILE_BYTES", None)
+        if isinstance(max_file_bytes, int) and snapshot["size_bytes"] > max_file_bytes:
+            raise QuotaExceeded("provider_file_size_limit")
         quota = provider.quota()
         remaining = quota.get("remaining_bytes")
         if isinstance(remaining, int) and remaining < snapshot["size_bytes"]:
