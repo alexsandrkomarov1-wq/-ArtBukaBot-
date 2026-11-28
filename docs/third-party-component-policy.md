@@ -103,3 +103,52 @@ No third-party component is approved by default. An empty registry means no cand
 A component may move to `approved` only when its intended use is compatible with the recorded terms, its source and dependencies have been reviewed, isolated tests have passed, the exact version is pinned, and its deployment/data-access scope is documented.
 
 If any of these conditions is unknown, the status remains `candidate`, `reviewing` or `deferred`.
+
+## 9. Additional discovery sources and repository handling
+
+The following sources are added to the discovery list. They are intake locations only; none is an automatic approval or a place to execute downloaded code directly:
+
+- PowerShell Gallery: https://www.powershellgallery.com/ — discover administration, diagnostics, backup, file-management and automation modules. Microsoft describes the Gallery as community-owned and untrusted by default for production dependency use; download for review, then promote only a pinned, reviewed version into the project's controlled component set.
+- Greasy Fork: https://greasyfork.org/ — discover browser userscripts only where browser automation genuinely helps the project. Read the complete source and every metadata directive. Greasy Fork requires readable, non-obfuscated source and license/copyright compliance; external executable code is restricted and must be inspected separately.
+- Reddit discussion supplied for discovery: https://www.reddit.com/r/Notion/comments/ndlz9i/devs_where_do_you_host_your_automation_scripts/?tl=ru — community discussion about where developers host automation scripts. Treat recommendations as leads, not proof of availability, security, license or suitability. Re-check each service's current terms and free-tier limits before use.
+- GitHub/GitLab/Codeberg: prefer upstream source repositories with release tags, commit history, security advisories and issue tracking. Pin a commit or release; do not install from a moving branch.
+
+Useful primary review references:
+- PowerShell Gallery publishing and signing guidance: https://learn.microsoft.com/en-us/powershell/gallery/concepts/publishing-guidelines
+- PowerShell repository trust guidance: https://learn.microsoft.com/en-us/powershell/gallery/powershellget/supported-repositories
+- Greasy Fork source-code rules: https://greasyfork.org/ru/help/code-rules
+- Greasy Fork external-code policy: https://greasyfork.org/en/help/external-scripts
+
+## 10. Domain, DNS, servers and hosting inventory
+
+Keep domain registration, DNS, hosting, compute servers, object storage, database and source-code hosting as separate infrastructure records. A domain name does not provide a server, and a hosting account does not automatically provide private archive storage.
+
+The `.su` top-level domain is the historic country-code domain assigned to the Soviet Union in 1990 and is still administered today. It is a domain namespace only; it is not a Soviet server network, hosting provider, data-centre location or guarantee of free hosting. Treat any proposed `.su` domain as an optional naming/identity choice, not as the archive's storage or compute solution.
+
+For every domain/hosting/server candidate, record:
+- provider and official service URL;
+- domain name and registrar (if applicable), renewal price and transfer/expiry rules;
+- DNS provider and control of DNS records;
+- server/hosting type (static hosting, VPS, dedicated server, managed application, object storage, database);
+- physical region/data residency, operator and jurisdiction, where verifiable;
+- CPU, RAM, disk type/capacity, traffic and bandwidth limits;
+- maximum single-object upload size, request/body timeout and resumable/multipart upload support;
+- TLS/HTTPS, backups, restore/export, snapshots and retention;
+- private access controls, encryption, audit logs and account recovery;
+- free-tier conditions, quotas, inactivity suspension, payment requirements and overage costs;
+- deployment method, supported runtime, repository integration and rollback;
+- terms of service, privacy/data-processing terms and account ownership;
+- evidence URL, check date and status.
+
+Do not infer that a provider is free, that a domain includes hosting, or that a stated storage quota is also the maximum size of one uploaded file. Verify those limits separately from current official documentation. Never migrate family originals or change production DNS based only on a forum recommendation.
+
+Initial domain/hosting research entries:
+| Candidate | Official URL | What it is | Initial status |
+|---|---|---|---|
+| .SU namespace | https://www.ripn.su/en/domen-su/history/ | Historic domain namespace; not hosting | research only |
+| Register.su | https://register.su/questions-about-su-domains/ | .SU registration information | research only; verify current registrar terms/pricing |
+| PowerShell Gallery | https://www.powershellgallery.com/ | Script/module repository, not hosting for KOMAROVA_CORE | discovery only |
+| Greasy Fork | https://greasyfork.org/ | Browser userscript repository, not server hosting | discovery only |
+| Reddit thread supplied by owner | https://www.reddit.com/r/Notion/comments/ndlz9i/devs_where_do_you_host_your_automation_scripts/?tl=ru | Community leads on automation hosting | discovery only |
+
+No new domain has been registered, no hosting account has been created, and no server or DNS configuration has been changed by this documentation update.
