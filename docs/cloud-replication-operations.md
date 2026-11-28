@@ -22,7 +22,7 @@
 - ONEDRIVE_FOLDER_ID — ID существующей папки KOMAROVA_CORE.
 - ONEDRIVE_ACCESS_TOKEN либо пара ONEDRIVE_REFRESH_TOKEN + ONEDRIVE_CLIENT_ID.
 - ONEDRIVE_CLIENT_SECRET — если он требуется типом регистрации приложения.
-- ONEDRIVE_TENANT_ID — необязательно; по умолчанию consumers.
+- ONEDRIVE_TENANT_ID — необязательно; по умолчанию consumers.\n- ONEDRIVE_TOKEN_CACHE_FILE — рекомендуется указать путь к защищённому файлу вне репозитория и web-root; обновлённые OAuth refresh/access tokens сохраняются атомарно с ограниченными правами.
 
 Загрузка выполняется через Microsoft Graph upload session фрагментами 10 MiB. После загрузки worker скачивает файл обратно и проверяет SHA-256. Перед передачей проверяется доступная квота OneDrive, если Graph вернул её значение.
 
