@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "title": "Семейные внешние ресурсы",
+  "description": "Единый список ссылок для локальной и онлайн-версии KOMAROVA_CORE. Ссылки открывают сайты, но сами по себе не подключают API и не синхронизируют файлы.",
+  "groups": [
+    {
+      "id": "cloud-accounts",
+      "title": "Облачные кабинеты и хранилища",
+      "items": [
+        {
+          "id": "google-drive-u1",
+          "name": "Google Drive · аккаунт 2",
+          "category": "Облако · отдельный аккаунт",
+          "url": "https://drive.google.com/drive/u/1/home",
+          "status": "Ссылка на личный кабинет",
+          "note": "Отдельная учётная запись Google u/1. Не объединять с u/0."
+        },
+        {
+          "id": "terabox-ai",
+          "name": "TeraBox AI",
+          "category": "Облако / AI",
+          "url": "https://www.terabox.com/ai/index/russian",
+          "status": "Внешний сервис · API не подтверждён",
+          "note": "Открывается именно предоставленная AI-страница TeraBox."
+        },
+        {
+          "id": "dropbox-home",
+          "name": "Dropbox",
+          "category": "Облачный кабинет",
+          "url": "https://www.dropbox.com/home",
+          "status": "Ссылка на личный кабинет",
+          "note": "Серверная синхронизация KOMAROVA_CORE отдельно не подтверждена."
+        },
+        {
+          "id": "onedrive-info",
+          "name": "Microsoft OneDrive",
+          "category": "Облачный сервис Microsoft",
+          "url": "https://www.microsoft.com/nl-nl/microsoft-365/onedrive/online-cloud-storage",
+          "status": "Информационная страница",
+          "note": "Это страница Microsoft о OneDrive, не личный файловый кабинет."
+        },
+        {
+          "id": "yandex-disk",
+          "name": "Яндекс Диск",
+          "category": "Облачный кабинет",
+          "url": "https://disk.yandex.ru/client/disk",
+          "status": "Ссылка на личный кабинет",
+          "note": "Серверная синхронизация KOMAROVA_CORE требует отдельной проверки."
+        },
+        {
+          "id": "pcloud-files",
+          "name": "pCloud",
+          "category": "Облачный кабинет",
+          "url": "https://my.pcloud.com/#/filemanager",
+          "status": "Ссылка на файловый кабинет",
+          "note": "Серверная синхронизация KOMAROVA_CORE не подтверждена."
+        },
+        {
+          "id": "mega-blog",
+          "name": "MEGA · блог",
+          "category": "Информация о сервисе",
+          "url": "https://blog.mega.io/?resilience=1",
+          "status": "Блог, не файловый кабинет",
+          "note": "Сохранён именно присланный адрес блога MEGA."
+        },
+        {
+          "id": "google-drive-u0",
+          "name": "Google Drive · аккаунт 1",
+          "category": "Облако · отдельный аккаунт",
+          "url": "https://drive.google.com/drive/u/0/home",
+          "status": "Ссылка на личный кабинет",
+          "note": "Отдельная учётная запись Google u/0. Не объединять с u/1."
+        }
+      ]
+    },
+    {
+      "id": "family-sources",
+      "title": "Семейные источники и переписка",
+      "items": [
+        {
+          "id": "facebook-family-profile",
+          "name": "Facebook · семейный профиль",
+          "category": "Социальный источник",
+          "url": "https://www.facebook.com/profile.php?id=100007606149196",
+          "status": "Ссылка на профиль",
+          "note": "Используется как источник семейных материалов; автоматический импорт не подключён."
+        },
+        {
+          "id": "gmail-u1",
+          "name": "Gmail · аккаунт 2",
+          "category": "Почта · отдельный аккаунт",
+          "url": "https://mail.google.com/mail/u/1/#inbox",
+          "status": "Ссылка на почтовый ящик",
+          "note": "Отдельная учётная запись Gmail u/1."
+        }
+      ]
+    }
+  ]
+}
