@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import io
 import os
 import tempfile
 import time
@@ -70,14 +69,28 @@ def _upload_and_verify(service, blob: StoredBlob, local_path: Path, folder_id: s
         }
         media = MediaFileUpload(str(local_path), mimetype=blob.detected_mime_type, resumable=True)
         file_id = service.files().create(body=metadata, media_body=media, fields="id,size").execute()["id"]
-    sink = io.BytesIO()
-    downloader = MediaIoBaseDownload(sink, service.files().get_media(fileId=file_id), chunksize=1024 * 1024)
-    done = False
-    while not done:
-        _, done = downloader.next_chunk()
-    actual = sink.getvalue()
-    if len(actual) != blob.size_bytes or hashlib.sha256(actual).hexdigest() != blob.sha256:
-        raise RuntimeError("drive_readback_integrity_mismatch")
+    readback_path = local_path.with_name("google-drive-readback.bin")
+    try:
+        with readback_path.open("wb") as sink:
+            downloader = MediaIoBaseDownload(
+                sink, service.files().get_media(fileId=file_id), chunksize=1024 * 1024
+            )
+            done = False
+            while not done:
+                _, done = downloader.next_chunk()
+        digest = hashlib.sha256()
+        actual_size = 0
+        with readback_path.open("rb") as stream:
+            while True:
+                chunk = stream.read(1024 * 1024)
+                if not chunk:
+                    break
+                digest.update(chunk)
+                actual_size += len(chunk)
+        if actual_size != blob.size_bytes or digest.hexdigest() != blob.sha256:
+            raise RuntimeError("drive_readback_integrity_mismatch")
+    finally:
+        readback_path.unlink(missing_ok=True)
     return file_id
 
 
