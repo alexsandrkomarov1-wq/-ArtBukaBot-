@@ -21,13 +21,13 @@ description: Закрытый семейный архив фотографий, 
 <section class="cloud-archive" id="archive-storage" aria-labelledby="archive-storage-title">
   <div class="media-library-heading">
     <div><p class="eyebrow">ФИЗИЧЕСКОЕ ХРАНЕНИЕ</p><h2 id="archive-storage-title">Семейный архив</h2></div>
-    <span id="cloud-connection-state" class="media-status">Хранилище ещё не настроено</span>
+    <span id="cloud-connection-state" class="media-status">Supabase настроен · вход не проверен</span>
   </div>
   <p>Папки архива: <strong>Семья → Фамилия → Поколение → Участник → Год</strong>. Внутри года лежат фотографии, видео и документы. У каждого файла свой MATERIAL-ID. Оригиналы остаются неизменными.</p>
   <div class="storage-location-card">
     <strong>Состояние архива</strong>
     <span id="cloud-storage-location">Существующий проект KOMAROVA_CORE</span>
-    <small id="supabase-project-state" role="status" aria-live="polite">Физическое хранилище ещё не создано. Загрузка файлов пока недоступна.</small>
+    <small id="supabase-project-state" role="status" aria-live="polite">Приватный бакет и каталог созданы. Для проверки реальной загрузки требуется вход владельца.</small>
   </div>
 </section>
 <section class="cloud-archive" id="archive-upload" aria-labelledby="archive-upload-title">
@@ -65,6 +65,16 @@ description: Закрытый семейный архив фотографий, 
       <label>Дата съёмки / создания
         <input id="cloud-captured-at" type="date">
       </label>
+      <label>Связанный PERSON-ID (необязательно)
+        <input id="cloud-person-id" name="person_id" maxlength="40" placeholder="P-…">
+      </label>
+      <label>Связанный EVENT-ID (необязательно)
+        <input id="cloud-event-id" name="event_id" maxlength="40" placeholder="E-…">
+      </label>
+      <label>Связанный PLACE-ID (необязательно)
+        <input id="cloud-place-id" name="place_id" maxlength="40" placeholder="PL-…">
+      </label>
+      <small>Максимальный размер одного файла на бесплатном тарифе Supabase: 50 MiB.</small>
       <button id="cloud-upload-submit" type="submit" class="media-open-button">Сохранить оригинал в архив</button>
     </form>
     <p id="cloud-archive-status" class="media-status" role="status" aria-live="polite">После входа здесь появятся ваши архивные материалы.</p>
@@ -143,14 +153,14 @@ description: Закрытый семейный архив фотографий, 
 <section class="media-limitations">
   <h2>Правила хранения и защиты</h2>
   <ul>
-    <li>Физическое хранилище в существующем проекте KOMAROVA_CORE ещё не создано. До его настройки загрузка в облачный архив недоступна.</li>
+    <li>Приватный бакет komarova_core_private и таблица archive_items созданы в существующем Supabase KOMAROVA_CORE. Реальная загрузка ещё не подтверждена: в Auth пока нет учётной записи владельца.</li>
     <li>Секретный service_role key никогда не добавляется в браузерный код и не показывается участникам.</li>
     <li>После настройки доступ к личным папкам будет ограничен учётной записью участника и политиками доступа.</li>
     <li>Оригинал загружается без преобразования. AI-результат в будущем будет отдельным объектом с новым MATERIAL-ID и ссылкой на оригинал.</li>
     <li>SHA-256 рассчитывается в браузере перед отправкой. Это контрольная сумма, а не антивирусная проверка.</li>
     <li>Автоматическое ClamAV-сканирование, AI-worker, совместные семейные права и полноценный резервный экспорт пока не подключены.</li>
-    <li>Для бесплатного Supabase фактические ограничения размера файла и объёма Storage зависят от настроек и лимитов проекта. Большие видео следует проверять отдельно до массовой загрузки.</li>
+    <li>На бесплатном тарифе Supabase ограничение одного файла — 50 MiB. Файлы больше этого размера интерфейс отклоняет до отправки.</li>
   </ul>
 </section>
-<script src="{{ '/assets/js/supabase-archive.js' | relative_url }}?v=20261128-archive-cleanup-1" defer></script>
+<script src="{{ '/assets/js/supabase-archive.js' | relative_url }}?v=20261128-private-archive-v2" defer></script>
 <script src="{{ '/assets/js/media-library.js' | relative_url }}?v=20261126-archive-navigation-1" defer></script>
