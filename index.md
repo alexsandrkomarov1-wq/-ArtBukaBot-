@@ -9,8 +9,9 @@ description: Цифровой семейный архив KOMAROVA_CORE. Ист�
     <h1 id="home-title">Войдите в <em>цифровой мир.</em></h1>
     <p class="hero-lead">Единое пространство людей, поколений, событий, географии и семейных материалов. Выбирайте портал в 3D-мире или пользуйтесь обычной навигацией.</p>
     <div class="hero-actions">
-      <a class="primary-link" href="#world-portals">Открыть проекты <span aria-hidden="true">↓</span></a>
-      <a class="text-link" href="{{ '/status/' | relative_url }}">Проверить состояние системы ↗</a>
+      <a class="primary-link" href="{{ '/media/#archive-upload' | relative_url }}">Загрузить фото, видео и документы <span aria-hidden="true">↗</span></a>
+      <a class="text-link" href="{{ '/events/' | relative_url }}">Открыть семейную хронологию ↗</a>
+      <a class="text-link" href="{{ '/cloud-network/' | relative_url }}">Облачное хранилище и статус подключений ↗</a>
     </div>
   </div>
   <div class="hero-art" tabindex="0" aria-label="Интерактивный трёхмерный мир KOMAROVA_CORE. Клавиши WASD или стрелки вращают сцену, плюс и минус меняют масштаб, клавиши 1–8 открывают порталы.">
