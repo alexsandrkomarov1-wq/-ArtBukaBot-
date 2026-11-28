@@ -6,6 +6,7 @@ from backend.app.cloud_providers import (
     CloudProviderError,
     OneDriveProvider,
     YandexDiskProvider,
+    _remote_object_name,
     build_provider,
 )
 
@@ -34,3 +35,16 @@ def test_yandex_disk_requires_server_token(monkeypatch):
 def test_provider_factory_rejects_unknown_provider():
     with pytest.raises(CloudProviderError, match="unsupported_provider"):
         build_provider("not-a-provider")
+
+
+
+def test_repair_object_name_is_unique_and_preserves_original_name():
+    stable = _remote_object_name("BL-123", "family-photo.jpg")
+    repaired_a = _remote_object_name("BL-123", "family-photo.jpg", force_new=True)
+    repaired_b = _remote_object_name("BL-123", "family-photo.jpg", force_new=True)
+
+    assert stable == "BL-123_family-photo.jpg"
+    assert repaired_a.startswith("BL-123_repair_")
+    assert repaired_a.endswith("_family-photo.jpg")
+    assert repaired_b.startswith("BL-123_repair_")
+    assert repaired_a != repaired_b
