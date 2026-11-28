@@ -376,3 +376,16 @@ The authenticated homepage includes a shared, interactive family bulletin board 
 - Automated tests must use an injected/frozen clock where deterministic behavior is required; production code must retain the operating-system clock as its time source.
 
 **Implementation note:** the current backend helper `utc_now()` uses Python `datetime.now(timezone.utc)`, which reads the host OS clock and represents that value in UTC. This is not network time synchronization. Browser `Date` APIs likewise use the device clock. No external time provider is required for these operations.
+
+
+## 13. Photo geography and capture-time analysis
+
+- REQ-PHOTO-GEO-001: Use `Europe/Amsterdam` as the project default timezone, without hardcoding a UTC offset. Apply it only when photo location/timezone evidence is absent and label the result as an assumption.
+- REQ-PHOTO-GEO-002: Read EXIF DateTimeOriginal, OffsetTimeOriginal, GPS coordinates, GPSDateStamp and GPSTimeStamp without modifying the original file.
+- REQ-PHOTO-GEO-003: Resolve the timezone at the photo's GPS coordinates using an offline IANA timezone boundary database; apply the historical daylight-saving rules for the capture date.
+- REQ-PHOTO-GEO-004: Prefer GPS UTC capture time, then explicit EXIF UTC offset, then the GPS-location timezone. If GPS is present but its timezone cannot be resolved, do not silently substitute Amsterdam.
+- REQ-PHOTO-GEO-005: Store raw EXIF date, coordinates, resolved timezone, derived local/UTC timestamps, provenance and confidence separately.
+- REQ-PHOTO-GEO-006: Do not send private photo coordinates to public reverse-geocoding services. A named place must come from an approved offline gazetteer or explicit user confirmation.
+- REQ-PHOTO-GEO-007: Unknown or conflicting metadata must remain unknown/conflicting; never invent a place or time.
+
+**Implementation status:** read-only extraction module added at `backend/app/photo_metadata.py`. Automatic archive persistence and upload/enhancement integration are not yet implemented. The optional `timezonefinder` dependency must be installed and covered by tests before location-based timezone resolution is available in the running service.
