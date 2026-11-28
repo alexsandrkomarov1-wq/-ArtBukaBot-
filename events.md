@@ -10,6 +10,20 @@ description: Годовые папки семейного фото- и виде�
   <p class="lead">Семейная хронология строится вокруг папок по годам. Внутри года находятся фотографии, видео и документы, связанные с участниками, местами и событиями. Оригиналы остаются неизменными.</p>
 </section>
 
+<section class="year-archive-intro" aria-label="Загрузка и каталог материалов">
+  <div class="year-archive-copy">
+    <p class="eyebrow">ДОБАВЛЕНИЕ МАТЕРИАЛОВ</p>
+    <h2>Фото, видео и документы события</h2>
+    <p>Все материалы добавляются через единый закрытый архив KOMAROVA_CORE. Выберите файл на устройстве, войдите в личную папку и отправьте оригинал. Не нужно открывать отдельные облачные кабинеты.</p>
+    <a class="year-archive-open" href="{{ '/media/#archive-upload' | relative_url }}">Перейти к загрузке материалов <span aria-hidden="true">↗</span></a>
+  </div>
+  <div class="year-archive-copy">
+    <p class="eyebrow">ЕДИНЫЙ КАТАЛОГ</p>
+    <h2>Просмотр и скачивание</h2>
+    <p>Сохранённые файлы открываются из личного каталога. События ссылаются на материалы, а не создают отдельные несвязанные копии.</p>
+    <a class="year-archive-open" href="{{ '/media/#archive-catalog' | relative_url }}">Открыть каталог архива <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
 <section class="year-archive-intro" aria-labelledby="year-archive-title">
   <div class="year-archive-copy">
     <p class="eyebrow">СТРУКТУРА ХРАНЕНИЯ</p>
