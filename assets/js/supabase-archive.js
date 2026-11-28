@@ -7,6 +7,7 @@
   const SUPABASE_PROJECT_URL = "https://bcotusztvddzbnwefnrq.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_OOJ5nZYn0rT8yJvcBjuWww_rfz0c-Rp";
   const bucket = "komarova_core_private";
+  const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
   const status = $("cloud-archive-status");
   const connection = $("cloud-connection-state");
   if (!connection) return;
@@ -73,8 +74,8 @@
     try {
       connection.textContent = "Проверяем существующий проект KOMAROVA_CORE…";
       await request("/auth/v1/settings");
-      connection.textContent = "Проект KOMAROVA_CORE доступен · физическое хранилище ещё не настроено.";
-      $("supabase-project-state").textContent = "Сервер отвечает, но приватное хранилище и каталог архива ещё не созданы. Загрузка файлов пока недоступна."
+      connection.textContent = "Supabase KOMAROVA_CORE отвечает · войдите, чтобы проверить личный архив.";
+      $("supabase-project-state").textContent = "Подключение к Supabase подтверждено. Приватный бакет и каталог созданы; доступ к ним проверяется после входа."
     } catch (error) {
       connection.textContent = "Supabase сейчас недоступен: " + error.message;
       $("supabase-project-state").textContent = "Проверка не пройдена. Файлы не загружались.";
@@ -99,7 +100,7 @@
       auth.hidden = true;
       panel.hidden = false;
       $("cloud-user-label").textContent = (currentUser.email || email) + " · защищённая сессия";
-      connection.textContent = "Учётная запись участника подтверждена · архивное хранилище ожидает настройки."
+      connection.textContent = "Учётная запись подтверждена · проверяем приватный каталог и хранилище.";
       passwordInput.value = "";
       await loadArchive();
       await checkBucket();
@@ -112,7 +113,14 @@
   }
 
   async function checkBucket() {
-    $("cloud-storage-location").textContent = "Существующий проект KOMAROVA_CORE · личная папка участника";
+    const probe = await request("/storage/v1/object/list/" + bucket, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prefix: currentUser.id + "/", limit: 1, offset: 0, sortBy: { column: "name", order: "asc" } })
+    });
+    if (!Array.isArray(probe)) throw new Error("Supabase Storage не подтвердил доступ к личной папке.");
+    $("cloud-storage-location").textContent = "KOMAROVA_CORE · приватный бакет · папка текущего участника";
+    connection.textContent = "Вход подтверждён · каталог и приватное хранилище доступны.";
   }
 
   async function loadArchive() {
@@ -257,6 +265,10 @@
     const fileInput = $("cloud-upload-file");
     const file = fileInput.files?.[0];
     if (!file || !currentUser) return;
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setStatus("Файл превышает лимит бесплатного Supabase: 50 MiB на один файл. Выберите файл меньшего размера.", true);
+      return;
+    }
     const submit = $("cloud-upload-submit");
     let storageUploaded = false;
     let uploadedPath = "";
@@ -284,6 +296,11 @@
         throw new Error("Supabase Storage отклонил загрузку: HTTP " + uploadResponse.status + (detail ? " · " + detail.slice(0, 220) : ""));
       }
       storageUploaded = true;
+      const remoteBlob = await getFile({ storage_path: path });
+      const remoteHash = await sha256(remoteBlob);
+      if (remoteBlob.size !== file.size || remoteHash !== hash) {
+        throw new Error("Проверочное чтение не совпало с оригиналом: размер или SHA-256 отличается. Запись каталога не создана; не повторяйте загрузку, пока не проверите объект.");
+      }
       const record = {
         user_id: currentUser.id,
         material_id: materialId,
@@ -297,9 +314,9 @@
         mime_type: file.type || "application/octet-stream",
         size_bytes: file.size,
         sha256: hash,
-        person_id: $("cloud-person-id").value.trim() || null,
-        event_id: $("cloud-event-id").value.trim() || null,
-        place_id: $("cloud-place-id").value.trim() || null,
+        person_id: $("cloud-person-id")?.value.trim() || null,
+        event_id: $("cloud-event-id")?.value.trim() || null,
+        place_id: $("cloud-place-id")?.value.trim() || null,
         record_status: "stored_original"
       };
       const inserted = await request("/rest/v1/archive_items", {
@@ -315,7 +332,7 @@
       $("cloud-upload-description").value = "";
       $("cloud-captured-at").value = "";
       await loadArchive();
-      setStatus("Оригинал сохранён в закрытом Supabase Storage. MATERIAL-ID: " + materialId + ". SHA-256 рассчитан; файл не обрабатывался и не перезаписывался.");
+      setStatus("Оригинал сохранён в приватном Storage и проверен обратным чтением. Размер и SHA-256 совпали. MATERIAL-ID: " + materialId + ". Оригинал не изменялся.");
     } catch (error) {
       const message = storageUploaded
         ? error.message + " Файл уже находится в приватном Storage по пути " + uploadedPath + "; не повторяйте загрузку, пока не проверите реестр."
