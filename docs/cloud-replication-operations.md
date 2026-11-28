@@ -32,7 +32,7 @@
 
 - YANDEX_DISK_SYNC_ENABLED=true
 - YANDEX_DISK_ACCESS_TOKEN — OAuth-токен только на сервере.
-- YANDEX_DISK_ROOT=/KOMAROVA_CORE — необязательно; путь по умолчанию.
+- YANDEX_DISK_ROOT=disk:/KOMAROVA_CORE — необязательно; путь по умолчанию.
 
 Яндекс API предоставляет upload URL для передачи файла одним потоковым HTTP PUT, но используемый REST flow не является resumable chunk-session API. Поэтому при сетевом обрыве повторяется передача всего файла; стабильный путь по blob ID предотвращает создание второй копии. Квота проверяется через сведения о диске. После передачи выполняется скачивание и проверка SHA-256.
 
