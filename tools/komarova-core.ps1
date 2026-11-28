@@ -14,6 +14,11 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$RequiredPowerShellVersion = [version]"7.7.0"
+if ($PSVersionTable.PSVersion -ne $RequiredPowerShellVersion) {
+    throw "KOMAROVA_CORE требует PowerShell 7.7.0. Текущая версия: $($PSVersionTable.PSVersion). Запустите скрипт через pwsh 7.7.0."
+}
+
 
 # The script lives in <project>\tools. All logs remain local and are not uploaded.
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
