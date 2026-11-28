@@ -12,7 +12,7 @@ permalink: /cloud-network/
   <p class="cn-eyebrow">KOMAROVA_CORE / PRIVATE ARCHIVE INFRASTRUCTURE</p>
   <h1 id="cloud-title">Единая <em>облачная сеть</em></h1>
   <p class="cn-lead">Здесь будет единая панель хранения для главного портала и AI MEDIA: один каталог материалов, несколько независимых облачных копий и прозрачный контроль синхронизации.</p>
-  <div class="cn-state"><span class="cn-dot"></span> РАЗРАБОТКА ИНТЕРФЕЙСА · ПОДКЛЮЧЕНИЯ ЕЩЁ НЕ АКТИВНЫ</div>
+  <div class="cn-state"><span class="cn-dot"></span> SUPABASE СХЕМА И ПРИВАТНЫЙ БАКЕТ СОЗДАНЫ · ПЕРВАЯ ЗАГРУЗКА ОЖИДАЕТ ВХОДА</div>
   <div class="cn-grid" aria-label="Состав облачной системы">
     <article class="cn-card"><span class="cn-tag">01 / REGISTRY</span><strong>Единый каталог</strong><p>PERSON-ID, EVENT-ID, PLACE-ID и MATERIAL-ID связывают файлы с семейной историей. Оригиналы и производные версии учитываются отдельно.</p></article>
     <article class="cn-card"><span class="cn-tag">02 / STORAGE</span><strong>Несколько хранилищ</strong><p>Провайдеры подключаются отдельными серверными адаптерами. Сбой одного облака не должен останавливать остальные.</p></article>
@@ -38,7 +38,7 @@ permalink: /cloud-network/
     <div class="cn-step"><b>04 · REPLICATE</b><span>Копирование в облака</span></div>
     <div class="cn-step"><b>05 · CONFIRM</b><span>Чтение и сверка копии</span></div>
   </div>
-  <div class="cn-note"><strong>Важно:</strong> эта страница показывает архитектуру и этапы разработки, а не имитирует работающую синхронизацию. Сейчас здесь нет подтверждённого статуса записи/чтения облаков. Air Live Drive может быть удобен на Windows как клиент, но не заменяет серверные коннекторы сайта.</div>
+  <div class="cn-note"><strong>Фактический статус:</strong> в существующем Supabase KOMAROVA_CORE создана таблица archive_items, приватный бакет komarova_core_private и RLS-политики владельца. Проверка структуры и политик пройдена. Реальная загрузка/обратное чтение ещё не испытаны: в Supabase Auth пока нет пользователя. Остальные облака остаются кандидатами, а Google Drive — временным тестом. Air Live Drive на Windows не заменяет серверные коннекторы сайта.</div>
   <div class="cn-links">
     <a href="{{ '/media/' | relative_url }}">Открыть AI MEDIA и архив ↗</a>
     <a href="{{ '/status/' | relative_url }}">Проверить состояние проекта ↗</a>
@@ -100,10 +100,10 @@ permalink: /cloud-network/
   <div class="pr-table-wrap"><table>
     <thead><tr><th>Компонент</th><th>Возможное применение</th><th>Текущее состояние</th></tr></thead>
     <tbody>
-      <tr><td>PostgreSQL</td><td>Метаданные PERSON/EVENT/PLACE/MATERIAL, связи и аудит</td><td>Проект существует; схему не меняем</td></tr>
-      <tr><td>Auth</td><td>Пользователи, OAuth и сессии</td><td>Не включать параллельно с текущей backend-auth без архитектурного решения</td></tr>
-      <tr><td>Storage</td><td>Приватные файлы и медиа</td><td>Не настроен и не проверен; отдельное разрешение обязательно</td></tr>
-      <tr><td>RLS</td><td>Разграничение семейных данных</td><td>Политики требуют аудита и ролевых тестов</td></tr>
+      <tr><td>PostgreSQL</td><td>Метаданные PERSON/EVENT/PLACE/MATERIAL, связи и аудит</td><td>Таблица archive_items создана; RLS включён</td></tr>
+      <tr><td>Auth</td><td>Пользователи, OAuth и сессии</td><td>Пока 0 пользователей; вход владельца ещё не проверен</td></tr>
+      <tr><td>Storage</td><td>Приватные файлы и медиа</td><td>Приватный бакет создан; проверка загрузки ждёт первого пользователя</td></tr>
+      <tr><td>RLS</td><td>Разграничение семейных данных</td><td>Две политики каталога и две Storage-политики созданы; Security Advisor без замечаний</tr>
       <tr><td>Edge Functions</td><td>Короткие API, webhook и интеграции</td><td>Не замена длительному AI/media worker</td></tr>
       <tr><td>Realtime</td><td>Статусы загрузок и синхронизации</td><td>Не настроен/не проверен</td></tr>
       <tr><td>PostGIS</td><td>Географические точки, расстояния и маршруты</td><td>Возможное расширение, не включено</td></tr>
