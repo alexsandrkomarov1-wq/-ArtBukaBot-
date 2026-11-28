@@ -73,8 +73,8 @@
     try {
       connection.textContent = "Проверяем существующий проект KOMAROVA_CORE…";
       await request("/auth/v1/settings");
-      connection.textContent = "Supabase API отвечает · используется существующий проект KOMAROVA_CORE.";
-      $("supabase-project-state").textContent = "Соединение с API подтверждено. Приватный bucket и таблица архива пока не созданы; пароль нужен только в папке участника.";
+      connection.textContent = "Проект KOMAROVA_CORE доступен · физическое хранилище ещё не настроено.";
+      $("supabase-project-state").textContent = "Сервер отвечает, но приватное хранилище и каталог архива ещё не созданы. Загрузка файлов пока недоступна."
     } catch (error) {
       connection.textContent = "Supabase сейчас недоступен: " + error.message;
       $("supabase-project-state").textContent = "Проверка не пройдена. Файлы не загружались.";
@@ -99,7 +99,7 @@
       auth.hidden = true;
       panel.hidden = false;
       $("cloud-user-label").textContent = (currentUser.email || email) + " · защищённая сессия";
-      connection.textContent = "Supabase Auth активен · Storage: приватный bucket";
+      connection.textContent = "Учётная запись участника подтверждена · архивное хранилище ожидает настройки."
       passwordInput.value = "";
       await loadArchive();
       await checkBucket();
@@ -112,7 +112,7 @@
   }
 
   async function checkBucket() {
-    $("cloud-storage-location").textContent = "Supabase Storage · " + bucket + " · приватный режим; фактическая запись проверяется при загрузке.";
+    $("cloud-storage-location").textContent = "Существующий проект KOMAROVA_CORE · личная папка участника";
   }
 
   async function loadArchive() {
