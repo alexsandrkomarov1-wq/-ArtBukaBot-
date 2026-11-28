@@ -31,3 +31,24 @@ description: Годовые папки семейного фото- и виде�
   <article><span>02</span><h3>Связь с семьёй</h3><p>Материал может быть связан с участником, событием и местом через постоянные идентификаторы.</p></article>
   <article><span>03</span><h3>Оригиналы защищены</h3><p>Загрузка создаёт отдельный материал. Исходный файл не перезаписывается.</p></article>
 </section>
+
+<section class="year-archive-rules" aria-labelledby="events-cloud-title">
+  <article>
+    <span>04</span>
+    <h3 id="events-cloud-title">Единое облачное хранилище</h3>
+    <p>События, фотографии и документы должны ссылаться на один семейный каталог KOMAROVA_CORE. Облачные копии не создают отдельные несвязанные архивы.</p>
+    <p><a href="{{ '/cloud-network/' | relative_url }}">Открыть панель облачной сети ↗</a></p>
+  </article>
+  <article>
+    <span>05</span>
+    <h3>Материалы события</h3>
+    <p>Оригиналы и обработанные версии хранятся отдельно, каждая запись получает свой MATERIAL-ID и связь с EVENT-ID.</p>
+    <p><a href="{{ '/media/#archive-catalog' | relative_url }}">Открыть каталог семейного архива ↗</a></p>
+  </article>
+  <article>
+    <span>06</span>
+    <h3>Общие подключения сайта</h3>
+    <p>Панель облачных провайдеров доступна из общего меню на каждой странице KOMAROVA_CORE. Внешний вход в облако не означает серверную синхронизацию.</p>
+    <p><a href="https://github.com/alexsandrkomarov1-wq/-ArtBukaBot-" target="_blank" rel="noopener noreferrer">Исходный код KOMAROVA_CORE ↗</a></p>
+  </article>
+</section>
