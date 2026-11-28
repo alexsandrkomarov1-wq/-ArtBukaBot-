@@ -108,6 +108,9 @@
       accessToken = "";
       currentUser = null;
       passwordInput.value = "";
+      panel.hidden = true;
+      auth.hidden = false;
+      $("cloud-archive-list").replaceChildren();
       connection.textContent = "Вход не выполнен: " + error.message;
     }
   }
