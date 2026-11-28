@@ -6,12 +6,13 @@ opaque and must never be exposed as public download URLs.
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import os
 import time
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 
@@ -78,12 +79,6 @@ class OneDriveProvider:
     def _token(self) -> str:
         if self.access_token:
             return self.access_token
-        token = _json_request(
-            f"https://login.microsoftonline.com/{quote(self.tenant, safe='')}/oauth2/v2.0/token",
-            method="POST",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            payload=None,
-        ) if False else None
         # Form encoding is required by Microsoft's token endpoint.
         body = urlencode({
             "client_id": self.client_id,
@@ -203,17 +198,29 @@ class YandexDiskProvider:
         href = data.get("href")
         if not href:
             raise CloudProviderError("yandex_upload_href_missing")
-        request = Request(href, data=source.read_bytes(), headers={
-            "Content-Type": "application/octet-stream",
-            "Content-Length": str(size_bytes),
-        }, method="PUT")
+        parsed = urlsplit(href)
+        if parsed.scheme != "https" or not parsed.hostname:
+            raise CloudProviderError("yandex_upload_url_invalid")
+        connection = http.client.HTTPSConnection(parsed.hostname, parsed.port or 443, timeout=300)
         try:
-            with urlopen(request, timeout=300):
-                pass
-        except HTTPError as exc:
-            raise CloudProviderError(f"yandex_upload_http_{exc.code}") from exc
-        except (URLError, TimeoutError, OSError) as exc:
+            connection.putrequest("PUT", parsed.path + (f"?{parsed.query}" if parsed.query else ""))
+            connection.putheader("Content-Type", "application/octet-stream")
+            connection.putheader("Content-Length", str(size_bytes))
+            connection.endheaders()
+            with source.open("rb") as stream:
+                while True:
+                    chunk = stream.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    connection.send(chunk)
+            response = connection.getresponse()
+            response.read()
+            if response.status not in (201, 202):
+                raise CloudProviderError(f"yandex_upload_http_{response.status}")
+        except (OSError, TimeoutError) as exc:
             raise CloudProviderError(f"yandex_upload_network_error:{type(exc).__name__}") from exc
+        finally:
+            connection.close()
         return remote_path
 
     def download(self, remote_id: str, destination: Path) -> tuple[int, str]:
