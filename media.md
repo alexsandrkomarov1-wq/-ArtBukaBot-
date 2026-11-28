@@ -65,15 +65,7 @@ description: Закрытый семейный архив фотографий, 
       <label>Дата съёмки / создания
         <input id="cloud-captured-at" type="date">
       </label>
-      <label>Связанный PERSON-ID (необязательно)
-        <input id="cloud-person-id" name="person_id" maxlength="40" placeholder="P-…">
-      </label>
-      <label>Связанный EVENT-ID (необязательно)
-        <input id="cloud-event-id" name="event_id" maxlength="40" placeholder="E-…">
-      </label>
-      <label>Связанный PLACE-ID (необязательно)
-        <input id="cloud-place-id" name="place_id" maxlength="40" placeholder="PL-…">
-      </label>
+      <p class="archive-entity-link-note">Связи с участниками, событиями и местами будут выбираться из каталога. Идентификаторы создаёт система; вводить PERSON-ID, EVENT-ID или PLACE-ID вручную не требуется.</p>
       <small>Максимальный размер одного файла на бесплатном тарифе Supabase: 50 MiB.</small>
       <button id="cloud-upload-submit" type="submit" class="media-open-button">Сохранить оригинал в архив</button>
     </form>
