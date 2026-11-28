@@ -72,6 +72,16 @@ class OneDriveProvider:
         self.client_id = os.getenv("ONEDRIVE_CLIENT_ID", "").strip()
         self.client_secret = os.getenv("ONEDRIVE_CLIENT_SECRET", "").strip()
         self.tenant = os.getenv("ONEDRIVE_TENANT_ID", "consumers").strip() or "consumers"
+        cache_path = os.getenv("ONEDRIVE_TOKEN_CACHE_FILE", "").strip()
+        self.token_cache_file = Path(cache_path).expanduser() if cache_path else None
+        if self.token_cache_file and self.token_cache_file.is_file():
+            try:
+                cached = json.loads(self.token_cache_file.read_text(encoding="utf-8"))
+                self.access_token = cached.get("access_token", self.access_token)
+                self.refresh_token = cached.get("refresh_token", self.refresh_token)
+                self.access_token_expires_at = float(cached.get("expires_at", 0))
+            except (OSError, ValueError, TypeError):
+                raise CloudProviderError("onedrive_token_cache_invalid")
         if not self.folder_id:
             raise CloudProviderError("onedrive_folder_id_missing")
         if not self.access_token and not all((self.refresh_token, self.client_id)):
@@ -104,6 +114,19 @@ class OneDriveProvider:
         self.access_token_expires_at = time.time() + int(data.get("expires_in", 3600))
         if not self.access_token:
             raise CloudProviderError("onedrive_access_token_missing")
+        if self.token_cache_file:
+            self.token_cache_file.parent.mkdir(parents=True, exist_ok=True)
+            temporary = self.token_cache_file.with_suffix(self.token_cache_file.suffix + ".tmp")
+            temporary.write_text(json.dumps({
+                "access_token": self.access_token,
+                "refresh_token": self.refresh_token,
+                "expires_at": self.access_token_expires_at,
+            }), encoding="utf-8")
+            try:
+                os.chmod(temporary, 0o600)
+            except OSError:
+                pass
+            os.replace(temporary, self.token_cache_file)
         return self.access_token
 
     def _headers(self) -> dict[str, str]:
