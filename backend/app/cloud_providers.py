@@ -179,6 +179,8 @@ class OneDriveProvider:
 class YandexDiskProvider:
     name = "yandex-disk"
     API = "https://cloud-api.yandex.net/v1/disk"
+    # Default to the documented single-file limit for accounts without Yandex 360.
+    MAX_FILE_BYTES = int(os.getenv("YANDEX_DISK_MAX_FILE_BYTES", str(1024 ** 3)))
 
     def __init__(self) -> None:
         self.token = os.getenv("YANDEX_DISK_ACCESS_TOKEN", "").strip()
@@ -198,6 +200,8 @@ class YandexDiskProvider:
         }
 
     def upload(self, source: Path, *, blob_id: str, filename: str, size_bytes: int) -> str:
+        if size_bytes > self.MAX_FILE_BYTES:
+            raise CloudProviderError("yandex_file_size_limit_exceeded")
         # Yandex Disk's public REST upload flow provides one upload URL, not a
         # resumable chunk-session API. Retry is handled by the durable outbox.
         remote_path = f"{self.root}/{blob_id}_{Path(filename).name}"
