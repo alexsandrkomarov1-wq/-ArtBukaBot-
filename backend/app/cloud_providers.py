@@ -147,7 +147,8 @@ class OneDriveProvider:
                 }, method="PUT")
                 try:
                     with urlopen(request, timeout=180) as response:
-                        data = json.loads(response.read().decode("utf-8")) if response.length != 0 else {}
+                        raw_response = response.read()
+                        data = json.loads(raw_response.decode("utf-8")) if raw_response else {}
                 except HTTPError as exc:
                     if exc.code in (416, 429, 500, 502, 503, 504):
                         # Query session state and continue from the server's first missing range.
