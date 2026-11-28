@@ -14,6 +14,10 @@
 
 Это подготовленная конфигурация, не заявление о том, что облачные подключения уже работают.
 
+## Windows shell standard (mandatory)
+
+All Windows commands and troubleshooting instructions for KOMAROVA_CORE must target **PowerShell 7.7.0 (pwsh)**. Do not silently provide Windows PowerShell 5.1 syntax or CMD syntax. Label command blocks as PowerShell 7.7.0, provide complete copy-paste-ready commands, and prefer one-line commands when practical. Avoid multi-line here-strings and split blocks when the user's terminal paste flow has shown that they are being inserted in reverse or leaving the >> continuation prompt. Never include the interactive PS prompt inside a command block. If the prompt is >>, first instruct the user to press Ctrl+C to return to the normal PS> prompt, then provide one complete replacement command. Version check: $PSVersionTable.PSVersion.
+
 ## 1. Независимая модель
 
 ### Рекомендуемый тестовый вариант
