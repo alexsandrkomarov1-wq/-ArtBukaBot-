@@ -169,7 +169,7 @@ def analyze_photo_metadata(path: str | Path, *, default_timezone: str = DEFAULT_
             "gps_utc" if gps_timestamp else
             "explicit_exif_offset" if offset and original_dt else
             "location_timezone" if timezone_name and original_dt else
-            "default_timezone_assumption" if original_dt else
+            "default_timezone_assumption" if original_dt and latitude is None else
             "missing_capture_time"
         ),
         "original_file_unchanged": True,
