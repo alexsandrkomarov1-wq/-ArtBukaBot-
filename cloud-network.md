@@ -31,6 +31,10 @@ permalink: /cloud-network/
     <article class="cn-card"><span class="cn-tag pending">АДАПТЕР НЕ ПОДТВЕРЖДЁН</span><strong>Dropbox</strong><p>Автоматическая передача не включена до реализации и проверки официального серверного API.</p></article>
     <article class="cn-card"><span class="cn-tag pending">АДАПТЕР НЕ ПОДТВЕРЖДЁН</span><strong>TeraBox</strong><p>Автоматическая передача не включена до реализации и проверки официального серверного API.</p></article>
   </div>
+  <section id="family-external-resources" data-resources-url="{{ '/assets/data/external-resources.json' | relative_url }}" aria-label="Семейные внешние ресурсы">
+    <p class="cn-lead">Общий каталог из десяти пользовательских ссылок. Он загружается из единого JSON-файла, чтобы локальная и онлайн-версии показывали одинаковые адреса, подписи и категории.</p>
+  </section>
+  <script src="{{ '/assets/js/external-resources.js' | relative_url }}" defer></script>
   <div class="cn-links">
     <a href="{{ '/media/#archive-upload' | relative_url }}">Загрузить материалы в KOMAROVA_CORE ↗</a>
     <a href="{{ '/media/#archive-catalog' | relative_url }}">Открыть каталог и скачать файлы ↗</a>
