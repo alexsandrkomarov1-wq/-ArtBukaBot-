@@ -77,9 +77,10 @@ class OneDriveProvider:
             raise CloudProviderError("onedrive_credentials_missing")
 
     def _token(self) -> str:
-        if self.access_token:
+        if self.access_token and not self.refresh_token:
             return self.access_token
-        # Form encoding is required by Microsoft's token endpoint.
+        # Prefer refreshing when a refresh token is available; an access token
+        # copied into server settings may expire between worker runs.
         body = urlencode({
             "client_id": self.client_id,
             "refresh_token": self.refresh_token,
