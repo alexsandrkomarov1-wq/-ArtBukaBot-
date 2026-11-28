@@ -216,3 +216,26 @@ class GoogleDriveOutbox(Base):
     last_error_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+class CloudReplica(Base):
+    """Provider-independent replica record and durable retry queue for cloud copies."""
+    __tablename__ = "cloud_replicas"
+    __table_args__ = (
+        UniqueConstraint("blob_id", "provider", name="uq_cloud_replica_blob_provider"),
+        UniqueConstraint("provider", "remote_id", name="uq_cloud_replica_remote_id"),
+    )
+    replica_id: Mapped[str] = mapped_column(String(35), primary_key=True, default=lambda: new_id("CR"))
+    blob_id: Mapped[str] = mapped_column(ForeignKey("stored_blobs.blob_id"), nullable=False, index=True)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    remote_id: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    expected_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    state: Mapped[str] = mapped_column(String(24), nullable=False, default="pending", index=True)
+    attempt_count: Mapped[int] = mapped_column(nullable=False, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, index=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_code: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
