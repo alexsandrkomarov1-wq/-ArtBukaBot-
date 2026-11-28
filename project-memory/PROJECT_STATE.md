@@ -67,3 +67,14 @@
 - Кодовые проверки на commit `c34e5916830ae0289fd7340493d93c3adf377fc2`: Pages build/deploy success (run `46085362926`), backend tests success (run `46085362957`), PowerShell self-test success (run `46085363013`).
 - Старые CI ошибки были связаны с устаревшими тестовыми контрактами, ожидавшими уже удалённую форму Supabase; контракты обновлены и прошли.
 - Изменения выполнялись только в `core-backend-foundation`; `main` не затронута.
+
+
+## Archive UI verification — 2026-11-28
+
+- Published media page: `https://alexsandrkomarov1-wq.github.io/-ArtBukaBot-/media/`.
+- Physical storage panel simplified to `Семья → Фамилия → Поколение → Участник → Год`; removed Project URL/key inputs, connection button, manual SQL link and setup instructions.
+- Password field remains only in the participant folder section.
+- Page now truthfully reports that the existing KOMAROVA_CORE Supabase project responds, but the private Storage bucket and archive registry table do not yet exist; uploads are unavailable.
+- Live page was inspected after commit `e812376a6ebb6a73a03505f92a15665fbbe7d6c5` via TinyFish run `6a4431e7-edd7-42a4-8ee1-d075f627e31f`.
+- CI for code commit `e812376a6ebb6a73a03505f92a15665fbbe7d6c5`: Pages build #490 success, backend tests #564 success, agent self-test #80 success. A docs-only follow-up commit `fe79a6ca7cafaf26d7ee7ec4b0e4ef74d9510a96` records this work.
+- No Supabase schema or Storage changes were made. The prepared SQL remains unapplied pending explicit owner approval. No additional Supabase project, GitHub repository, or Drive folder was created.
