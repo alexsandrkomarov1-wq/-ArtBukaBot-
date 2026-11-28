@@ -100,7 +100,17 @@ def process_one(session_factory, storage, provider_name: str) -> bool:
             )
             read_size, read_sha256 = provider.download(remote_id, readback)
             if read_size != snapshot["size_bytes"] or read_sha256 != snapshot["sha256"]:
-                raise CloudProviderError("replica_readback_integrity_mismatch")
+                # Never overwrite the suspect remote object. Create a fresh immutable
+                # repair object, then verify that new object before marking it available.
+                remote_id = provider.upload(
+                    source, blob_id=snapshot["blob_id"],
+                    filename=snapshot["original_filename"], size_bytes=snapshot["size_bytes"],
+                    force_new=True,
+                )
+                readback.unlink(missing_ok=True)
+                read_size, read_sha256 = provider.download(remote_id, readback)
+                if read_size != snapshot["size_bytes"] or read_sha256 != snapshot["sha256"]:
+                    raise CloudProviderError("replica_repair_readback_integrity_mismatch")
         with session_factory() as db:
             replica = db.get(CloudReplica, snapshot["replica_id"])
             replica.remote_id = remote_id
