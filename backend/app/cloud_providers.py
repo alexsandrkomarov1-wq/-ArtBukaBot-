@@ -9,6 +9,7 @@ import hashlib
 import http.client
 import json
 import os
+import tempfile
 import time
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -116,17 +117,26 @@ class OneDriveProvider:
             raise CloudProviderError("onedrive_access_token_missing")
         if self.token_cache_file:
             self.token_cache_file.parent.mkdir(parents=True, exist_ok=True)
-            temporary = self.token_cache_file.with_suffix(self.token_cache_file.suffix + ".tmp")
-            temporary.write_text(json.dumps({
-                "access_token": self.access_token,
-                "refresh_token": self.refresh_token,
-                "expires_at": self.access_token_expires_at,
-            }), encoding="utf-8")
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=".onedrive-token-", dir=self.token_cache_file.parent
+            )
+            temporary = Path(temporary_name)
             try:
-                os.chmod(temporary, 0o600)
-            except OSError:
-                pass
-            os.replace(temporary, self.token_cache_file)
+                with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+                    json.dump({
+                        "access_token": self.access_token,
+                        "refresh_token": self.refresh_token,
+                        "expires_at": self.access_token_expires_at,
+                    }, stream)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                try:
+                    os.chmod(temporary, 0o600)
+                except OSError:
+                    pass
+                os.replace(temporary, self.token_cache_file)
+            finally:
+                temporary.unlink(missing_ok=True)
         return self.access_token
 
     def _headers(self) -> dict[str, str]:
