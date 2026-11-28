@@ -68,6 +68,7 @@ class OneDriveProvider:
         self.folder_id = os.getenv("ONEDRIVE_FOLDER_ID", "").strip()
         self.access_token = os.getenv("ONEDRIVE_ACCESS_TOKEN", "").strip()
         self.refresh_token = os.getenv("ONEDRIVE_REFRESH_TOKEN", "").strip()
+        self.access_token_expires_at = 0.0
         self.client_id = os.getenv("ONEDRIVE_CLIENT_ID", "").strip()
         self.client_secret = os.getenv("ONEDRIVE_CLIENT_SECRET", "").strip()
         self.tenant = os.getenv("ONEDRIVE_TENANT_ID", "consumers").strip() or "consumers"
@@ -77,7 +78,7 @@ class OneDriveProvider:
             raise CloudProviderError("onedrive_credentials_missing")
 
     def _token(self) -> str:
-        if self.access_token and not self.refresh_token:
+        if self.access_token and (not self.refresh_token or time.time() < self.access_token_expires_at - 60):
             return self.access_token
         # Prefer refreshing when a refresh token is available; an access token
         # copied into server settings may expire between worker runs.
@@ -99,6 +100,8 @@ class OneDriveProvider:
         except Exception as exc:
             raise CloudProviderError("onedrive_token_refresh_failed") from exc
         self.access_token = data.get("access_token", "")
+        self.refresh_token = data.get("refresh_token", self.refresh_token)
+        self.access_token_expires_at = time.time() + int(data.get("expires_in", 3600))
         if not self.access_token:
             raise CloudProviderError("onedrive_access_token_missing")
         return self.access_token
