@@ -36,6 +36,15 @@ GitHub Pages is a public showcase only. It is not the private archive server and
 
 Active implementation is maintained on `core-backend-foundation`. The `main` branch is not the working branch for backend development.
 
+
+## Windows command-line standard
+
+- The supported interactive shell for Windows project instructions is **PowerShell 7.7.0 (pwsh)**, not Windows PowerShell 5.1 or Command Prompt unless a task explicitly requires another shell.
+- Before giving Windows commands, identify them as **PowerShell 7.7.0** commands. Do not mix shell syntaxes.
+- Prefer complete, copy-paste-ready commands. Use a single-line command when practical; avoid fragile multi-line here-strings and fragmented snippets when a one-line equivalent exists.
+- Do not include the PS prompt in command blocks. If a command leaves the >> continuation prompt, press Ctrl+C before entering the corrected complete command.
+- When version verification matters, use $PSVersionTable.PSVersion and confirm major version 7, minor version 7.
+
 ## Contributing and support
 
 The software and generic technical documentation are public. Family photographs, documents, account data, OAuth tokens and private metadata are not public project assets. The project seeks donated infrastructure/compute to operate and test the private service; it does not claim registered nonprofit status or promise unlimited lifetime hosting.
