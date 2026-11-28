@@ -19,6 +19,11 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$RequiredPowerShellVersion = [version]"7.7.0"
+if ($PSVersionTable.PSVersion -ne $RequiredPowerShellVersion) {
+    throw "KOMAROVA_CORE требует PowerShell 7.7.0. Текущая версия: $($PSVersionTable.PSVersion). Запустите скрипт через pwsh 7.7.0."
+}
+
 
 $script:TimeZoneId = "Europe/Amsterdam"
 $script:StoreRoot = if ($env:KOMAROVA_CONTROL_HOME) {
