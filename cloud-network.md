@@ -85,13 +85,13 @@ permalink: /cloud-network/
   <div class="pr-table-wrap"><table>
     <thead><tr><th>Провайдер</th><th>Интерфейс / API</th><th>Роль</th><th>Статус</th></tr></thead>
     <tbody>
-      <tr><td>MEGA</td><td>Официальный API / developer stack</td><td>Возможная реплика файлов</td><td>Исследование API и условий</td></tr>
-      <tr><td>Google Drive</td><td>Drive API / OAuth 2.0</td><td>Временный тестовый адаптер</td><td>Не постоянный провайдер; production-запись не подтверждена</td></tr>
-      <tr><td>pCloud</td><td>HTTP API / OAuth</td><td>Возможная реплика файлов</td><td>Проверить авторизацию и региональный endpoint</td></tr>
-      <tr><td>Яндекс Диск</td><td>REST API / OAuth / WebDAV</td><td>Возможная реплика файлов</td><td>Не подключён</td></tr>
-      <tr><td>OneDrive</td><td>Microsoft Graph / OAuth</td><td>Возможная реплика файлов</td><td>Не подключён</td></tr>
-      <tr><td>Dropbox</td><td>Dropbox API / OAuth</td><td>Возможная реплика файлов</td><td>Исследование scopes и квот</td></tr>
-      <tr><td>TeraBox</td><td>Официальный API не подтверждён</td><td>Не включать до проверки</td><td>Заблокирован для интеграции</td></tr>
+      <tr><td>pCloud</td><td>HTTP API / OAuth</td><td>Хранилище для окна 01; AI обрабатывает через отдельный backend</td><td>Ссылка задана; адаптер не подключён</td></tr>
+      <tr><td>MEGA</td><td>Официальный API и условия требуют отдельной проверки</td><td>Хранилище для окна 02; AI KOMAROVA_CORE отдельно</td><td>Ссылка задана; адаптер не подключён</td></tr>
+      <tr><td>Яндекс Диск</td><td>REST API / OAuth / WebDAV</td><td>Хранилище для окна 03; AI KOMAROVA_CORE отдельно</td><td>Ссылка задана; адаптер не подключён</td></tr>
+      <tr><td>TeraBox</td><td>Официальный серверный API не подтверждён</td><td>Веб-хранилище и AI-раздел по ссылке; интеграция не подтверждена</td><td>Ссылка задана; автоматизация не включена</td></tr>
+      <tr><td>Dropbox</td><td>Dropbox API / OAuth</td><td>Хранилище для окна 05; AI KOMAROVA_CORE отдельно</td><td>Ссылка задана; адаптер не подключён</td></tr>
+      <tr><td>Google Drive · u/0</td><td>Drive API / OAuth 2.0</td><td>Первое отдельное хранилище Google</td><td>Ссылка задана; отдельная авторизация не подтверждена</td></tr>
+      <tr><td>Google Drive · u/1</td><td>Drive API / OAuth 2.0</td><td>Второе отдельное хранилище Google</td><td>Ссылка задана; отдельная авторизация не подтверждена</td></tr>
     </tbody>
   </table></div>
 
