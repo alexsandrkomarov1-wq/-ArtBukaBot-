@@ -11,6 +11,7 @@ import json
 import os
 import tempfile
 import time
+import uuid
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit
@@ -19,6 +20,11 @@ from urllib.request import Request, urlopen
 
 class CloudProviderError(RuntimeError):
     pass
+
+
+def _remote_object_name(blob_id: str, filename: str, *, force_new: bool = False) -> str:
+    base = f"{blob_id}_{Path(filename).name}"
+    return f"{blob_id}_repair_{uuid.uuid4().hex}_{Path(filename).name}" if force_new else base
 
 
 def _json_request(url: str, *, method: str = "GET", headers: dict | None = None,
@@ -151,8 +157,8 @@ class OneDriveProvider:
             remaining = max(0, total - used)
         return {"total_bytes": total, "used_bytes": used, "remaining_bytes": remaining}
 
-    def upload(self, source: Path, *, blob_id: str, filename: str, size_bytes: int) -> str:
-        safe_name = f"{blob_id}_{Path(filename).name}"
+    def upload(self, source: Path, *, blob_id: str, filename: str, size_bytes: int, force_new: bool = False) -> str:
+        safe_name = _remote_object_name(blob_id, filename, force_new=force_new)
         item_url = (f"{self.GRAPH}/me/drive/items/{quote(self.folder_id, safe='')}:/"
                     f"{quote(safe_name, safe='')}")
         try:
@@ -239,7 +245,7 @@ class YandexDiskProvider:
             "remaining_bytes": max(0, total - used) if isinstance(total, int) and isinstance(used, int) else None,
         }
 
-    def upload(self, source: Path, *, blob_id: str, filename: str, size_bytes: int) -> str:
+    def upload(self, source: Path, *, blob_id: str, filename: str, size_bytes: int, force_new: bool = False) -> str:
         if size_bytes > self.MAX_FILE_BYTES:
             raise CloudProviderError("yandex_file_size_limit_exceeded")
         # Yandex Disk's public REST upload flow provides one upload URL, not a
@@ -251,7 +257,8 @@ class YandexDiskProvider:
             if not str(exc).startswith("http_404:"):
                 raise
             _json_request(f"{self.API}/resources?{root_query}", method="PUT", headers=self._headers())
-        remote_path = f"{self.root}/{blob_id}_{Path(filename).name}"
+        remote_name = _remote_object_name(blob_id, filename, force_new=force_new)
+        remote_path = f"{self.root}/{remote_name}"
         exists_query = urlencode({"path": remote_path})
         try:
             existing = _json_request(f"{self.API}/resources?{exists_query}", headers=self._headers())
