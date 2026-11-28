@@ -116,8 +116,16 @@ class OneDriveProvider:
 
     def upload(self, source: Path, *, blob_id: str, filename: str, size_bytes: int) -> str:
         safe_name = f"{blob_id}_{Path(filename).name}"
-        url = (f"{self.GRAPH}/me/drive/items/{quote(self.folder_id, safe='')}:/"
-               f"{quote(safe_name, safe='')}:/createUploadSession")
+        item_url = (f"{self.GRAPH}/me/drive/items/{quote(self.folder_id, safe='')}:/"
+                    f"{quote(safe_name, safe='')}")
+        try:
+            existing = _json_request(item_url, headers=self._headers())
+            if existing.get("id"):
+                return existing["id"]
+        except CloudProviderError as exc:
+            if not str(exc).startswith("http_404:"):
+                raise
+        url = item_url + ":/createUploadSession"
         session = _json_request(
             url, method="POST", headers=self._headers(),
             payload={"item": {"@microsoft.graph.conflictBehavior": "fail", "name": safe_name}},
@@ -193,6 +201,14 @@ class YandexDiskProvider:
         # Yandex Disk's public REST upload flow provides one upload URL, not a
         # resumable chunk-session API. Retry is handled by the durable outbox.
         remote_path = f"{self.root}/{blob_id}_{Path(filename).name}"
+        exists_query = urlencode({"path": remote_path})
+        try:
+            existing = _json_request(f"{self.API}/resources?{exists_query}", headers=self._headers())
+            if existing.get("path"):
+                return remote_path
+        except CloudProviderError as exc:
+            if not str(exc).startswith("http_404:"):
+                raise
         params = urlencode({"path": remote_path, "overwrite": "false"})
         data = _json_request(f"{self.API}/resources/upload?{params}", headers=self._headers())
         href = data.get("href")
